@@ -1,0 +1,612 @@
+/**
+ * Encrypted Message Storage
+ *
+ * SQLite-based message storage with AES-256-GCM encryption.
+ * Each user has their own database with messages encrypted using their encryption key.
+ *
+ * Database schema:
+ * - messages table: stores encrypted message data
+ * - Each message is encrypted as: [IV 12B][Ciphertext][Auth Tag 16B]
+ */
+
+import type {Database} from "sqlite3";
+import log from "../../log";
+import path from "path";
+import fs from "fs/promises";
+import Config from "../../config";
+import Msg, {Message} from "../../models/msg";
+import Chan, {Channel} from "../../models/chan";
+import Helper from "../../helper";
+import type {SearchableMessageStorage, DeletionRequest} from "./types";
+import Network from "../../models/network";
+import {SearchQuery, SearchResponse} from "../../../shared/types/storage";
+import crypto from "crypto";
+
+// LRU Cache for decrypted messages (performance optimization)
+class LRUCache<K, V> {
+	private cache: Map<K, V>;
+	private maxSize: number;
+
+	constructor(maxSize: number = 1000) {
+		this.cache = new Map();
+		this.maxSize = maxSize;
+	}
+
+	get(key: K): V | undefined {
+		const value = this.cache.get(key);
+		if (value !== undefined) {
+			// Move to end (most recently used)
+			this.cache.delete(key);
+			this.cache.set(key, value);
+		}
+		return value;
+	}
+
+	set(key: K, value: V): void {
+		// Remove oldest if at capacity
+		if (this.cache.size >= this.maxSize) {
+			const firstKey = this.cache.keys().next().value;
+			this.cache.delete(firstKey);
+		}
+
+		this.cache.set(key, value);
+	}
+
+	clear(): void {
+		this.cache.clear();
+	}
+}
+
+let sqlite3: any;
+
+try {
+	sqlite3 = require("sqlite3");
+} catch (e: any) {
+	log.error(
+		"Unable to load sqlite3 module. See https://github.com/mapbox/node-sqlite3/wiki/Binaries"
+	);
+}
+
+export const currentSchemaVersion = 1736697600000; // 2025-01-12 (encrypted schema)
+
+// Schema for encrypted message storage
+const schema = [
+	"CREATE TABLE options (name TEXT, value TEXT, CONSTRAINT name_unique UNIQUE (name))",
+	// Encrypted messages table
+	// - network, channel, time are plaintext for indexing/sorting
+	// - encrypted_data contains: [IV 12B][Encrypted JSON][Tag 16B]
+	"CREATE TABLE messages (id INTEGER PRIMARY KEY AUTOINCREMENT, network TEXT, channel TEXT, time INTEGER, encrypted_data BLOB)",
+	"CREATE INDEX network_channel ON messages (network, channel)",
+	"CREATE INDEX time ON messages (time)",
+];
+
+class Deferred {
+	resolve!: () => void;
+	promise: Promise<void>;
+
+	constructor() {
+		this.promise = new Promise((resolve) => {
+			this.resolve = resolve;
+		});
+	}
+}
+
+export class EncryptedMessageStorage implements SearchableMessageStorage {
+	isEnabled: boolean;
+	database!: Database;
+	initDone: Deferred;
+	userName: string;
+	private encryptionKey: Buffer;
+	private cache: LRUCache<string, Message[]>;
+
+	constructor(userName: string, encryptionKey: Buffer) {
+		this.userName = userName;
+		this.encryptionKey = encryptionKey;
+		this.isEnabled = false;
+		this.initDone = new Deferred();
+		this.cache = new LRUCache(1000); // Cache up to 1000 channel histories
+	}
+
+	/**
+	 * Update encryption key (used when password changes)
+	 */
+	updateEncryptionKey(newKey: Buffer): void {
+		this.encryptionKey = newKey;
+		this.cache.clear(); // Clear cache as old decrypted data is invalid
+	}
+
+	/**
+	 * Encrypt message data
+	 */
+	private encrypt(plaintext: string): Buffer {
+		const iv = crypto.randomBytes(12);
+		const cipher = crypto.createCipheriv("aes-256-gcm", this.encryptionKey, iv);
+
+		const encrypted = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
+
+		const tag = cipher.getAuthTag();
+
+		// Return: [IV 12B][Ciphertext][Tag 16B]
+		return Buffer.concat([iv, encrypted, tag]);
+	}
+
+	/**
+	 * Decrypt message data
+	 */
+	private decrypt(ciphertext: Buffer): string {
+		const iv = ciphertext.slice(0, 12);
+		const tag = ciphertext.slice(-16);
+		const encrypted = ciphertext.slice(12, -16);
+
+		const decipher = crypto.createDecipheriv("aes-256-gcm", this.encryptionKey, iv);
+		decipher.setAuthTag(tag);
+
+		const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+
+		return decrypted.toString("utf8");
+	}
+
+	async _enable(connection_string: string) {
+		this.database = new sqlite3.Database(connection_string);
+
+		try {
+			await this.run_pragmas();
+			await this.run_migrations();
+		} catch (e) {
+			this.isEnabled = false;
+			throw Helper.catch_to_error("Migration failed", e);
+		}
+
+		this.isEnabled = true;
+	}
+
+	async enable() {
+		const logsPath = Config.getUserLogsPath();
+		const sqlitePath = path.join(logsPath, `${this.userName}.encrypted.sqlite3`);
+
+		try {
+			await fs.mkdir(logsPath, {recursive: true});
+		} catch (e) {
+			throw Helper.catch_to_error("Unable to create logs directory", e);
+		}
+
+		try {
+			await this._enable(sqlitePath);
+		} finally {
+			this.initDone.resolve();
+		}
+	}
+
+	async setup_new_db() {
+		for (const stmt of schema) {
+			await this.serialize_run(stmt);
+		}
+
+		await this.serialize_run(
+			"INSERT INTO options (name, value) VALUES ('schema_version', ?)",
+			currentSchemaVersion.toString()
+		);
+	}
+
+	async current_version(): Promise<number> {
+		const have_options = await this.serialize_get(
+			"select 1 from sqlite_master where type = 'table' and name = 'options'"
+		);
+
+		if (!have_options) {
+			return 0;
+		}
+
+		const version = await this.serialize_get(
+			"SELECT value FROM options WHERE name = 'schema_version'"
+		);
+
+		if (version === undefined) {
+			return 0;
+		}
+
+		const storedSchemaVersion = parseInt(version.value, 10);
+		return storedSchemaVersion;
+	}
+
+	async update_version_in_db() {
+		return this.serialize_run(
+			"UPDATE options SET value = ? WHERE name = 'schema_version'",
+			currentSchemaVersion.toString()
+		);
+	}
+
+	async run_pragmas() {
+		await this.serialize_run("PRAGMA foreign_keys = ON;");
+	}
+
+	async run_migrations() {
+		const version = await this.current_version();
+
+		if (version > currentSchemaVersion) {
+			throw `sqlite messages schema version is higher than expected (${version} > ${currentSchemaVersion}). Is The Lounge out of date?`;
+		} else if (version === currentSchemaVersion) {
+			return; // nothing to do
+		}
+
+		await this.serialize_run("BEGIN EXCLUSIVE TRANSACTION");
+
+		try {
+			if (version === 0) {
+				await this.setup_new_db();
+			} else {
+				// TODO: Add migrations if schema changes in future
+				log.warn(
+					`Encrypted message storage schema version ${version} is outdated. Creating new database.`
+				);
+				await this.setup_new_db();
+			}
+		} catch (err) {
+			await this.serialize_run("ROLLBACK");
+			throw err;
+		}
+
+		await this.serialize_run("COMMIT");
+		await this.serialize_run("VACUUM");
+	}
+
+	async close() {
+		if (!this.isEnabled) {
+			return;
+		}
+
+		this.isEnabled = false;
+
+		return new Promise<void>((resolve, reject) => {
+			this.database.close((err) => {
+				if (err) {
+					reject(`Failed to close sqlite database: ${err.message}`);
+					return;
+				}
+
+				resolve();
+			});
+		});
+	}
+
+	/**
+	 * Helper methods for database operations
+	 */
+	serialize_run(stmt: string, ...params: any[]): Promise<void> {
+		return new Promise((resolve, reject) => {
+			this.database.serialize(() => {
+				this.database.run(stmt, params, (err: Error | null) => {
+					if (err) {
+						reject(err);
+						return;
+					}
+
+					resolve();
+				});
+			});
+		});
+	}
+
+	serialize_get(stmt: string, ...params: any[]): Promise<any> {
+		return new Promise((resolve, reject) => {
+			this.database.serialize(() => {
+				this.database.get(stmt, params, (err: Error | null, row: any) => {
+					if (err) {
+						reject(err);
+						return;
+					}
+
+					resolve(row);
+				});
+			});
+		});
+	}
+
+	serialize_fetchall(stmt: string, ...params: any[]): Promise<any[]> {
+		return new Promise((resolve, reject) => {
+			this.database.serialize(() => {
+				this.database.all(stmt, params, (err: Error | null, rows: any[]) => {
+					if (err) {
+						reject(err);
+						return;
+					}
+
+					resolve(rows);
+				});
+			});
+		});
+	}
+
+	/**
+	 * Index a message (store encrypted)
+	 */
+	async index(network: Network, channel: Channel, msg: Message) {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			return;
+		}
+
+		// Clone message to avoid modifying original
+		const clonedMsg = Object.keys(msg).reduce((newMsg, prop) => {
+			// id is regenerated when messages are retrieved
+			// previews are not stored because storage is cleared on lounge restart
+			// type and time are stored in a separate column
+			if (prop !== "id" && prop !== "previews" && prop !== "type" && prop !== "time") {
+				newMsg[prop] = msg[prop];
+			}
+
+			return newMsg;
+		}, {});
+
+		// Encrypt message data
+		const plaintext = JSON.stringify(clonedMsg);
+		const encrypted = this.encrypt(plaintext);
+
+		await this.serialize_run(
+			"INSERT INTO messages(network, channel, time, encrypted_data) VALUES(?, ?, ?, ?)",
+			network.uuid,
+			channel.name.toLowerCase(),
+			msg.time.getTime(),
+			encrypted
+		);
+
+		// Invalidate cache for this channel
+		const cacheKey = `${network.uuid}:${channel.name.toLowerCase()}`;
+		this.cache.set(cacheKey, []); // Clear cache entry
+	}
+
+	/**
+	 * Delete all messages for a channel
+	 */
+	async deleteChannel(network: Network, channel: Channel) {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			return;
+		}
+
+		await this.serialize_run(
+			"DELETE FROM messages WHERE network = ? AND channel = ?",
+			network.uuid,
+			channel.name.toLowerCase()
+		);
+
+		// Invalidate cache
+		const cacheKey = `${network.uuid}:${channel.name.toLowerCase()}`;
+		this.cache.set(cacheKey, []);
+	}
+
+	/**
+	 * Get messages for a channel (decrypt on-the-fly)
+	 */
+	async getMessages(
+		network: Network,
+		channel: Channel,
+		nextID: () => number
+	): Promise<Message[]> {
+		await this.initDone.promise;
+
+		if (!this.isEnabled || Config.values.maxHistory === 0) {
+			return [];
+		}
+
+		const cacheKey = `${network.uuid}:${channel.name.toLowerCase()}`;
+
+		// Check cache first
+		const cached = this.cache.get(cacheKey);
+		if (cached && cached.length > 0) {
+			// Regenerate IDs
+			return cached.map((msg) => {
+				const newMsg = new Msg(msg);
+				newMsg.id = nextID();
+				return newMsg;
+			});
+		}
+
+		// If unlimited history is specified, load 100k messages
+		const limit = Config.values.maxHistory < 0 ? 100000 : Config.values.maxHistory;
+
+		const rows = await this.serialize_fetchall(
+			"SELECT encrypted_data, time FROM messages WHERE network = ? AND channel = ? ORDER BY time DESC LIMIT ?",
+			network.uuid,
+			channel.name.toLowerCase(),
+			limit
+		);
+
+		// Decrypt messages
+		const messages = rows.reverse().map((row: any): Message => {
+			try {
+				const decrypted = this.decrypt(row.encrypted_data);
+				const msg = JSON.parse(decrypted);
+				msg.time = row.time;
+
+				const newMsg = new Msg(msg);
+				newMsg.id = nextID();
+
+				return newMsg;
+			} catch (error) {
+				log.error(`Failed to decrypt message: ${error}`);
+				// Return error message placeholder
+				return new Msg({
+					type: "error",
+					text: "[Decryption failed]",
+					time: row.time,
+				});
+			}
+		});
+
+		// Cache decrypted messages
+		this.cache.set(cacheKey, messages);
+
+		return messages;
+	}
+
+	/**
+	 * Search messages (requires decrypting all matching messages)
+	 */
+	async search(query: SearchQuery): Promise<SearchResponse> {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			throw new Error(
+				"search called but encrypted storage provider not enabled. This is a programming error"
+			);
+		}
+
+		// For encrypted storage, we need to decrypt all messages to search
+		// This is a performance limitation of encryption
+		let select = "SELECT encrypted_data, time, network, channel FROM messages";
+		const params: any[] = [];
+
+		if (query.networkUuid) {
+			select += " WHERE network = ?";
+			params.push(query.networkUuid);
+		}
+
+		if (query.channelName) {
+			select += query.networkUuid ? " AND" : " WHERE";
+			select += " channel = ?";
+			params.push(query.channelName.toLowerCase());
+		}
+
+		select += " ORDER BY time DESC";
+
+		const rows = await this.serialize_fetchall(select, ...params);
+
+		// Decrypt and filter messages
+		const results: Message[] = [];
+		let skipped = 0;
+		const maxResults = 100;
+
+		for (const row of rows) {
+			if (results.length >= maxResults) {
+				break;
+			}
+
+			try {
+				const decrypted = this.decrypt(row.encrypted_data);
+				const msg = JSON.parse(decrypted);
+
+				// Check if message matches search term
+				if (msg.text && msg.text.toLowerCase().includes(query.searchTerm.toLowerCase())) {
+					if (skipped < query.offset) {
+						skipped++;
+						continue;
+					}
+
+					msg.time = row.time;
+					msg.network = row.network;
+					msg.channel = row.channel;
+
+					const newMsg = new Msg(msg);
+					newMsg.id = results.length; // Temporary ID
+
+					results.push(newMsg);
+				}
+			} catch (error) {
+				log.error(`Failed to decrypt message during search: ${error}`);
+			}
+		}
+
+		return {
+			...query,
+			results: results.reverse(),
+		};
+	}
+
+	/**
+	 * Delete messages (not implemented for encrypted storage)
+	 */
+	async deleteMessages(req: DeletionRequest): Promise<number> {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			return 0;
+		}
+
+		// TODO: Implement if needed
+		log.warn("deleteMessages not implemented for encrypted storage");
+		return 0;
+	}
+
+	/**
+	 * Get message count (for cleanup)
+	 */
+	async getMessagesForCleanup(req: DeletionRequest): Promise<Message[]> {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			return [];
+		}
+
+		// TODO: Implement if needed
+		return [];
+	}
+
+	/**
+	 * Re-encrypt all messages with new encryption key
+	 * Used when user changes password
+	 */
+	async reEncrypt(oldKey: Buffer, newKey: Buffer): Promise<void> {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			return;
+		}
+
+		log.info(`Re-encrypting messages for user ${this.userName}...`);
+
+		// Fetch all encrypted messages
+		const rows = await this.serialize_fetchall("SELECT id, encrypted_data FROM messages");
+
+		await this.serialize_run("BEGIN TRANSACTION");
+
+		try {
+			for (const row of rows) {
+				// Decrypt with old key
+				const iv = row.encrypted_data.slice(0, 12);
+				const tag = row.encrypted_data.slice(-16);
+				const encrypted = row.encrypted_data.slice(12, -16);
+
+				const decipher = crypto.createDecipheriv("aes-256-gcm", oldKey, iv);
+				decipher.setAuthTag(tag);
+
+				const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+				const plaintext = decrypted.toString("utf8");
+
+				// Encrypt with new key
+				const newIv = crypto.randomBytes(12);
+				const cipher = crypto.createCipheriv("aes-256-gcm", newKey, newIv);
+
+				const newEncrypted = Buffer.concat([
+					cipher.update(plaintext, "utf8"),
+					cipher.final(),
+				]);
+
+				const newTag = cipher.getAuthTag();
+				const newCiphertext = Buffer.concat([newIv, newEncrypted, newTag]);
+
+				// Update database
+				await this.serialize_run(
+					"UPDATE messages SET encrypted_data = ? WHERE id = ?",
+					newCiphertext,
+					row.id
+				);
+			}
+
+			await this.serialize_run("COMMIT");
+
+			// Update encryption key
+			this.encryptionKey = newKey;
+			this.cache.clear();
+
+			log.info(`Re-encryption complete for user ${this.userName}`);
+		} catch (error) {
+			await this.serialize_run("ROLLBACK");
+			throw error;
+		}
+	}
+}
+
+export default EncryptedMessageStorage;
