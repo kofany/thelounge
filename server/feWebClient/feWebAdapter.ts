@@ -96,6 +96,9 @@ export class FeWebAdapter {
 		// 10. nicklist - Complete channel nicklist
 		this.socket.onMessage("nicklist", (msg) => this.handleNicklist(msg));
 
+		// 10b. nicklist_update - Delta update for nicklist (NEW!)
+		this.socket.onMessage("nicklist_update", (msg) => this.handleNicklistUpdate(msg));
+
 		// 11. nick_change - Nick change
 		this.socket.onMessage("nick_change", (msg) => this.handleNickChange(msg));
 
@@ -412,10 +415,131 @@ export class FeWebAdapter {
 			log.debug(
 				`[FeWebAdapter] Calling onNicklistUpdate with ${usersArray.length} users for channel ${channel.id}`
 			);
+			log.debug(
+				`[FeWebAdapter] First 3 users BEFORE callback: ${JSON.stringify(
+					usersArray
+						.slice(0, 3)
+						.map((u) => ({nick: u.nick, modes: u.modes, mode: u.mode}))
+				)}`
+			);
 			this.callbacks.onNicklistUpdate(network.uuid, channel.id, usersArray);
+			log.debug(`[FeWebAdapter] onNicklistUpdate callback COMPLETED`);
 		} catch (error) {
 			log.error(`[FeWebAdapter] Failed to parse nicklist: ${error}`);
 		}
+	}
+
+	/**
+	 * 10b. nicklist_update - Delta update for nicklist
+	 * Handles incremental changes: add, remove, mode changes
+	 */
+	private handleNicklistUpdate(msg: FeWebMessage): void {
+		// task field is in msg.text according to fe-web protocol
+		const task = msg.text;
+
+		log.debug(
+			`[FeWebAdapter] handleNicklistUpdate: server=${msg.server}, channel=${msg.channel}, nick=${msg.nick}, task=${task}`
+		);
+
+		const network = this.getOrCreateNetwork(msg.server!);
+		if (!network) {
+			log.error(`[FeWebAdapter] Network not found for server: ${msg.server}`);
+			return;
+		}
+
+		const channel = this.findChannel(network, msg.channel!);
+		if (!channel) {
+			log.error(`[FeWebAdapter] Channel not found: ${msg.channel} on ${msg.server}`);
+			return;
+		}
+
+		const nick = msg.nick!;
+
+		if (!task) {
+			log.error(`[FeWebAdapter] nicklist_update missing task field`);
+			return;
+		}
+
+		switch (task) {
+			case "add":
+				// Add user with no modes
+				this.addUserToChannel(channel, nick);
+				log.debug(`[FeWebAdapter] Added user ${nick} to ${msg.channel}`);
+				break;
+
+			case "remove":
+				// Remove user from nicklist
+				channel.users.delete(nick.toLowerCase());
+				log.debug(`[FeWebAdapter] Removed user ${nick} from ${msg.channel}`);
+				break;
+
+			case "change":
+				// Nick change - rename user
+				const newNick = msg.extra?.new_nick;
+				if (!newNick) {
+					log.error(`[FeWebAdapter] Nick change missing new_nick in extra`);
+					return;
+				}
+				const user = channel.users.get(nick.toLowerCase());
+				if (user) {
+					channel.users.delete(nick.toLowerCase());
+					user.nick = newNick;
+					channel.users.set(newNick.toLowerCase(), user);
+					log.debug(`[FeWebAdapter] Renamed user ${nick} → ${newNick} in ${msg.channel}`);
+				}
+				break;
+
+			case "+o":
+			case "-o":
+			case "+v":
+			case "-v":
+			case "+h":
+			case "-h":
+				// Mode change
+				const targetUser = channel.users.get(nick.toLowerCase());
+				if (!targetUser) {
+					log.warn(`[FeWebAdapter] User ${nick} not found for mode change ${task}`);
+					return;
+				}
+
+				const isAdding = task[0] === "+";
+				const modeChar = task[1]; // o, v, h
+
+				// Convert mode character to symbol using PREFIX
+				const modeSymbol = network.serverOptions.PREFIX.modeToSymbol[modeChar];
+				if (!modeSymbol) {
+					log.warn(`[FeWebAdapter] Unknown mode character: ${modeChar}`);
+					return;
+				}
+
+				if (isAdding) {
+					// Add mode if not already present
+					if (!targetUser.modes.includes(modeSymbol)) {
+						targetUser.modes.unshift(modeSymbol); // Add to front (higher priority)
+					}
+				} else {
+					// Remove mode
+					targetUser.modes = targetUser.modes.filter((m) => m !== modeSymbol);
+				}
+
+				log.debug(
+					`[FeWebAdapter] Updated modes for ${nick} in ${
+						msg.channel
+					}: ${targetUser.modes.join("")}`
+				);
+				break;
+
+			default:
+				log.warn(`[FeWebAdapter] Unknown nicklist_update task: ${task}`);
+				return;
+		}
+
+		// Re-sort users after any change
+		this.sortChannelUsers(channel);
+
+		// Emit update to frontend
+		const usersArray = Array.from(channel.users.values());
+		this.callbacks.onNicklistUpdate(network.uuid, channel.id, usersArray);
 	}
 
 	/**

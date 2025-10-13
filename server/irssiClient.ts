@@ -314,6 +314,50 @@ export class IrssiClient {
 	}
 
 	/**
+	 * Handle NAMES request from browser (refresh nicklist)
+	 */
+	async handleNamesRequest(socketId: string, data: {target: number}): Promise<void> {
+		if (!this.irssiConnection) {
+			log.error(
+				`User ${colors.bold(this.name)}: cannot request names, not connected to irssi`
+			);
+			return;
+		}
+
+		// Find channel in ALL networks
+		let channel: Chan | undefined;
+		let network: NetworkData | undefined;
+
+		for (const net of this.networks) {
+			channel = net.channels.find((c) => c.id === data.target);
+			if (channel) {
+				network = net;
+				break;
+			}
+		}
+
+		if (!channel || !network) {
+			log.warn(
+				`User ${colors.bold(this.name)}: channel ${data.target} not found for NAMES request`
+			);
+			return;
+		}
+
+		// Execute /NAMES command in irssi to refresh internal state
+		const command = `names ${channel.name}`;
+		await this.irssiConnection.executeCommand(command, network.serverTag);
+
+		log.info(
+			`User ${colors.bold(this.name)}: requested NAMES for ${channel.name} on ${
+				network.serverTag
+			}`
+		);
+
+		// fe-web will send nicklist message after executing NAMES
+		// We don't need to do anything else here - the nicklist handler will take care of it
+	}
+
+	/**
 	 * Handle input from browser (user command/message)
 	 */
 	async handleInput(socketId: string, data: {target: number; text: string}): Promise<void> {
@@ -480,6 +524,7 @@ export class IrssiClient {
 	 */
 	private async sendInitialState(socket: Socket): Promise<void> {
 		try {
+			log.info(`[IrssiClient] ⏰ TIMING: sendInitialState() START for socket ${socket.id}`);
 			// Convert NetworkData[] to SharedNetwork[] for Socket.IO
 			const sharedNetworks = this.networks.map((net) => {
 				// Serialize Prefix class to plain object for JSON
@@ -511,6 +556,9 @@ export class IrssiClient {
 				active: this.lastActiveChannel || -1,
 			});
 
+			log.info(
+				`[IrssiClient] ⏰ TIMING: sendInitialState() SENT init event for socket ${socket.id} with ${sharedNetworks.length} networks`
+			);
 			log.info(`User ${colors.bold(this.name)}: sent initial state to browser ${socket.id}`);
 		} catch (error) {
 			log.error(`Failed to send initial state to browser ${socket.id}: ${error}`);
@@ -729,6 +777,9 @@ export class IrssiClient {
 	}
 
 	private handleNicklistUpdate(networkUuid: string, channelId: number, users: User[]): void {
+		log.info(
+			`[IrssiClient] ⏰ TIMING: handleNicklistUpdate() for channel ${channelId} with ${users.length} users`
+		);
 		log.debug(`[IrssiClient] Nicklist update: ${channelId} (${users.length} users)`);
 
 		// Log first 3 users to verify format
@@ -741,15 +792,27 @@ export class IrssiClient {
 			log.debug(`[IrssiClient] Sample users: ${JSON.stringify(sample)}`);
 		}
 
+		log.info(
+			`[IrssiClient] ⏰ TIMING: Broadcasting 'users' event for channel ${channelId} to ${this.attachedBrowsers.size} browsers`
+		);
+
 		// Broadcast to all browsers
 		this.broadcastToAllBrowsers("users", {
 			chan: channelId,
 		});
 
+		log.info(
+			`[IrssiClient] ⏰ TIMING: Broadcasting 'names' event for channel ${channelId} with ${users.length} users to ${this.attachedBrowsers.size} browsers`
+		);
+
 		this.broadcastToAllBrowsers("names", {
 			id: channelId,
 			users: users,
 		});
+
+		log.info(
+			`[IrssiClient] ⏰ TIMING: handleNicklistUpdate() COMPLETED for channel ${channelId}`
+		);
 	}
 
 	private handleTopicUpdate(networkUuid: string, channelId: number, topic: string): void {

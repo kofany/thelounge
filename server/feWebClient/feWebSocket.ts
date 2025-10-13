@@ -42,6 +42,7 @@ export type ServerMessageType =
 	| "topic"
 	| "channel_mode"
 	| "nicklist"
+	| "nicklist_update" // Delta update for nicklist (NEW!)
 	| "nick_change"
 	| "user_mode"
 	| "away"

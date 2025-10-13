@@ -1122,6 +1122,17 @@ function initializeIrssiClient(
 		}
 	});
 
+	// Handle names request (frontend requests user list for a channel)
+	socket.on("names", (data) => {
+		if (!_.isPlainObject(data)) {
+			return;
+		}
+
+		// IrssiClient handles NAMES by executing /NAMES in irssi
+		// which will trigger fe-web to send nicklist message
+		client.handleNamesRequest(socket.id, data);
+	});
+
 	// Handle message history request
 	socket.on("more", (data) => {
 		if (_.isPlainObject(data)) {
