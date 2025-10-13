@@ -55,9 +55,16 @@ export type ServerMessageType =
 export interface FeWebConfig {
 	host: string;
 	port: number;
-	password?: string; // WebSocket authentication password (also used as encryption salt)
-	encryption?: boolean; // Use AES-256-GCM encryption (default: true)
-	userPassword?: string; // User's The Lounge password (for encryption key derivation)
+	password?: string; // WebSocket authentication password (used for key derivation)
+	encryption?: boolean; // Use AES-256-GCM encryption (ALWAYS true for fe-web v1.5)
+
+	// SSL/TLS options (fe-web v1.5 REQUIRES wss://)
+	useTLS?: boolean; // Use wss:// instead of ws:// (default: true for fe-web v1.5)
+	rejectUnauthorized?: boolean; // Verify SSL certificate (false for self-signed)
+	ca?: Buffer; // CA certificate for self-signed cert verification
+	cert?: Buffer; // Client certificate (optional)
+	key?: Buffer; // Client key (optional)
+
 	autoConnect?: boolean;
 	defaultServer?: string;
 	reconnect?: boolean;
@@ -85,8 +92,15 @@ export class FeWebSocket {
 			host: config.host,
 			port: config.port,
 			password: config.password ?? "",
-			encryption: config.encryption ?? true, // Encryption enabled by default
-			userPassword: config.userPassword ?? "",
+			encryption: config.encryption ?? true, // ALWAYS true for fe-web v1.5
+
+			// SSL/TLS options (fe-web v1.5 REQUIRES wss://)
+			useTLS: config.useTLS ?? true, // Default to wss:// for fe-web v1.5
+			rejectUnauthorized: config.rejectUnauthorized ?? false, // Accept self-signed by default
+			ca: config.ca,
+			cert: config.cert,
+			key: config.key,
+
 			autoConnect: config.autoConnect ?? true,
 			defaultServer: config.defaultServer ?? "*",
 			reconnect: config.reconnect ?? true,
@@ -97,11 +111,10 @@ export class FeWebSocket {
 
 		this.currentReconnectDelay = this.config.reconnectDelay;
 
-		// Initialize encryption if enabled
-		if (this.config.encryption && this.config.userPassword && this.config.password) {
+		// Initialize encryption (REQUIRED for fe-web v1.5)
+		if (this.config.encryption && this.config.password) {
 			this.encryption = new FeWebEncryption(
-				this.config.userPassword, // User's The Lounge password
-				this.config.password, // irssi WebSocket password (salt)
+				this.config.password, // WebSocket password (for PBKDF2 with FIXED salt)
 				true
 			);
 		}
@@ -115,31 +128,56 @@ export class FeWebSocket {
 	}
 
 	/**
-	 * Connect to fe-web WebSocket server
+	 * Connect to fe-web WebSocket server (v1.5 with dual-layer security)
 	 */
 	async connect(): Promise<void> {
-		// Derive encryption key if encryption is enabled
+		// Derive encryption key if encryption is enabled (REQUIRED for fe-web v1.5)
 		if (this.encryption) {
-			console.log("[FeWebSocket] Deriving encryption key...");
+			console.log("[FeWebSocket] Deriving encryption key (fe-web v1.5)...");
 			await this.encryption.deriveKey();
 		}
 
 		return new Promise((resolve, reject) => {
-			// Always use plain ws:// - encryption is at application level
-			let url = `ws://${this.config.host}:${this.config.port}/`;
+			// fe-web v1.5 REQUIRES wss:// (dual-layer security)
+			const protocol = this.config.useTLS ? "wss" : "ws";
+			let url = `${protocol}://${this.config.host}:${this.config.port}/`;
 
 			// Add password as query parameter if provided
 			if (this.config.password && this.config.password.length > 0) {
 				url += `?password=${encodeURIComponent(this.config.password)}`;
 			}
 
-			const encStatus = this.encryption ? "encrypted" : "plain";
+			const encStatus = this.encryption ? "AES-256-GCM" : "plain";
+			const tlsStatus = this.config.useTLS ? "TLS" : "plain";
 			console.log(
-				`[FeWebSocket] Connecting to ws://${this.config.host}:${this.config.port}/ (${encStatus})...`
+				`[FeWebSocket] Connecting to ${url} (Layer 1: ${tlsStatus}, Layer 2: ${encStatus})...`
 			);
 
+			// Prepare WebSocket options for SSL/TLS
+			const wsOptions: any = {};
+
+			if (this.config.useTLS) {
+				// SSL/TLS options for self-signed certificates
+				if (this.config.rejectUnauthorized !== undefined) {
+					wsOptions.rejectUnauthorized = this.config.rejectUnauthorized;
+				}
+				if (this.config.ca) {
+					wsOptions.ca = this.config.ca;
+				}
+				if (this.config.cert) {
+					wsOptions.cert = this.config.cert;
+				}
+				if (this.config.key) {
+					wsOptions.key = this.config.key;
+				}
+
+				console.log(
+					`[FeWebSocket] SSL/TLS options: rejectUnauthorized=${wsOptions.rejectUnauthorized}`
+				);
+			}
+
 			try {
-				this.ws = new WebSocket(url);
+				this.ws = new WebSocket(url, wsOptions);
 			} catch (error) {
 				console.error("[FeWebSocket] Failed to create WebSocket:", error);
 				reject(error);

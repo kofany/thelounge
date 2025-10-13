@@ -1,50 +1,59 @@
 /**
- * fe-web Encryption Helper (Server-side)
- * 
+ * fe-web Encryption Helper (Server-side) v1.5
+ *
  * Implements AES-256-GCM encryption for fe-web WebSocket messages.
- * Uses password-based key derivation (PBKDF2) with irssi WebSocket password as salt.
- * 
- * This is a server-side port of client/js/feWebEncryption.ts using Node.js crypto API.
+ * Compatible with fe-web v1.5 dual-layer security requirements.
+ *
+ * ⚠️ IMPORTANT: fe-web v1.5 ENFORCES dual-layer security:
+ * - Layer 1: SSL/TLS (wss://) - self-signed certificate
+ * - Layer 2: AES-256-GCM - application-level encryption
+ *
+ * This is a server-side port using Node.js crypto API.
  */
 
 import crypto from "crypto";
 
 /**
+ * FIXED salt for fe-web v1.5 protocol
+ * MUST match server exactly: "irssi-fe-web-v1" (15 bytes UTF-8)
+ */
+const FE_WEB_SALT = "irssi-fe-web-v1";
+
+/**
  * Encryption helper for fe-web messages
- * 
+ *
  * Algorithm: AES-256-GCM (Galois/Counter Mode)
  * - Key size: 256 bits (32 bytes)
  * - IV size: 96 bits (12 bytes) - random per message
  * - Tag size: 128 bits (16 bytes) - authentication tag
- * 
+ *
  * Key Derivation: PBKDF2-HMAC-SHA256
- * - Input: User's The Lounge password
- * - Salt: irssi WebSocket password (unique per user)
+ * - Password: WebSocket password (from URL parameter)
+ * - Salt: "irssi-fe-web-v1" (FIXED, 15 bytes UTF-8)
  * - Iterations: 10,000
  * - Output: 256-bit key
- * 
+ *
  * Message Format:
  * [IV (12 bytes)] [Ciphertext (variable)] [Auth Tag (16 bytes)]
  */
 export class FeWebEncryption {
 	private password: string;
-	private salt: string;
 	private key: Buffer | null = null;
 	private enabled: boolean;
 
 	/**
-	 * @param password - User's The Lounge password (for encryption key derivation)
-	 * @param salt - irssi WebSocket password (used as salt)
-	 * @param enabled - Enable/disable encryption
+	 * @param password - WebSocket password (used for key derivation with FIXED salt)
+	 * @param enabled - Enable/disable encryption (default: true)
 	 */
-	constructor(password: string, salt: string, enabled: boolean = true) {
+	constructor(password: string, enabled: boolean = true) {
 		this.password = password;
-		this.salt = salt;
 		this.enabled = enabled;
 	}
 
 	/**
 	 * Derive encryption key from password using PBKDF2
+	 *
+	 * Uses FIXED salt "irssi-fe-web-v1" as per fe-web v1.5 protocol
 	 */
 	async deriveKey(): Promise<void> {
 		if (!this.enabled || !this.password) {
@@ -55,8 +64,8 @@ export class FeWebEncryption {
 		return new Promise((resolve, reject) => {
 			crypto.pbkdf2(
 				this.password,
-				this.salt,
-				10000, // iterations
+				FE_WEB_SALT, // FIXED salt for fe-web v1.5
+				10000, // iterations (MUST be 10,000)
 				32, // key length (256 bits)
 				"sha256",
 				(err, derivedKey) => {
@@ -66,7 +75,9 @@ export class FeWebEncryption {
 					}
 
 					this.key = derivedKey;
-					console.log("[FeWebEncryption] Encryption key derived successfully");
+					console.log(
+						"[FeWebEncryption] Encryption key derived successfully (fe-web v1.5)"
+					);
 					resolve();
 				}
 			);
@@ -75,7 +86,7 @@ export class FeWebEncryption {
 
 	/**
 	 * Encrypt a JSON message
-	 * 
+	 *
 	 * @param plaintext - JSON string to encrypt
 	 * @returns Binary data: IV (12 bytes) + Ciphertext + Tag (16 bytes)
 	 */
@@ -108,7 +119,7 @@ export class FeWebEncryption {
 
 	/**
 	 * Decrypt a binary message
-	 * 
+	 *
 	 * @param data - Binary data: IV (12 bytes) + Ciphertext + Tag (16 bytes)
 	 * @returns Decrypted JSON string
 	 */

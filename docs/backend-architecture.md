@@ -1,13 +1,14 @@
 # The Lounge Backend Architecture - irssi Proxy Mode
 
-**Wersja:** 2.0 (Backend Proxy)
-**Data:** 2025-10-12
+**Wersja:** 2.1 (Backend Proxy + fe-web v1.5 Dual-Layer Security)
+**Data:** 2025-10-13
 **Status:** 🚧 W implementacji
 
 ## 🎯 Cel
 
 Przekształcenie The Lounge w **multi-user proxy** do irssi z:
 - Persistent WebSocket connections (zawsze aktywne)
+- **Dual-layer security** (SSL/TLS + AES-256-GCM) - fe-web v1.5
 - Encrypted message storage (AES-256-GCM)
 - Multi-session support (wiele przeglądarek per user)
 - Synchronizacja stanu między wszystkimi urządzeniami
@@ -71,9 +72,16 @@ Przekształcenie The Lounge w **multi-user proxy** do irssi z:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 🔐 Encryption Architecture
+## 🔐 Encryption Architecture (fe-web v1.5)
 
-### Dual-Key System
+### ⚠️ Dual-Layer Security (OBOWIĄZKOWE!)
+
+fe-web v1.5 **WYMUSZA** dual-layer security - OBA warstwy są OBOWIĄZKOWE:
+
+1. **Warstwa 1: SSL/TLS (wss://)** - self-signed certificate
+2. **Warstwa 2: AES-256-GCM** - application-level encryption
+
+### Triple-Key System
 
 **1. Authentication Key** (bcrypt hash):
 ```json
@@ -83,47 +91,76 @@ Przekształcenie The Lounge w **multi-user proxy** do irssi z:
 }
 ```
 
-**2. Encryption Key** (PBKDF2-derived, in-memory):
+**2. WebSocket Encryption Key** (PBKDF2-derived, używany przez FeWebSocket):
 ```typescript
-// Generowany podczas logowania
-const encryptionKey = crypto.pbkdf2Sync(
+// fe-web v1.5 używa FIXED salt!
+const webSocketKey = crypto.pbkdf2Sync(
+  irssiPassword,           // "irssi_pass_456" (hasło do irssi WebSocket)
+  "irssi-fe-web-v1",       // FIXED salt (15 bytes UTF-8) - MUSI być dokładnie ten!
+  10000,                   // iterations (MUSI być 10,000)
+  32,                      // key length (256 bits)
+  'sha256'
+);
+// Ten klucz jest używany TYLKO przez FeWebSocket do szyfrowania komunikacji z irssi
+```
+
+**3. Message Storage Encryption Key** (PBKDF2-derived, in-memory):
+```typescript
+// Osobny klucz dla lokalnego storage (RÓŻNY od WebSocket!)
+const storageKey = crypto.pbkdf2Sync(
   userPassword,      // "secret123" (hasło użytkownika do The Lounge)
   irssiPassword,     // "irssi_pass_456" (hasło do irssi WebSocket - SALT)
   10000,             // iterations
   32,                // key length (256 bits)
   'sha256'
 );
+// Ten klucz jest używany TYLKO do szyfrowania wiadomości w SQLite
 ```
 
-**3. irssi Password** (encrypted, on-disk):
+**4. irssi Password** (encrypted, on-disk):
 ```json
 // ~/.thelounge/users/alice.json
 {
   "irssiConnection": {
     "host": "127.0.0.1",
     "port": 9001,
-    "passwordEncrypted": "..." // Encrypted with encryptionKey
+    "passwordEncrypted": "..." // Encrypted with temp key (userPassword + temp salt)
   }
 }
 ```
 
-### Encryption Flow
+### Encryption Flow (fe-web v1.5)
 
 **Logowanie użytkownika**:
 ```
 1. User → Browser: username="alice", password="secret123"
-2. Backend: bcrypt.compare("secret123", stored_hash) ✓
-3. Backend: Decrypt irssi password:
-   - encryptionKey = PBKDF2("secret123", salt="temporary_salt")
-   - irssiPassword = decrypt(passwordEncrypted, encryptionKey)
-4. Backend: Derive final encryption key:
-   - encryptionKey = PBKDF2("secret123", salt=irssiPassword)
-5. Backend: Store in memory:
-   - client.encryptionKey = encryptionKey
-6. Backend: Connect to irssi:
-   - irssiConnection = new FeWebSocket({password: irssiPassword, userPassword: "secret123"})
-7. Backend: Initialize message storage:
+
+2. Backend: Weryfikacja hasła
+   - bcrypt.compare("secret123", stored_hash) ✓
+
+3. Backend: Decrypt irssi password
+   - tempKey = PBKDF2("secret123", salt="thelounge_irssi_temp_salt", 10000, 32, sha256)
+   - irssiPassword = AES-256-GCM-decrypt(passwordEncrypted, tempKey)
+   - Result: irssiPassword = "irssi_pass_456"
+
+4. Backend: Derive message storage encryption key
+   - storageKey = PBKDF2("secret123", salt="irssi_pass_456", 10000, 32, sha256)
+   - Store in memory: client.encryptionKey = storageKey
+
+5. Backend: Initialize encrypted message storage
    - messageStorage = new EncryptedMessageStorage(encryptionKey)
+
+6. Backend: Connect to irssi fe-web (dual-layer security!)
+   - Layer 1 (TLS): wss://127.0.0.1:9001/?password=irssi_pass_456
+   - Layer 2 (AES): FeWebSocket internally derives:
+     * webSocketKey = PBKDF2("irssi_pass_456", salt="irssi-fe-web-v1", 10000, 32, sha256)
+     * All messages encrypted with this key
+
+7. irssi fe-web → Backend: auth_ok (encrypted with webSocketKey)
+
+8. Ready! Dwa osobne klucze:
+   - webSocketKey: dla komunikacji z irssi (zarządzany przez FeWebSocket)
+   - storageKey: dla lokalnego storage (zarządzany przez EncryptedMessageStorage)
 ```
 
 **Zapisywanie wiadomości**:
