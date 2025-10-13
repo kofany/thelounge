@@ -476,15 +476,38 @@ export class IrssiClient {
 
 	/**
 	 * Send initial state to a newly attached browser
+	 * Converts NetworkData[] to SharedNetwork[] format for frontend
 	 */
 	private async sendInitialState(socket: Socket): Promise<void> {
 		try {
-			// TODO: Implement with FeWebAdapter
-			// Send networks, channels, messages from irssi state
+			// Convert NetworkData[] to SharedNetwork[] for Socket.IO
+			const sharedNetworks = this.networks.map((net) => {
+				// Serialize Prefix class to plain object for JSON
+				const serverOptions = {
+					CHANTYPES: net.serverOptions.CHANTYPES,
+					PREFIX: {
+						prefix: net.serverOptions.PREFIX.prefix,
+						modeToSymbol: net.serverOptions.PREFIX.modeToSymbol,
+						symbols: net.serverOptions.PREFIX.symbols,
+					},
+					NETWORK: net.serverOptions.NETWORK,
+				};
 
-			// For now, send empty state
+				return {
+					uuid: net.uuid,
+					name: net.name,
+					nick: net.nick,
+					serverOptions: serverOptions,
+					status: {
+						connected: net.connected,
+						secure: true,
+					},
+					channels: net.channels.map((ch) => ch.getFilteredClone(true)),
+				};
+			}) as any[];
+
 			socket.emit("init", {
-				networks: this.networks || [],
+				networks: sharedNetworks,
 				active: this.lastActiveChannel || -1,
 			});
 
@@ -652,21 +675,34 @@ export class IrssiClient {
 		log.debug(`[IrssiClient] Message: ${msg.text?.substring(0, 50)}`);
 
 		// Save to encrypted storage
-		if (this.messageStorage) {
+		// NOTE: Message storage for irssi proxy mode is currently disabled because:
+		// 1. NetworkData is a simplified structure, not a full Network model
+		// 2. messageStorage.index() expects Network/Channel from models
+		// 3. irssi already stores messages - we're just a proxy
+		// 4. If needed in future, create adapter to convert NetworkData → Network
+		if (this.messageStorage && false) {
+			// Disabled for irssi proxy mode
 			const network = this.networks.find((n) => n.uuid === networkUuid);
 			const channel = network?.channels.find((c) => c.id === channelId);
 			if (network && channel) {
-				// TODO: Convert to proper network/channel format for storage
-				// await this.messageStorage.index(network, channel, msg);
+				// Would need to convert NetworkData to Network model
+				// await this.messageStorage.index(network as any, channel, msg);
 			}
 		}
+
+		// Detect highlight (mention of user's nick)
+		const network = this.networks.find((n) => n.uuid === networkUuid);
+		const isHighlight =
+			network && msg.text
+				? msg.text.toLowerCase().includes(network.nick.toLowerCase())
+				: false;
 
 		// Broadcast to all browsers
 		this.broadcastToAllBrowsers("msg", {
 			chan: channelId,
 			msg: msg,
 			unread: msg.self ? 0 : 1,
-			highlight: 0, // TODO: implement highlight detection
+			highlight: isHighlight && !msg.self ? 1 : 0,
 		});
 	}
 

@@ -36,6 +36,8 @@ class User {
 		return {
 			nick: this.nick,
 			modes: this.modes,
+			mode: this.mode, // Frontend needs this for rendering
+			away: this.away,
 			lastMessage: this.lastMessage,
 		};
 	}
