@@ -559,6 +559,24 @@ export class IrssiClient {
 			log.info(
 				`[IrssiClient] ⏰ TIMING: sendInitialState() SENT init event for socket ${socket.id} with ${sharedNetworks.length} networks`
 			);
+
+			// Send names event for each channel with users
+			// This ensures frontend has nicklist data immediately after init
+			for (const net of this.networks) {
+				for (const channel of net.channels) {
+					if (channel.users.size > 0) {
+						const usersArray = Array.from(channel.users.values());
+						socket.emit("names", {
+							id: channel.id,
+							users: usersArray,
+						});
+						log.debug(
+							`[IrssiClient] Sent names for channel ${channel.id} (${usersArray.length} users) in init`
+						);
+					}
+				}
+			}
+
 			log.info(`User ${colors.bold(this.name)}: sent initial state to browser ${socket.id}`);
 		} catch (error) {
 			log.error(`Failed to send initial state to browser ${socket.id}: ${error}`);
