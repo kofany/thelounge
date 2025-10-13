@@ -203,11 +203,16 @@ export class IrssiClient {
 			log.info(`Encrypted message storage enabled for user ${colors.bold(this.name)}`);
 		}
 
-		// Step 4: Connect to irssi fe-web
+		// Step 4: Connect to irssi fe-web (ASYNCHRONOUSLY - don't block login!)
 		// WebSocket będzie używał:
 		// - Auth: /?password=<irssiPassword>
 		// - Encryption: PBKDF2(irssiPassword, salt="irssi-fe-web-v1")
-		await this.connectToIrssi();
+		// Don't await - let it connect in background
+		// If it fails, user can still use The Lounge UI and fix config in Settings
+		this.connectToIrssi().catch((error) => {
+			log.error(`Failed to connect to irssi for user ${colors.bold(this.name)}: ${error}`);
+			// Don't throw - user is already logged in to The Lounge
+		});
 
 		log.info(`User ${colors.bold(this.name)} logged in successfully`);
 	}
