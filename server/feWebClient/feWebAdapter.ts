@@ -354,14 +354,31 @@ export class FeWebAdapter {
 	 * text field contains JSON array: [{"nick":"alice","prefix":"@"}, ...]
 	 */
 	private handleNicklist(msg: FeWebMessage): void {
+		log.debug(
+			`[FeWebAdapter] handleNicklist: server=${msg.server}, channel=${
+				msg.channel
+			}, text.length=${msg.text?.length || 0}`
+		);
+
 		const network = this.getOrCreateNetwork(msg.server!);
-		if (!network) return;
+		if (!network) {
+			log.error(`[FeWebAdapter] Network not found for server: ${msg.server}`);
+			return;
+		}
 
 		const channel = this.findChannel(network, msg.channel!);
-		if (!channel) return;
+		if (!channel) {
+			log.error(
+				`[FeWebAdapter] Channel not found: ${msg.channel} on ${
+					msg.server
+				}, available: ${network.channels.map((c) => c.name).join(", ")}`
+			);
+			return;
+		}
 
 		try {
 			const nicklist: Array<{nick: string; prefix: string}> = JSON.parse(msg.text || "[]");
+			log.debug(`[FeWebAdapter] Parsed ${nicklist.length} users from nicklist JSON`);
 
 			// Clear existing users
 			channel.users.clear();
@@ -385,11 +402,16 @@ export class FeWebAdapter {
 				channel.users.set(user.nick.toLowerCase(), user);
 			});
 
+			log.debug(`[FeWebAdapter] Added ${channel.users.size} users to channel.users Map`);
+
 			// Sort users by mode then nick
 			this.sortChannelUsers(channel);
 
 			// Emit nicklist update (convert Map to Array)
 			const usersArray = Array.from(channel.users.values());
+			log.debug(
+				`[FeWebAdapter] Calling onNicklistUpdate with ${usersArray.length} users for channel ${channel.id}`
+			);
 			this.callbacks.onNicklistUpdate(network.uuid, channel.id, usersArray);
 		} catch (error) {
 			log.error(`[FeWebAdapter] Failed to parse nicklist: ${error}`);

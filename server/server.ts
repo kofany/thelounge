@@ -1093,38 +1093,21 @@ function initializeIrssiClient(
 	socket.off("auth:perform", performAuthentication);
 	socket.emit("auth:success");
 
-	// Attach browser to IrssiClient
-	client.attachBrowser(socket, openChannel);
-
-	// TODO: Implement channel management for irssi
-	// For now, just send empty init event
 	void socket.join(client.id);
 
-	const sendInitEvent = (tokenToSend?: string) => {
-		socket.emit("init", {
-			active: openChannel || -1,
-			networks: [], // TODO: Get networks from irssi
-			token: tokenToSend,
-		});
-		socket.emit("commands", inputs.getCommands());
-	};
+	// Attach browser to IrssiClient
+	// This will call client.sendInitialState() which sends proper init event with networks
+	client.attachBrowser(socket, openChannel);
 
-	if (Config.values.public) {
-		sendInitEvent();
-	} else if (!token) {
+	// Send commands list
+	socket.emit("commands", inputs.getCommands());
+
+	// Handle token generation for non-public mode
+	if (!Config.values.public && !token) {
 		client.generateToken((newToken) => {
 			token = client.calculateTokenHash(newToken);
-			// TODO: Store token in IrssiClient
-			// client.attachedClients[socket.id].token = token;
-
-			// TODO: Update session
-			// client.updateSession(token, getClientIp(socket), socket.request);
-			sendInitEvent(newToken);
+			// Token will be sent in init event by sendInitialState()
 		});
-	} else {
-		// TODO: Update session
-		// client.updateSession(token, getClientIp(socket), socket.request);
-		sendInitEvent();
 	}
 
 	// Handle disconnect
