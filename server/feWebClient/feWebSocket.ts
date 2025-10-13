@@ -187,13 +187,13 @@ export class FeWebSocket extends EventEmitter {
 					wsOptions.key = this.config.key;
 				}
 
-				// Allow older TLS versions for compatibility with irssi
-				// irssi may use TLSv1.0/1.1, Node.js 24 defaults to TLSv1.2+
-				wsOptions.minVersion = "TLSv1";
+				// irssi with OpenSSL 3.x requires TLS 1.2+
+				// Node.js 24 also defaults to TLS 1.2+
+				wsOptions.minVersion = "TLSv1.2";
 				wsOptions.maxVersion = "TLSv1.3";
 
 				console.log(
-					`[FeWebSocket] SSL/TLS options: rejectUnauthorized=${wsOptions.rejectUnauthorized}, minVersion=TLSv1, maxVersion=TLSv1.3`
+					`[FeWebSocket] SSL/TLS options: rejectUnauthorized=${wsOptions.rejectUnauthorized}, minVersion=TLSv1.2, maxVersion=TLSv1.3`
 				);
 			}
 
