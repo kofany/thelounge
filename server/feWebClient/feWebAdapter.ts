@@ -320,61 +320,294 @@ export class FeWebAdapter {
 		this.callbacks.onMessage(network.uuid, channel.id, topicMsg);
 	}
 
-	// Placeholder handlers for remaining message types (9-20)
+	/**
+	 * 9. channel_mode - Channel mode change
+	 */
 	private handleChannelMode(msg: FeWebMessage): void {
-		log.debug(`[FeWebAdapter] channel_mode: ${JSON.stringify(msg)}`);
-		// TODO: Implement
+		const network = this.getOrCreateNetwork(msg.server!);
+		if (!network) return;
+
+		const channel = this.findChannel(network, msg.channel!);
+		if (!channel) return;
+
+		const modeMsg = new Msg({
+			type: MessageType.MODE_CHANNEL,
+			time: new Date(),
+			from: new User({nick: msg.nick || ""}),
+			text: msg.text || "",
+			self: false,
+		});
+		modeMsg.id = this.messageIdCounter++;
+		this.callbacks.onMessage(network.uuid, channel.id, modeMsg);
 	}
 
+	/**
+	 * 10. nicklist - Complete channel nicklist
+	 * text field contains JSON array: [{"nick":"alice","prefix":"@"}, ...]
+	 */
 	private handleNicklist(msg: FeWebMessage): void {
-		log.debug(`[FeWebAdapter] nicklist: ${JSON.stringify(msg)}`);
-		// TODO: Implement
+		const network = this.getOrCreateNetwork(msg.server!);
+		if (!network) return;
+
+		const channel = this.findChannel(network, msg.channel!);
+		if (!channel) return;
+
+		try {
+			const nicklist: Array<{nick: string; prefix: string}> = JSON.parse(msg.text || "[]");
+
+			// Clear existing users
+			channel.users = [];
+
+			// Add all users with their modes
+			nicklist.forEach((user) => {
+				const mode = this.prefixToMode(user.prefix);
+				channel.users.push(
+					new User({
+						nick: user.nick,
+						mode: mode,
+					})
+				);
+			});
+
+			// Sort users by mode then nick
+			this.sortChannelUsers(channel);
+
+			// Emit nicklist update
+			this.callbacks.onNicklistUpdate(network.uuid, channel.id, channel.users);
+		} catch (error) {
+			log.error(`[FeWebAdapter] Failed to parse nicklist: ${error}`);
+		}
 	}
 
+	/**
+	 * 11. nick_change - Nick change
+	 * nick: old nick, text: new nick
+	 */
 	private handleNickChange(msg: FeWebMessage): void {
-		log.debug(`[FeWebAdapter] nick_change: ${JSON.stringify(msg)}`);
-		// TODO: Implement
+		const network = this.getOrCreateNetwork(msg.server!);
+		if (!network) return;
+
+		const oldNick = msg.nick!;
+		const newNick = msg.text!;
+
+		// Check if it's our own nick
+		const isSelf = network.nick === oldNick;
+		if (isSelf) {
+			network.nick = newNick;
+		}
+
+		// Update nick in all channels
+		network.channels.forEach((channel) => {
+			const user = channel.users.find((u) => u.nick === oldNick);
+			if (user) {
+				user.nick = newNick;
+
+				const nickMsg = new Msg({
+					type: MessageType.NICK,
+					time: new Date(),
+					from: new User({nick: oldNick}),
+					new_nick: newNick,
+					self: isSelf,
+				});
+				nickMsg.id = this.messageIdCounter++;
+				this.callbacks.onMessage(network.uuid, channel.id, nickMsg);
+			}
+		});
 	}
 
+	/**
+	 * 12. user_mode - User mode change
+	 */
 	private handleUserMode(msg: FeWebMessage): void {
-		log.debug(`[FeWebAdapter] user_mode: ${JSON.stringify(msg)}`);
-		// TODO: Implement
+		const network = this.getOrCreateNetwork(msg.server!);
+		if (!network) return;
+
+		// User mode changes are shown in lobby
+		const lobby = network.channels.find((c) => c.type === "lobby");
+		if (!lobby) return;
+
+		const modeMsg = new Msg({
+			type: MessageType.MODE,
+			time: new Date(),
+			from: new User({nick: network.nick}),
+			text: msg.text || "",
+			self: true,
+		});
+		modeMsg.id = this.messageIdCounter++;
+		this.callbacks.onMessage(network.uuid, lobby.id, modeMsg);
 	}
 
+	/**
+	 * 13. away - Away status change
+	 */
 	private handleAway(msg: FeWebMessage): void {
-		log.debug(`[FeWebAdapter] away: ${JSON.stringify(msg)}`);
-		// TODO: Implement
+		const network = this.getOrCreateNetwork(msg.server!);
+		if (!network) return;
+
+		const nick = msg.nick!;
+		const awayMessage = msg.text || "";
+
+		// Update away status in all channels
+		network.channels.forEach((channel) => {
+			const user = channel.users.find((u) => u.nick === nick);
+			if (user) {
+				user.away = awayMessage;
+			}
+		});
 	}
 
+	/**
+	 * 14. whois - WHOIS response
+	 */
 	private handleWhois(msg: FeWebMessage): void {
-		log.debug(`[FeWebAdapter] whois: ${JSON.stringify(msg)}`);
-		// TODO: Implement
+		const network = this.getOrCreateNetwork(msg.server!);
+		if (!network) return;
+
+		// Show in lobby
+		const lobby = network.channels.find((c) => c.type === "lobby");
+		if (!lobby) return;
+
+		const whoisMsg = new Msg({
+			type: MessageType.WHOIS,
+			time: new Date(),
+			whois: {
+				nick: msg.nick!,
+				ident: msg.extra?.user || "",
+				hostname: msg.extra?.host || "",
+				real_name: msg.extra?.realname || "",
+				channels: msg.extra?.channels || "",
+				server: msg.extra?.server || "",
+				account: msg.extra?.account || "",
+			},
+			self: false,
+		});
+		whoisMsg.id = this.messageIdCounter++;
+		this.callbacks.onMessage(network.uuid, lobby.id, whoisMsg);
 	}
 
+	/**
+	 * 15. channel_list - Channel list response
+	 */
 	private handleChannelList(msg: FeWebMessage): void {
-		log.debug(`[FeWebAdapter] channel_list: ${JSON.stringify(msg)}`);
-		// TODO: Implement
+		const network = this.getOrCreateNetwork(msg.server!);
+		if (!network) return;
+
+		const channel = this.findChannel(network, msg.channel!);
+		if (!channel) return;
+
+		const listMsg = new Msg({
+			type: MessageType.MODE_CHANNEL,
+			time: new Date(),
+			text: `${msg.extra?.list_type || ""} list: ${msg.extra?.entries || ""}`,
+			self: false,
+		});
+		listMsg.id = this.messageIdCounter++;
+		this.callbacks.onMessage(network.uuid, channel.id, listMsg);
 	}
 
+	/**
+	 * 16. state_dump - Initial state dump
+	 * Marker message, followed by channel_join, topic, nicklist
+	 */
 	private handleStateDump(msg: FeWebMessage): void {
-		log.info("[FeWebAdapter] Received state_dump");
-		// TODO: Implement - this is critical for initial state
+		log.info(`[FeWebAdapter] State dump started for server: ${msg.server}`);
+
+		const network = this.getOrCreateNetwork(msg.server!);
+		if (!network) return;
+
+		// Clear existing channels (except lobby) to prepare for fresh state
+		const lobby = network.channels.find((ch) => ch.type === "lobby");
+		network.channels = lobby ? [lobby] : [];
+
+		// Mark network as connected
+		network.connected = true;
+
+		log.info(`[FeWebAdapter] Network ${msg.server} status: connected=${network.connected}`);
+
+		// Emit network status update
+		this.callbacks.onNetworkUpdate(network);
+
+		// After state_dump, we'll receive channel_join, topic, nicklist for each channel
+		// Emit init after a short delay to ensure all state messages are processed
+		setTimeout(() => {
+			this.emitInit();
+		}, 100);
 	}
 
+	/**
+	 * Emit init event with all networks
+	 */
+	private emitInit(): void {
+		if (this.initEmitted) return;
+		this.initEmitted = true;
+
+		const networks = Array.from(this.serverTagToNetworkMap.values());
+		log.info(`[FeWebAdapter] Emitting init event with ${networks.length} networks`);
+		this.callbacks.onInit(networks);
+	}
+
+	/**
+	 * 17. query_opened - Query window opened
+	 */
 	private handleQueryOpened(msg: FeWebMessage): void {
-		log.debug(`[FeWebAdapter] query_opened: ${JSON.stringify(msg)}`);
-		// TODO: Implement
+		log.info(`[FeWebAdapter] Query opened: ${msg.nick} on ${msg.server}`);
+		const network = this.getOrCreateNetwork(msg.server!);
+		if (!network) return;
+
+		const nick = msg.nick!;
+
+		// Check if query already exists
+		let channel = this.findChannel(network, nick);
+		if (channel) {
+			log.debug(`[FeWebAdapter] Query ${nick} already exists`);
+			return;
+		}
+
+		// Create query channel
+		channel = this.createQueryChannel(network, nick);
+		log.info(`[FeWebAdapter] Created query channel for ${nick} on ${msg.server}`);
+		this.callbacks.onChannelJoin(network.uuid, channel);
 	}
 
+	/**
+	 * 18. query_closed - Query window closed
+	 */
 	private handleQueryClosed(msg: FeWebMessage): void {
-		log.debug(`[FeWebAdapter] query_closed: ${JSON.stringify(msg)}`);
-		// TODO: Implement
+		log.info(`[FeWebAdapter] Query closed: ${msg.nick} on ${msg.server}`);
+		const network = this.getOrCreateNetwork(msg.server!);
+		if (!network) return;
+
+		const nick = msg.nick!;
+
+		// Find and remove query channel
+		const channelIndex = network.channels.findIndex(
+			(ch) => ch.type === "query" && ch.name.toLowerCase() === nick.toLowerCase()
+		);
+
+		if (channelIndex === -1) {
+			log.debug(`[FeWebAdapter] Query ${nick} not found`);
+			return;
+		}
+
+		const channel = network.channels[channelIndex];
+
+		// Remove from network
+		network.channels.splice(channelIndex, 1);
+
+		// Emit part event
+		this.callbacks.onChannelPart(network.uuid, channel.id);
 	}
 
+	/**
+	 * 19. error - Error message
+	 */
 	private handleError(msg: FeWebMessage): void {
 		log.error(`[FeWebAdapter] Error from fe-web: ${msg.text}`);
 	}
 
+	/**
+	 * 20. pong - Pong response
+	 */
 	private handlePong(msg: FeWebMessage): void {
 		log.debug("[FeWebAdapter] Received pong");
 	}
@@ -444,6 +677,41 @@ export class FeWebAdapter {
 
 	private generateUuid(): string {
 		return `network-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+	}
+
+	/**
+	 * Convert IRC prefix to mode character
+	 * @: op, +: voice, %: halfop, ~: owner, &: admin
+	 */
+	private prefixToMode(prefix: string): string {
+		const prefixMap: {[key: string]: string} = {
+			"@": "o", // op
+			"+": "v", // voice
+			"%": "h", // halfop
+			"~": "q", // owner
+			"&": "a", // admin
+		};
+		return prefixMap[prefix] || "";
+	}
+
+	/**
+	 * Sort channel users by mode then nick
+	 * Order: owner (~), admin (&), op (@), halfop (%), voice (+), normal
+	 */
+	private sortChannelUsers(channel: Chan): void {
+		const modeOrder = ["q", "a", "o", "h", "v", ""];
+
+		channel.users.sort((a, b) => {
+			const aModeIndex = modeOrder.indexOf(a.mode);
+			const bModeIndex = modeOrder.indexOf(b.mode);
+
+			if (aModeIndex !== bModeIndex) {
+				return aModeIndex - bModeIndex;
+			}
+
+			// Same mode - sort by nick (case insensitive)
+			return a.nick.toLowerCase().localeCompare(b.nick.toLowerCase());
+		});
 	}
 }
 
