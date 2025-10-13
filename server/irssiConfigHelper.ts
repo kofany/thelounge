@@ -86,6 +86,8 @@ export async function createIrssiUserConfig(
 			port: irssiPort,
 			passwordEncrypted: encryptedIrssiPassword,
 			encryption: true,
+			useTLS: true, // fe-web v1.5 requires wss://
+			rejectUnauthorized: false, // Accept self-signed certificates by default
 		},
 		sessions: {},
 		clientSettings: {},
@@ -147,6 +149,8 @@ export async function updateIrssiConnection(
 			host: newHost,
 			port: newPort,
 			passwordEncrypted: encryptedIrssiPassword,
+			useTLS: true, // fe-web v1.5 requires wss://
+			rejectUnauthorized: false, // Accept self-signed certificates
 		},
 	};
 }

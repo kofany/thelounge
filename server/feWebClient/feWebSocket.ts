@@ -8,6 +8,7 @@
  */
 
 import WebSocket from "ws";
+import {EventEmitter} from "events";
 import {FeWebEncryption} from "./feWebEncryption";
 
 // Message types from CLIENT-SPEC.md
@@ -75,19 +76,34 @@ export interface FeWebConfig {
 
 type MessageHandler = (message: FeWebMessage) => void;
 
-export class FeWebSocket {
-	private config: Required<FeWebConfig>;
+// Internal config type with all required fields
+type InternalFeWebConfig = Required<Omit<FeWebConfig, "ca" | "cert" | "key">> & {
+	ca?: Buffer;
+	cert?: Buffer;
+	key?: Buffer;
+};
+
+export class FeWebSocket extends EventEmitter {
+	private config: InternalFeWebConfig;
 	private ws: WebSocket | null = null;
 	private reconnectTimer: NodeJS.Timeout | null = null;
 	private pingIntervalTimer: NodeJS.Timeout | null = null;
 	private currentReconnectDelay: number;
 	private messageHandlers: Map<ServerMessageType, MessageHandler[]> = new Map();
-	private isConnected = false;
+	private _isConnected = false;
 	private isAuthenticated = false;
 	private messageIdCounter = 0;
 	private encryption: FeWebEncryption | null = null;
 
+	/**
+	 * Check if WebSocket is connected
+	 */
+	public isConnected(): boolean {
+		return this._isConnected && this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+	}
+
 	constructor(config: FeWebConfig) {
+		super(); // Call EventEmitter constructor
 		this.config = {
 			host: config.host,
 			port: config.port,
@@ -124,7 +140,7 @@ export class FeWebSocket {
 	 * Get connection status
 	 */
 	get connected(): boolean {
-		return this.isConnected && this.isAuthenticated;
+		return this._isConnected && this.isAuthenticated;
 	}
 
 	/**
@@ -217,7 +233,7 @@ export class FeWebSocket {
 			// Connection opened
 			this.ws.on("open", () => {
 				console.log("[FeWebSocket] WebSocket connected, waiting for auth_ok...");
-				this.isConnected = true;
+				this._isConnected = true;
 				this.currentReconnectDelay = this.config.reconnectDelay;
 			});
 
@@ -235,10 +251,8 @@ export class FeWebSocket {
 			// Connection closed
 			this.ws.on("close", (code: number, reason: Buffer) => {
 				const reasonStr = reason.toString();
-				console.log(
-					`[FeWebSocket] WebSocket closed (code: ${code}, reason: ${reasonStr})`
-				);
-				this.isConnected = false;
+				console.log(`[FeWebSocket] WebSocket closed (code: ${code}, reason: ${reasonStr})`);
+				this._isConnected = false;
 				this.isAuthenticated = false;
 				this.stopPing();
 
@@ -279,7 +293,7 @@ export class FeWebSocket {
 			this.ws = null;
 		}
 
-		this.isConnected = false;
+		this._isConnected = false;
 		this.isAuthenticated = false;
 	}
 
@@ -413,7 +427,7 @@ export class FeWebSocket {
 	 * Check if connected and authenticated
 	 */
 	isReady(): boolean {
-		return this.isConnected && this.isAuthenticated;
+		return this._isConnected && this.isAuthenticated;
 	}
 
 	/**
@@ -476,7 +490,7 @@ export class FeWebSocket {
 		this.stopPing();
 
 		this.pingIntervalTimer = setInterval(() => {
-			if (this.isConnected) {
+			if (this._isConnected) {
 				this.ping();
 			}
 		}, this.config.pingInterval);
@@ -524,4 +538,3 @@ export class FeWebSocket {
 		return `msg-${Date.now()}-${++this.messageIdCounter}`;
 	}
 }
-

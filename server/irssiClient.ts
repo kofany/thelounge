@@ -36,6 +36,8 @@ export type IrssiConnectionConfig = {
 	port: number;
 	passwordEncrypted: string; // Encrypted with encryption key
 	encryption: boolean;
+	useTLS: boolean; // Use wss:// (required for fe-web v1.5)
+	rejectUnauthorized: boolean; // Accept self-signed certificates
 };
 
 // User config for irssi proxy mode
@@ -273,11 +275,12 @@ export class IrssiClient {
 		}
 
 		// Connection events (for logging only - FeWebAdapter handles the actual events)
-		this.irssiConnection.on("connected", () => {
+		// Note: Using 'as any' because these are custom events not in ServerMessageType
+		(this.irssiConnection as any).on("connected", () => {
 			log.info(`User ${colors.bold(this.name)}: irssi WebSocket connected`);
 		});
 
-		this.irssiConnection.on("disconnected", () => {
+		(this.irssiConnection as any).on("disconnected", () => {
 			log.warn(`User ${colors.bold(this.name)}: irssi WebSocket disconnected`);
 		});
 
@@ -289,7 +292,7 @@ export class IrssiClient {
 			log.info(`User ${colors.bold(this.name)}: irssi authentication successful`);
 		});
 
-		this.irssiConnection.on("auth_fail", () => {
+		(this.irssiConnection as any).on("auth_fail", () => {
 			log.error(`User ${colors.bold(this.name)}: irssi authentication failed`);
 		});
 	}
@@ -501,7 +504,7 @@ export class IrssiClient {
 		this.userPassword = null;
 
 		if (shouldSave) {
-			this.manager.saveUser(this);
+			this.manager.saveUser(this as any); // IrssiClient is compatible with Client interface
 		}
 
 		log.info(`User ${colors.bold(this.name)} quit successfully`);
@@ -576,7 +579,7 @@ export class IrssiClient {
 	 * Save user config to disk
 	 */
 	save(): void {
-		this.manager.saveUser(this);
+		this.manager.saveUser(this as any); // IrssiClient is compatible with Client interface
 	}
 
 	// FeWebAdapter callback handlers

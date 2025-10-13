@@ -762,16 +762,17 @@ function initializeClient(
 		});
 
 		// irssi connection configuration (only for IrssiClient)
-		socket.on("irssi:config:get", () => {
+		// Custom irssi events (not in ServerToClientEvents type)
+		(socket as any).on("irssi:config:get", () => {
 			if (!(client instanceof IrssiClient)) {
-				socket.emit("irssi:config:error", {
+				(socket as any).emit("irssi:config:error", {
 					error: "Not in irssi mode",
 				});
 				return;
 			}
 
 			// Return connection config (without password)
-			socket.emit("irssi:config:info", {
+			(socket as any).emit("irssi:config:info", {
 				host: client.config.irssiConnection.host,
 				port: client.config.irssiConnection.port,
 				useTLS: client.config.irssiConnection.useTLS,
@@ -781,16 +782,16 @@ function initializeClient(
 			});
 		});
 
-		socket.on("irssi:config:save", async (data) => {
+		(socket as any).on("irssi:config:save", async (data: any) => {
 			if (!(client instanceof IrssiClient)) {
-				socket.emit("irssi:config:error", {
+				(socket as any).emit("irssi:config:error", {
 					error: "Not in irssi mode",
 				});
 				return;
 			}
 
 			if (!_.isPlainObject(data)) {
-				socket.emit("irssi:config:error", {
+				(socket as any).emit("irssi:config:error", {
 					error: "Invalid data",
 				});
 				return;
@@ -799,7 +800,7 @@ function initializeClient(
 			const {host, port, password, rejectUnauthorized} = data;
 
 			if (!host || !port || !password) {
-				socket.emit("irssi:config:error", {
+				(socket as any).emit("irssi:config:error", {
 					error: "Missing required fields",
 				});
 				return;
@@ -833,27 +834,27 @@ function initializeClient(
 
 				await client.connectToIrssi();
 
-				socket.emit("irssi:config:success", {
+				(socket as any).emit("irssi:config:success", {
 					message: "Connection settings saved and reconnected",
 				});
 			} catch (error) {
 				log.error(`Failed to save irssi config: ${error}`);
-				socket.emit("irssi:config:error", {
+				(socket as any).emit("irssi:config:error", {
 					error: `Failed to save: ${error}`,
 				});
 			}
 		});
 
-		socket.on("irssi:config:test", async (data) => {
+		(socket as any).on("irssi:config:test", async (data: any) => {
 			if (!(client instanceof IrssiClient)) {
-				socket.emit("irssi:config:error", {
+				(socket as any).emit("irssi:config:error", {
 					error: "Not in irssi mode",
 				});
 				return;
 			}
 
 			if (!_.isPlainObject(data)) {
-				socket.emit("irssi:config:error", {
+				(socket as any).emit("irssi:config:error", {
 					error: "Invalid data",
 				});
 				return;
@@ -862,7 +863,7 @@ function initializeClient(
 			const {host, port, password, rejectUnauthorized} = data;
 
 			if (!host || !port || !password) {
-				socket.emit("irssi:config:error", {
+				(socket as any).emit("irssi:config:error", {
 					error: "Missing required fields",
 				});
 				return;
@@ -892,12 +893,12 @@ function initializeClient(
 						resolve(false);
 					}, 5000); // 5 second timeout
 
-					testSocket.once("auth_ok", () => {
+					(testSocket as any).once("auth_ok", () => {
 						clearTimeout(timeout);
 						resolve(true);
 					});
 
-					testSocket.once("auth_fail", () => {
+					(testSocket as any).once("auth_fail", () => {
 						clearTimeout(timeout);
 						resolve(false);
 					});
@@ -912,17 +913,17 @@ function initializeClient(
 				await testSocket.disconnect();
 
 				if (authResult) {
-					socket.emit("irssi:config:test:success", {
+					(socket as any).emit("irssi:config:test:success", {
 						message: "Connection test successful",
 					});
 				} else {
-					socket.emit("irssi:config:test:error", {
+					(socket as any).emit("irssi:config:test:error", {
 						error: "Authentication failed",
 					});
 				}
 			} catch (error) {
 				log.error(`irssi connection test failed: ${error}`);
-				socket.emit("irssi:config:test:error", {
+				(socket as any).emit("irssi:config:test:error", {
 					error: `Connection failed: ${error}`,
 				});
 			}
@@ -1160,7 +1161,9 @@ function initializeIrssiClient(
 	// - network:get (not applicable for irssi)
 	// - etc.
 
-	log.info(`Browser ${colors.bold(socket.id)} attached to irssi user ${colors.bold(client.name)}`);
+	log.info(
+		`Browser ${colors.bold(socket.id)} attached to irssi user ${colors.bold(client.name)}`
+	);
 }
 
 function performAuthentication(this: Socket, data: AuthPerformData) {
@@ -1294,9 +1297,7 @@ function performAuthentication(this: Socket, data: AuthPerformData) {
 			try {
 				await manager!.loginUser(client, data.password);
 			} catch (error) {
-				log.error(
-					`Failed to login irssi user ${colors.bold(data.user)}: ${error}`
-				);
+				log.error(`Failed to login irssi user ${colors.bold(data.user)}: ${error}`);
 				socket.emit("auth:failed");
 				return;
 			}
