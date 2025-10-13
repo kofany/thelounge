@@ -368,11 +368,19 @@ export class FeWebAdapter {
 
 			// Add all users with their modes
 			nicklist.forEach((userEntry) => {
-				const mode = this.prefixToMode(userEntry.prefix);
-				const user = new User({
-					nick: userEntry.nick,
-					mode: mode,
-				});
+				// Convert prefix symbol (@, +, %, !) to mode character (o, v, h, Y)
+				const modeChar = this.prefixToMode(userEntry.prefix);
+
+				// User constructor expects modes: string[] (mode characters)
+				// and will convert them to symbols using PREFIX.modeToSymbol
+				const user = new User(
+					{
+						nick: userEntry.nick,
+						modes: modeChar ? [modeChar] : [], // Array of mode characters
+					},
+					network.serverOptions.PREFIX // Prefix for symbol conversion
+				);
+
 				channel.users.set(user.nick.toLowerCase(), user);
 			});
 
@@ -628,7 +636,9 @@ export class FeWebAdapter {
 		let network = this.serverTagToNetworkMap.get(serverTag);
 
 		if (!network) {
-			// Create new network with default serverOptions (same as Network model)
+			// Create new network with default serverOptions
+			// Note: irssi fe-web doesn't send CHANTYPES/PREFIX/NETWORK in state_dump
+			// We use defaults + server tag as NETWORK name
 			network = {
 				uuid: this.generateUuid(),
 				name: serverTag,
@@ -637,19 +647,24 @@ export class FeWebAdapter {
 				channels: [],
 				connected: false,
 				serverOptions: {
-					CHANTYPES: ["#", "&"],
+					CHANTYPES: ["#", "&", "!"], // Standard IRC channel types
 					PREFIX: new Prefix([
-						{symbol: "!", mode: "Y"},
-						{symbol: "@", mode: "o"},
-						{symbol: "%", mode: "h"},
-						{symbol: "+", mode: "v"},
+						{symbol: "!", mode: "Y"}, // Owner (rare)
+						{symbol: "@", mode: "o"}, // Op
+						{symbol: "%", mode: "h"}, // Halfop
+						{symbol: "+", mode: "v"}, // Voice
 					]),
-					NETWORK: "",
+					NETWORK: serverTag, // Use server tag as network name
 				},
 			};
 
 			this.serverTagToNetworkMap.set(serverTag, network);
 			log.info(`[FeWebAdapter] Created network for server tag: ${serverTag}`);
+			log.debug(
+				`[IrssiClient] Network ${serverTag} serverOptions: ${JSON.stringify(
+					network.serverOptions
+				)}`
+			);
 		}
 
 		return network;
