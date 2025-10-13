@@ -8,14 +8,13 @@
  */
 
 import crypto from "crypto";
-import {FeWebEncryption} from "./feWebClient/feWebEncryption";
 import {IrssiUserConfig, IrssiConnectionConfig} from "./irssiClient";
 
 /**
  * Encrypt irssi password with user's The Lounge password
  *
- * Uses FeWebEncryption with user's password to encrypt the irssi password.
- * The encrypted password is stored in user.json.
+ * Uses AES-256-GCM with PBKDF2(userPassword, "thelounge_irssi_temp_salt")
+ * This MUST match the decryption in IrssiClient.login()
  *
  * @param irssiPassword - Plain irssi WebSocket password
  * @param userPassword - User's The Lounge password
@@ -25,15 +24,28 @@ export async function encryptIrssiPassword(
 	irssiPassword: string,
 	userPassword: string
 ): Promise<string> {
-	const encryption = new FeWebEncryption(userPassword, true);
-	await encryption.deriveKey();
+	// IMPORTANT: Use same salt as in IrssiClient.login()
+	const tempSalt = "thelounge_irssi_temp_salt";
+	const tempKey = crypto.pbkdf2Sync(userPassword, tempSalt, 10000, 32, "sha256");
 
-	const encrypted = await encryption.encrypt(irssiPassword);
-	return encrypted.toString("base64");
+	// Generate random IV (12 bytes for GCM)
+	const iv = crypto.randomBytes(12);
+
+	// Encrypt with AES-256-GCM
+	const cipher = crypto.createCipheriv("aes-256-gcm", tempKey, iv);
+	const encrypted = Buffer.concat([cipher.update(irssiPassword, "utf8"), cipher.final()]);
+	const tag = cipher.getAuthTag();
+
+	// Format: [IV (12 bytes)] [Ciphertext] [Tag (16 bytes)]
+	const result = Buffer.concat([iv, encrypted, tag]);
+	return result.toString("base64");
 }
 
 /**
  * Decrypt irssi password with user's The Lounge password
+ *
+ * Uses AES-256-GCM with PBKDF2(userPassword, "thelounge_irssi_temp_salt")
+ * This MUST match the encryption in encryptIrssiPassword()
  *
  * @param encryptedPassword - Base64-encoded encrypted password
  * @param userPassword - User's The Lounge password
@@ -43,11 +55,23 @@ export async function decryptIrssiPassword(
 	encryptedPassword: string,
 	userPassword: string
 ): Promise<string> {
-	const encryption = new FeWebEncryption(userPassword, true);
-	await encryption.deriveKey();
+	// IMPORTANT: Use same salt as in encryptIrssiPassword()
+	const tempSalt = "thelounge_irssi_temp_salt";
+	const tempKey = crypto.pbkdf2Sync(userPassword, tempSalt, 10000, 32, "sha256");
 
-	const encrypted = Buffer.from(encryptedPassword, "base64");
-	return encryption.decrypt(encrypted);
+	const encryptedBuffer = Buffer.from(encryptedPassword, "base64");
+
+	// Parse: [IV (12 bytes)] [Ciphertext] [Tag (16 bytes)]
+	const iv = encryptedBuffer.slice(0, 12);
+	const tag = encryptedBuffer.slice(-16);
+	const ciphertext = encryptedBuffer.slice(12, -16);
+
+	// Decrypt with AES-256-GCM
+	const decipher = crypto.createDecipheriv("aes-256-gcm", tempKey, iv);
+	decipher.setAuthTag(tag);
+
+	const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+	return decrypted.toString("utf8");
 }
 
 /**
