@@ -796,42 +796,15 @@ export class IrssiClient {
 	}
 
 	private handleNicklistUpdate(networkUuid: string, channelId: number, users: User[]): void {
-		log.info(
-			`[IrssiClient] ⏰ TIMING: handleNicklistUpdate() for channel ${channelId} with ${users.length} users`
-		);
 		log.debug(`[IrssiClient] Nicklist update: ${channelId} (${users.length} users)`);
 
-		// Log first 3 users to verify format
-		if (users.length > 0) {
-			const sample = users.slice(0, 3).map((u) => ({
-				nick: u.nick,
-				modes: u.modes,
-				mode: u.mode,
-			}));
-			log.debug(`[IrssiClient] Sample users: ${JSON.stringify(sample)}`);
-		}
-
-		log.info(
-			`[IrssiClient] ⏰ TIMING: Broadcasting 'users' event for channel ${channelId} to ${this.attachedBrowsers.size} browsers`
-		);
-
-		// Broadcast to all browsers
-		this.broadcastToAllBrowsers("users", {
-			chan: channelId,
-		});
-
-		log.info(
-			`[IrssiClient] ⏰ TIMING: Broadcasting 'names' event for channel ${channelId} with ${users.length} users to ${this.attachedBrowsers.size} browsers`
-		);
+		// DON'T send 'users' event - it triggers frontend to request /names which is wasteful!
+		// In irssi mode we already have the data, just send 'names' event directly
 
 		this.broadcastToAllBrowsers("names", {
 			id: channelId,
 			users: users,
 		});
-
-		log.info(
-			`[IrssiClient] ⏰ TIMING: handleNicklistUpdate() COMPLETED for channel ${channelId}`
-		);
 	}
 
 	private handleTopicUpdate(networkUuid: string, channelId: number, topic: string): void {
