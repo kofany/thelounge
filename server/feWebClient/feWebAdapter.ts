@@ -434,8 +434,7 @@ export class FeWebAdapter {
 	 * Handles incremental changes: add, remove, mode changes
 	 */
 	private handleNicklistUpdate(msg: FeWebMessage): void {
-		// task field is in msg.text according to fe-web protocol
-		const task = msg.text;
+		const task = msg.task;
 
 		log.debug(
 			`[FeWebAdapter] handleNicklistUpdate: server=${msg.server}, channel=${msg.channel}, nick=${msg.nick}, task=${task}`
@@ -474,20 +473,40 @@ export class FeWebAdapter {
 				break;
 
 			case "change":
-				// Nick change - rename user
+				// Nick change - rename user in ALL channels of this network
 				const newNick = msg.extra?.new_nick;
 				if (!newNick) {
 					log.error(`[FeWebAdapter] Nick change missing new_nick in extra`);
 					return;
 				}
-				const user = channel.users.get(nick.toLowerCase());
-				if (user) {
-					channel.users.delete(nick.toLowerCase());
-					user.nick = newNick;
-					channel.users.set(newNick.toLowerCase(), user);
-					log.debug(`[FeWebAdapter] Renamed user ${nick} → ${newNick} in ${msg.channel}`);
-				}
-				break;
+
+				// Update nick in ALL channels where this user exists
+				let updatedChannels = 0;
+				network.channels.forEach((ch) => {
+					const user = ch.users.get(nick.toLowerCase());
+					if (user) {
+						ch.users.delete(nick.toLowerCase());
+						user.nick = newNick;
+						ch.users.set(newNick.toLowerCase(), user);
+						this.sortChannelUsers(ch);
+						updatedChannels++;
+					}
+				});
+
+				log.debug(
+					`[FeWebAdapter] Renamed user ${nick} → ${newNick} in ${updatedChannels} channels on ${msg.server}`
+				);
+
+				// Emit update for ALL channels (frontend needs to refresh nicklist for all)
+				network.channels.forEach((ch) => {
+					if (ch.users.has(newNick.toLowerCase())) {
+						const usersArray = Array.from(ch.users.values());
+						this.callbacks.onNicklistUpdate(network.uuid, ch.id, usersArray);
+					}
+				});
+
+				// Don't continue to the single-channel update at the end
+				return;
 
 			case "+o":
 			case "-o":

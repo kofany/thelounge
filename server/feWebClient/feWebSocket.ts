@@ -25,6 +25,7 @@ export interface FeWebMessage {
 	response_to?: string;
 	extra?: Record<string, any>;
 	command?: string;
+	task?: string; // For nicklist_update: "add", "remove", "change", "+o", "-o", "+v", "-v", "+h", "-h"
 }
 
 // Client → Server message types
