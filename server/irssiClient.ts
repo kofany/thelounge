@@ -731,6 +731,16 @@ export class IrssiClient {
 	private handleNicklistUpdate(networkUuid: string, channelId: number, users: User[]): void {
 		log.debug(`[IrssiClient] Nicklist update: ${channelId} (${users.length} users)`);
 
+		// Log first 3 users to verify format
+		if (users.length > 0) {
+			const sample = users.slice(0, 3).map((u) => ({
+				nick: u.nick,
+				modes: u.modes,
+				mode: u.mode,
+			}));
+			log.debug(`[IrssiClient] Sample users: ${JSON.stringify(sample)}`);
+		}
+
 		// Broadcast to all browsers
 		this.broadcastToAllBrowsers("users", {
 			chan: channelId,
@@ -786,6 +796,14 @@ export class IrssiClient {
 				channels: net.channels.map((ch) => ch.getFilteredClone(true)),
 			};
 		}) as any[];
+
+		// Log structure for debugging
+		log.debug(
+			`[IrssiClient] Init event structure: ${sharedNetworks.length} networks, ` +
+				`channels: ${sharedNetworks
+					.map((n) => `${n.name}(${n.channels.length})`)
+					.join(", ")}`
+		);
 
 		// Broadcast to all browsers
 		this.broadcastToAllBrowsers("init", {
