@@ -210,8 +210,9 @@ export class FeWebSocket extends EventEmitter {
 
 			// Register auth handler BEFORE opening connection
 			const authHandler = (msg: FeWebMessage) => {
+				console.log("[FeWebSocket] authHandler called, msg.type:", msg.type);
 				if (msg.type === "auth_ok") {
-					console.log("[FeWebSocket] Authenticated");
+					console.log("[FeWebSocket] Authenticated - resolving promise");
 					this.isAuthenticated = true;
 					this.off("auth_ok", authHandler);
 					clearTimeout(authTimeout);
@@ -224,7 +225,9 @@ export class FeWebSocket extends EventEmitter {
 						this.syncServer(this.config.defaultServer);
 					}
 
+					console.log("[FeWebSocket] Calling resolve()");
 					resolve();
+					console.log("[FeWebSocket] resolve() called");
 				}
 			};
 
@@ -445,6 +448,12 @@ export class FeWebSocket extends EventEmitter {
 	 */
 	private async handleMessage(data: WebSocket.Data): Promise<void> {
 		try {
+			console.log(
+				`[FeWebSocket] Received message, type: ${
+					Buffer.isBuffer(data) ? "binary" : typeof data
+				}, length: ${Buffer.isBuffer(data) ? data.length : (data as string).length}`
+			);
+
 			let json: string;
 
 			// Check if message is binary (encrypted) or text (plain)
@@ -457,10 +466,13 @@ export class FeWebSocket extends EventEmitter {
 					return;
 				}
 
+				console.log(`[FeWebSocket] Decrypting binary message (${data.length} bytes)...`);
 				json = await this.encryption.decrypt(data);
+				console.log(`[FeWebSocket] Decrypted message: ${json}`);
 			} else if (typeof data === "string") {
 				// Text frame - plain JSON
 				json = data;
+				console.log(`[FeWebSocket] Plain text message: ${json}`);
 			} else {
 				console.error("[FeWebSocket] Unexpected message type:", typeof data);
 				return;
@@ -468,6 +480,9 @@ export class FeWebSocket extends EventEmitter {
 
 			const message: FeWebMessage = JSON.parse(json);
 			console.log("[FeWebSocket] Received:", message);
+
+			// Emit event for EventEmitter listeners (used in connect() Promise)
+			this.emit(message.type, message);
 
 			// Dispatch to registered handlers
 			const handlers = this.messageHandlers.get(message.type as ServerMessageType);
