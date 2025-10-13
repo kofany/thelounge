@@ -15,6 +15,7 @@ import type {FeWebSocket, FeWebMessage} from "./feWebSocket";
 import Chan from "../models/chan";
 import Msg from "../models/msg";
 import User from "../models/user";
+import Prefix from "../models/prefix";
 import {ChanType} from "../../shared/types/chan";
 import {MessageType} from "../../shared/types/msg";
 import log from "../log";
@@ -28,6 +29,11 @@ export type NetworkData = {
 	serverTag: string;
 	channels: Chan[];
 	connected: boolean;
+	serverOptions: {
+		CHANTYPES: string[];
+		PREFIX: Prefix;
+		NETWORK: string;
+	};
 };
 
 export type FeWebAdapterCallbacks = {
@@ -622,7 +628,7 @@ export class FeWebAdapter {
 		let network = this.serverTagToNetworkMap.get(serverTag);
 
 		if (!network) {
-			// Create new network
+			// Create new network with default serverOptions (same as Network model)
 			network = {
 				uuid: this.generateUuid(),
 				name: serverTag,
@@ -630,6 +636,16 @@ export class FeWebAdapter {
 				serverTag: serverTag,
 				channels: [],
 				connected: false,
+				serverOptions: {
+					CHANTYPES: ["#", "&"],
+					PREFIX: new Prefix([
+						{symbol: "!", mode: "Y"},
+						{symbol: "@", mode: "o"},
+						{symbol: "%", mode: "h"},
+						{symbol: "+", mode: "v"},
+					]),
+					NETWORK: "",
+				},
 			};
 
 			this.serverTagToNetworkMap.set(serverTag, network);
