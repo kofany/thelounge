@@ -147,6 +147,17 @@ export class IrssiClient {
 		// Store user password in memory (for message storage encryption)
 		this.userPassword = userPassword;
 
+		// Check if irssi password is configured
+		if (!this.config.irssiConnection.passwordEncrypted) {
+			log.warn(
+				`User ${colors.bold(
+					this.name
+				)} has no irssi password configured - skipping connection`
+			);
+			// Don't throw error - user can configure it later in Settings
+			return;
+		}
+
 		// Step 1: Decrypt irssi password using temporary encryption
 		// Używamy userPassword do odszyfrowania irssiPassword z config
 		const tempSalt = "thelounge_irssi_temp_salt"; // Temporary salt for bootstrapping
