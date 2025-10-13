@@ -1150,10 +1150,174 @@ function initializeIrssiClient(
 		}
 	});
 
-	// TODO: Implement other event handlers for irssi mode
-	// - network:new (not applicable for irssi)
-	// - network:get (not applicable for irssi)
-	// - etc.
+	// Handle settings
+	socket.on("setting:get", () => {
+		if (!Object.prototype.hasOwnProperty.call(client.config, "clientSettings")) {
+			socket.emit("setting:all", {});
+			return;
+		}
+
+		const clientSettings = client.config.clientSettings;
+		socket.emit("setting:all", clientSettings);
+	});
+
+	// irssi connection configuration
+	(socket as any).on("irssi:config:get", () => {
+		log.info(`[irssi:config:get] Request from ${socket.id}`);
+
+		// Return connection config (without password)
+		(socket as any).emit("irssi:config:info", {
+			host: client.config.irssiConnection.host,
+			port: client.config.irssiConnection.port,
+			useTLS: client.config.irssiConnection.useTLS,
+			rejectUnauthorized: client.config.irssiConnection.rejectUnauthorized,
+			encryption: client.config.irssiConnection.encryption,
+			connected: client.irssiConnection?.isConnected() || false,
+		});
+		log.info(`[irssi:config:get] Sent config info to ${socket.id}`);
+	});
+
+	(socket as any).on("irssi:config:save", async (data: any) => {
+		log.info(`[irssi:config:save] Request from ${socket.id}:`, data);
+
+		if (!_.isPlainObject(data)) {
+			log.error(`[irssi:config:save] Invalid data type`);
+			(socket as any).emit("irssi:config:error", {
+				error: "Invalid data",
+			});
+			return;
+		}
+
+		const {host, port, password, rejectUnauthorized} = data;
+
+		if (!host || !port || !password) {
+			log.error(
+				`[irssi:config:save] Missing fields: host=${host}, port=${port}, password=${!!password}`
+			);
+			(socket as any).emit("irssi:config:error", {
+				error: "Missing required fields",
+			});
+			return;
+		}
+
+		try {
+			// Import helper functions
+			const {updateIrssiConnection} = await import("./irssiConfigHelper");
+
+			// Update config with new connection settings
+			client.config = await updateIrssiConnection(
+				client.config,
+				host,
+				port,
+				password,
+				client.userPassword! // User's The Lounge password (in memory)
+			);
+
+			// Update rejectUnauthorized if provided
+			if (typeof rejectUnauthorized === "boolean") {
+				client.config.irssiConnection.rejectUnauthorized = rejectUnauthorized;
+			}
+
+			// Save to disk
+			client.save();
+
+			// Reconnect to irssi with new settings
+			if (client.irssiConnection) {
+				await client.irssiConnection.disconnect();
+			}
+
+			await client.connectToIrssi();
+
+			(socket as any).emit("irssi:config:success", {
+				message: "Connection settings saved and reconnected",
+			});
+		} catch (error) {
+			log.error(`Failed to save irssi config: ${error}`);
+			(socket as any).emit("irssi:config:error", {
+				error: `Failed to save: ${error}`,
+			});
+		}
+	});
+
+	(socket as any).on("irssi:config:test", async (data: any) => {
+		log.info(`[irssi:config:test] Request from ${socket.id}:`, data);
+
+		if (!_.isPlainObject(data)) {
+			log.error(`[irssi:config:test] Invalid data type`);
+			(socket as any).emit("irssi:config:error", {
+				error: "Invalid data",
+			});
+			return;
+		}
+
+		const {host, port, password, rejectUnauthorized} = data;
+
+		if (!host || !port || !password) {
+			(socket as any).emit("irssi:config:error", {
+				error: "Missing required fields",
+			});
+			return;
+		}
+
+		try {
+			// Import FeWebSocket
+			const {FeWebSocket} = await import("./feWebClient/feWebSocket");
+
+			// Create temporary connection for testing
+			const testSocket = new FeWebSocket({
+				host,
+				port,
+				password,
+				encryption: true,
+				useTLS: true,
+				rejectUnauthorized: rejectUnauthorized ?? false,
+				reconnect: false, // Don't auto-reconnect for test
+			});
+
+			// Try to connect
+			await testSocket.connect();
+
+			// Wait for auth_ok or auth_fail
+			const authResult = await new Promise<boolean>((resolve) => {
+				const timeout = setTimeout(() => {
+					resolve(false);
+				}, 5000); // 5 second timeout
+
+				(testSocket as any).once("auth_ok", () => {
+					clearTimeout(timeout);
+					resolve(true);
+				});
+
+				(testSocket as any).once("auth_fail", () => {
+					clearTimeout(timeout);
+					resolve(false);
+				});
+
+				testSocket.once("error", () => {
+					clearTimeout(timeout);
+					resolve(false);
+				});
+			});
+
+			// Disconnect test connection
+			await testSocket.disconnect();
+
+			if (authResult) {
+				(socket as any).emit("irssi:config:test:success", {
+					message: "Connection test successful",
+				});
+			} else {
+				(socket as any).emit("irssi:config:test:error", {
+					error: "Authentication failed",
+				});
+			}
+		} catch (error) {
+			log.error(`irssi connection test failed: ${error}`);
+			(socket as any).emit("irssi:config:test:error", {
+				error: `Connection failed: ${error}`,
+			});
+		}
+	});
 
 	log.info(
 		`Browser ${colors.bold(socket.id)} attached to irssi user ${colors.bold(client.name)}`
