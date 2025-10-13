@@ -16,7 +16,7 @@ import Chan from "../models/chan";
 import Msg from "../models/msg";
 import User from "../models/user";
 import Prefix from "../models/prefix";
-import {ChanType} from "../../shared/types/chan";
+import {ChanType, ChanState} from "../../shared/types/chan";
 import {MessageType} from "../../shared/types/msg";
 import log from "../log";
 import colors from "chalk";
@@ -639,12 +639,22 @@ export class FeWebAdapter {
 			// Create new network with default serverOptions
 			// Note: irssi fe-web doesn't send CHANTYPES/PREFIX/NETWORK in state_dump
 			// We use defaults + server tag as NETWORK name
+
+			// Create lobby channel (required by The Lounge frontend)
+			// Frontend expects network.channels[0] to be lobby, channels[1+] to be real channels
+			const lobbyChannel = new Chan({
+				name: serverTag,
+				type: ChanType.LOBBY,
+			});
+			lobbyChannel.id = this.channelIdCounter++;
+			lobbyChannel.state = ChanState.JOINED; // Lobby is always "joined"
+
 			network = {
 				uuid: this.generateUuid(),
 				name: serverTag,
 				nick: "", // Will be set from state_dump or nick_change
 				serverTag: serverTag,
-				channels: [],
+				channels: [lobbyChannel], // Start with lobby channel
 				connected: false,
 				serverOptions: {
 					CHANTYPES: ["#", "&", "!"], // Standard IRC channel types
@@ -659,7 +669,9 @@ export class FeWebAdapter {
 			};
 
 			this.serverTagToNetworkMap.set(serverTag, network);
-			log.info(`[FeWebAdapter] Created network for server tag: ${serverTag}`);
+			log.info(
+				`[FeWebAdapter] Created network for server tag: ${serverTag} with lobby channel`
+			);
 			log.debug(
 				`[IrssiClient] Network ${serverTag} serverOptions: ${JSON.stringify(
 					network.serverOptions
