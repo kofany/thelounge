@@ -61,64 +61,64 @@ export class FeWebAdapter {
 		log.info("[FeWebAdapter] Registering fe-web message handlers");
 
 		// 1. auth_ok - Authentication successful
-		this.socket.on("auth_ok", (msg) => this.handleAuthOk(msg));
+		this.socket.onMessage("auth_ok", (msg) => this.handleAuthOk(msg));
 
 		// 2. message - IRC message (public/private)
-		this.socket.on("message", (msg) => this.handleMessage(msg));
+		this.socket.onMessage("message", (msg) => this.handleMessage(msg));
 
 		// 3. server_status - Server connection status
-		this.socket.on("server_status", (msg) => this.handleServerStatus(msg));
+		this.socket.onMessage("server_status", (msg) => this.handleServerStatus(msg));
 
 		// 4. channel_join - User joined channel
-		this.socket.on("channel_join", (msg) => this.handleChannelJoin(msg));
+		this.socket.onMessage("channel_join", (msg) => this.handleChannelJoin(msg));
 
 		// 5. channel_part - User left channel
-		this.socket.on("channel_part", (msg) => this.handleChannelPart(msg));
+		this.socket.onMessage("channel_part", (msg) => this.handleChannelPart(msg));
 
 		// 6. channel_kick - User kicked from channel
-		this.socket.on("channel_kick", (msg) => this.handleChannelKick(msg));
+		this.socket.onMessage("channel_kick", (msg) => this.handleChannelKick(msg));
 
 		// 7. user_quit - User quit IRC
-		this.socket.on("user_quit", (msg) => this.handleUserQuit(msg));
+		this.socket.onMessage("user_quit", (msg) => this.handleUserQuit(msg));
 
 		// 8. topic - Channel topic
-		this.socket.on("topic", (msg) => this.handleTopic(msg));
+		this.socket.onMessage("topic", (msg) => this.handleTopic(msg));
 
 		// 9. channel_mode - Channel mode change
-		this.socket.on("channel_mode", (msg) => this.handleChannelMode(msg));
+		this.socket.onMessage("channel_mode", (msg) => this.handleChannelMode(msg));
 
 		// 10. nicklist - Complete channel nicklist
-		this.socket.on("nicklist", (msg) => this.handleNicklist(msg));
+		this.socket.onMessage("nicklist", (msg) => this.handleNicklist(msg));
 
 		// 11. nick_change - Nick change
-		this.socket.on("nick_change", (msg) => this.handleNickChange(msg));
+		this.socket.onMessage("nick_change", (msg) => this.handleNickChange(msg));
 
 		// 12. user_mode - User mode change
-		this.socket.on("user_mode", (msg) => this.handleUserMode(msg));
+		this.socket.onMessage("user_mode", (msg) => this.handleUserMode(msg));
 
 		// 13. away - Away status change
-		this.socket.on("away", (msg) => this.handleAway(msg));
+		this.socket.onMessage("away", (msg) => this.handleAway(msg));
 
 		// 14. whois - WHOIS response
-		this.socket.on("whois", (msg) => this.handleWhois(msg));
+		this.socket.onMessage("whois", (msg) => this.handleWhois(msg));
 
 		// 15. channel_list - Channel list response
-		this.socket.on("channel_list", (msg) => this.handleChannelList(msg));
+		this.socket.onMessage("channel_list", (msg) => this.handleChannelList(msg));
 
 		// 16. state_dump - Initial state dump
-		this.socket.on("state_dump", (msg) => this.handleStateDump(msg));
+		this.socket.onMessage("state_dump", (msg) => this.handleStateDump(msg));
 
 		// 17. query_opened - Query window opened
-		this.socket.on("query_opened", (msg) => this.handleQueryOpened(msg));
+		this.socket.onMessage("query_opened", (msg) => this.handleQueryOpened(msg));
 
 		// 18. query_closed - Query window closed
-		this.socket.on("query_closed", (msg) => this.handleQueryClosed(msg));
+		this.socket.onMessage("query_closed", (msg) => this.handleQueryClosed(msg));
 
 		// 19. error - Error message
-		this.socket.on("error", (msg) => this.handleError(msg));
+		this.socket.onMessage("error", (msg) => this.handleError(msg));
 
 		// 20. pong - Pong response
-		this.socket.on("pong", (msg) => this.handlePong(msg));
+		this.socket.onMessage("pong", (msg) => this.handlePong(msg));
 	}
 
 	/**

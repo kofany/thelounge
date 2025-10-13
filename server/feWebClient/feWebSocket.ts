@@ -341,8 +341,9 @@ export class FeWebSocket extends EventEmitter {
 
 	/**
 	 * Register a message handler for a specific message type
+	 * Note: Use onMessage() instead of on() to avoid conflict with EventEmitter
 	 */
-	on(type: ServerMessageType, handler: MessageHandler): void {
+	onMessage(type: ServerMessageType, handler: MessageHandler): void {
 		if (!this.messageHandlers.has(type)) {
 			this.messageHandlers.set(type, []);
 		}
@@ -352,8 +353,9 @@ export class FeWebSocket extends EventEmitter {
 
 	/**
 	 * Unregister a message handler
+	 * Note: Use offMessage() instead of off() to avoid conflict with EventEmitter
 	 */
-	off(type: ServerMessageType, handler: MessageHandler): void {
+	offMessage(type: ServerMessageType, handler: MessageHandler): void {
 		const handlers = this.messageHandlers.get(type);
 
 		if (handlers) {
