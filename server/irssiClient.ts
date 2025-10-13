@@ -26,6 +26,7 @@ import {EncryptedMessageStorage} from "./plugins/messageStorage/encrypted";
 import {ServerToClientEvents} from "../shared/types/socket-events";
 import {FeWebSocket, FeWebConfig} from "./feWebClient/feWebSocket";
 import {FeWebEncryption} from "./feWebClient/feWebEncryption";
+import {FeWebAdapter, FeWebAdapterCallbacks, NetworkData} from "./feWebClient/feWebAdapter";
 
 // irssi connection config (stored in user.json)
 export type IrssiConnectionConfig = {
@@ -73,9 +74,13 @@ export class IrssiClient {
 
 	// irssi connection (persistent!)
 	irssiConnection: FeWebSocket | null = null;
+	feWebAdapter: FeWebAdapter | null = null;
 	encryptionKey: Buffer | null = null;
 	irssiPassword: string | null = null; // Decrypted irssi password (in memory)
 	userPassword: string | null = null; // User's The Lounge password (in memory, for encryption)
+
+	// Networks from irssi (managed by FeWebAdapter)
+	networks: NetworkData[] = [];
 
 	// Browser sessions (multiple browsers per user)
 	attachedBrowsers: Map<string, BrowserSession> = new Map();
@@ -229,6 +234,22 @@ export class IrssiClient {
 		};
 
 		this.irssiConnection = new FeWebSocket(feWebConfig);
+
+		// Initialize FeWebAdapter with callbacks
+		const adapterCallbacks: FeWebAdapterCallbacks = {
+			onNetworkUpdate: (network) => this.handleNetworkUpdate(network),
+			onMessage: (networkUuid, channelId, msg) =>
+				this.handleMessage(networkUuid, channelId, msg),
+			onChannelJoin: (networkUuid, channel) => this.handleChannelJoin(networkUuid, channel),
+			onChannelPart: (networkUuid, channelId) => this.handleChannelPart(networkUuid, channelId),
+			onNicklistUpdate: (networkUuid, channelId, users) =>
+				this.handleNicklistUpdate(networkUuid, channelId, users),
+			onTopicUpdate: (networkUuid, channelId, topic) =>
+				this.handleTopicUpdate(networkUuid, channelId, topic),
+			onInit: (networks) => this.handleInit(networks),
+		};
+
+		this.feWebAdapter = new FeWebAdapter(this.irssiConnection, adapterCallbacks);
 
 		// Set up event handlers
 		this.setupIrssiEventHandlers();
@@ -435,6 +456,102 @@ export class IrssiClient {
 	 */
 	nextMessageId(): number {
 		return this.idMsg++;
+	}
+
+	// FeWebAdapter callback handlers
+
+	private handleNetworkUpdate(network: NetworkData): void {
+		log.debug(`[IrssiClient] Network update: ${network.name}`);
+		// Update networks array
+		const index = this.networks.findIndex((n) => n.uuid === network.uuid);
+		if (index !== -1) {
+			this.networks[index] = network;
+		} else {
+			this.networks.push(network);
+		}
+
+		// Broadcast to all browsers
+		this.broadcastToAllBrowsers("network:status", {
+			network: network.uuid,
+			connected: network.connected,
+		});
+	}
+
+	private handleMessage(networkUuid: string, channelId: number, msg: Msg): void {
+		log.debug(`[IrssiClient] Message: ${msg.text?.substring(0, 50)}`);
+
+		// Save to encrypted storage
+		if (this.messageStorage) {
+			const network = this.networks.find((n) => n.uuid === networkUuid);
+			const channel = network?.channels.find((c) => c.id === channelId);
+			if (network && channel) {
+				// TODO: Convert to proper network/channel format for storage
+				// await this.messageStorage.index(network, channel, msg);
+			}
+		}
+
+		// Broadcast to all browsers
+		this.broadcastToAllBrowsers("msg", {
+			chan: channelId,
+			msg: msg,
+			unread: msg.self ? 0 : 1,
+			highlight: 0, // TODO: implement highlight detection
+		});
+	}
+
+	private handleChannelJoin(networkUuid: string, channel: Chan): void {
+		log.info(`[IrssiClient] Channel join: ${channel.name}`);
+
+		// Broadcast to all browsers
+		this.broadcastToAllBrowsers("join", {
+			network: networkUuid,
+			chan: channel,
+		});
+	}
+
+	private handleChannelPart(networkUuid: string, channelId: number): void {
+		log.info(`[IrssiClient] Channel part: ${channelId}`);
+
+		// Broadcast to all browsers
+		this.broadcastToAllBrowsers("part", {
+			chan: channelId,
+		});
+	}
+
+	private handleNicklistUpdate(networkUuid: string, channelId: number, users: User[]): void {
+		log.debug(`[IrssiClient] Nicklist update: ${channelId} (${users.length} users)`);
+
+		// Broadcast to all browsers
+		this.broadcastToAllBrowsers("users", {
+			chan: channelId,
+		});
+
+		this.broadcastToAllBrowsers("names", {
+			id: channelId,
+			users: users,
+		});
+	}
+
+	private handleTopicUpdate(networkUuid: string, channelId: number, topic: string): void {
+		log.debug(`[IrssiClient] Topic update: ${channelId}`);
+
+		// Broadcast to all browsers
+		this.broadcastToAllBrowsers("topic", {
+			chan: channelId,
+			topic: topic,
+		});
+	}
+
+	private handleInit(networks: NetworkData[]): void {
+		log.info(`[IrssiClient] Init with ${networks.length} networks`);
+		this.networks = networks;
+
+		// Broadcast to all browsers
+		this.broadcastToAllBrowsers("init", {
+			networks: networks,
+			active: -1,
+			token: null, // TODO: implement token
+		});
 	}
 }
 
