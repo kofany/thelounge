@@ -39,4 +39,5 @@ export type SharedChan = {
 	data?: any;
 	closed?: boolean;
 	num_users?: number;
+	users?: SharedUser[]; // User list (for irssi proxy mode)
 };

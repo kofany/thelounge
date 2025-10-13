@@ -498,8 +498,9 @@ export class IrssiClient {
 			}`
 		);
 
-		// Send initial state to browser
-		this.sendInitialState(socket);
+		// DON'T send init here - handleInit() will send it after state_dump completes!
+		// If we send init now, this.networks is empty (state_dump hasn't arrived yet)
+		// handleInit() is called by FeWebAdapter after state_dump + 100ms delay
 	}
 
 	/**
@@ -891,6 +892,27 @@ export class IrssiClient {
 			networks: sharedNetworks,
 			active: -1,
 		});
+
+		log.info(`[IrssiClient] ⏰ TIMING: Sent init event with ${sharedNetworks.length} networks`);
+
+		// Send names event for each channel with users
+		// This ensures frontend has nicklist data immediately after init
+		for (const net of networks) {
+			for (const channel of net.channels) {
+				if (channel.users.size > 0) {
+					const usersArray = Array.from(channel.users.values());
+					this.broadcastToAllBrowsers("names", {
+						id: channel.id,
+						users: usersArray,
+					});
+					log.info(
+						`[IrssiClient] ⏰ TIMING: Sent names for channel ${channel.id} (${usersArray.length} users) after init`
+					);
+				}
+			}
+		}
+
+		log.info(`[IrssiClient] ⏰ TIMING: handleInit() COMPLETED`);
 	}
 }
 

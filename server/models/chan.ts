@@ -221,6 +221,7 @@ class Chan {
 			data: this.data,
 			closed: this.closed,
 			num_users: this.num_users,
+			users: Array.from(this.users.values()), // Include users array for irssi mode
 		};
 		// TODO: funny array mutation below might need to be reproduced
 		// static optionalProperties = ["userAway", "special", "data", "closed", "num_users"];

@@ -21,8 +21,13 @@ export function toClientChan(shared: SharedNetworkChan): ClientChan {
 		inputHistoryPosition: 0,
 		historyLoading: false,
 		scrolledToBottom: true,
-		users: [],
-		usersOutdated: shared.type === ChanType.CHANNEL ? true : false,
+		users: (shared as any).users || [], // Use users from shared if available (irssi mode), otherwise empty
+		usersOutdated:
+			(shared as any).users && (shared as any).users.length > 0
+				? false
+				: shared.type === ChanType.CHANNEL
+				? true
+				: false,
 		moreHistoryAvailable: shared.totalMessages > shared.messages.length,
 		inputHistory: history,
 		messages: sharedMsgToClientMsg(messages),
