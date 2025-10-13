@@ -241,7 +241,8 @@ export class FeWebAdapter {
 				type: MessageType.PART,
 				time: new Date(),
 				from: new User({nick}),
-				text: msg.text || "",
+				text: msg.text || "", // Part reason
+				hostmask: msg.extra?.hostname || "",
 				self: false,
 			});
 			partMsg.id = this.messageIdCounter++;
@@ -298,7 +299,8 @@ export class FeWebAdapter {
 					type: MessageType.QUIT,
 					time: new Date(),
 					from: new User({nick}),
-					text: msg.text || "",
+					text: msg.text || "", // Quit reason
+					hostmask: msg.extra?.hostname || "",
 					self: false,
 				});
 				quitMsg.id = this.messageIdCounter++;
