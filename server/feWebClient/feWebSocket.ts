@@ -198,7 +198,10 @@ export class FeWebSocket extends EventEmitter {
 			}
 
 			try {
-				this.ws = new WebSocket(url, wsOptions);
+				// WebSocket constructor: new WebSocket(address, protocols, options)
+				// protocols: string | string[] | undefined
+				// options: object (TLS options go here!)
+				this.ws = new WebSocket(url, undefined, wsOptions);
 			} catch (error) {
 				console.error("[FeWebSocket] Failed to create WebSocket:", error);
 				reject(error);
