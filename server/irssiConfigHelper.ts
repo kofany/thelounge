@@ -122,14 +122,42 @@ export async function updateIrssiPassword(
 }
 
 /**
+ * Update irssi connection settings (host, port, password)
+ *
+ * @param config - Current user config
+ * @param newHost - New irssi host
+ * @param newPort - New irssi port
+ * @param newIrssiPassword - New plain irssi WebSocket password
+ * @param userPassword - User's The Lounge password
+ * @returns Updated config
+ */
+export async function updateIrssiConnection(
+	config: IrssiUserConfig,
+	newHost: string,
+	newPort: number,
+	newIrssiPassword: string,
+	userPassword: string
+): Promise<IrssiUserConfig> {
+	const encryptedIrssiPassword = await encryptIrssiPassword(newIrssiPassword, userPassword);
+
+	return {
+		...config,
+		irssiConnection: {
+			...config.irssiConnection,
+			host: newHost,
+			port: newPort,
+			passwordEncrypted: encryptedIrssiPassword,
+		},
+	};
+}
+
+/**
  * Validate irssi connection config
  *
  * @param config - irssi connection config
  * @returns true if valid, error message if invalid
  */
-export function validateIrssiConnectionConfig(
-	config: IrssiConnectionConfig
-): true | string {
+export function validateIrssiConnectionConfig(config: IrssiConnectionConfig): true | string {
 	if (!config.host || config.host.trim().length === 0) {
 		return "irssi host is required";
 	}
@@ -194,8 +222,8 @@ export default {
 	decryptIrssiPassword,
 	createIrssiUserConfig,
 	updateIrssiPassword,
+	updateIrssiConnection,
 	validateIrssiConnectionConfig,
 	deriveEncryptionKey,
 	reEncryptIrssiPassword,
 };
-

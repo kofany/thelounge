@@ -19,12 +19,13 @@ import type {Socket} from "socket.io";
 import log from "./log";
 import Chan from "./models/chan";
 import Msg from "./models/msg";
+import User from "./models/user";
 import Config from "./config";
 import {SharedMention} from "../shared/types/mention";
 import ClientManager from "./clientManager";
 import {EncryptedMessageStorage} from "./plugins/messageStorage/encrypted";
 import {ServerToClientEvents} from "../shared/types/socket-events";
-import {FeWebSocket, FeWebConfig} from "./feWebClient/feWebSocket";
+import {FeWebSocket, FeWebConfig, FeWebMessage} from "./feWebClient/feWebSocket";
 import {FeWebEncryption} from "./feWebClient/feWebEncryption";
 import {FeWebAdapter, FeWebAdapterCallbacks, NetworkData} from "./feWebClient/feWebAdapter";
 import UAParser from "ua-parser-js";
@@ -98,10 +99,6 @@ export class IrssiClient {
 	// ID generators
 	idMsg: number = 1;
 	idChan: number = 1;
-
-	// Networks from irssi (virtual, for compatibility with frontend)
-	// These are populated from irssi state_dump messages
-	networks: any[] = [];
 
 	constructor(manager: ClientManager, name: string, config: IrssiUserConfig) {
 		this.id = uuidv4();
@@ -242,7 +239,8 @@ export class IrssiClient {
 			onMessage: (networkUuid, channelId, msg) =>
 				this.handleMessage(networkUuid, channelId, msg),
 			onChannelJoin: (networkUuid, channel) => this.handleChannelJoin(networkUuid, channel),
-			onChannelPart: (networkUuid, channelId) => this.handleChannelPart(networkUuid, channelId),
+			onChannelPart: (networkUuid, channelId) =>
+				this.handleChannelPart(networkUuid, channelId),
 			onNicklistUpdate: (networkUuid, channelId, users) =>
 				this.handleNicklistUpdate(networkUuid, channelId, users),
 			onTopicUpdate: (networkUuid, channelId, topic) =>
@@ -259,37 +257,32 @@ export class IrssiClient {
 		await this.irssiConnection.connect();
 
 		log.info(
-			`User ${colors.bold(this.name)} connected to irssi at wss://${feWebConfig.host}:${feWebConfig.port} (dual-layer security)`
+			`User ${colors.bold(this.name)} connected to irssi at wss://${feWebConfig.host}:${
+				feWebConfig.port
+			} (dual-layer security)`
 		);
 	}
 
 	/**
 	 * Set up event handlers for irssi WebSocket
+	 * Note: Most events are handled by FeWebAdapter, these are just for logging
 	 */
 	private setupIrssiEventHandlers(): void {
 		if (!this.irssiConnection) {
 			return;
 		}
 
-		// Connection events
+		// Connection events (for logging only - FeWebAdapter handles the actual events)
 		this.irssiConnection.on("connected", () => {
 			log.info(`User ${colors.bold(this.name)}: irssi WebSocket connected`);
-			this.broadcastToAllBrowsers("irssi:connected", {});
 		});
 
 		this.irssiConnection.on("disconnected", () => {
 			log.warn(`User ${colors.bold(this.name)}: irssi WebSocket disconnected`);
-			this.broadcastToAllBrowsers("irssi:disconnected", {});
 		});
 
-		this.irssiConnection.on("error", (error: Error) => {
-			log.error(`User ${colors.bold(this.name)}: irssi WebSocket error: ${error.message}`);
-			this.broadcastToAllBrowsers("irssi:error", {message: error.message});
-		});
-
-		// Message events (will be implemented with FeWebAdapter)
-		this.irssiConnection.on("message", (data: any) => {
-			this.handleIrssiMessage(data);
+		this.irssiConnection.on("error", (msg: FeWebMessage) => {
+			log.error(`User ${colors.bold(this.name)}: irssi WebSocket error: ${msg.text}`);
 		});
 
 		this.irssiConnection.on("auth_ok", () => {
@@ -298,26 +291,7 @@ export class IrssiClient {
 
 		this.irssiConnection.on("auth_fail", () => {
 			log.error(`User ${colors.bold(this.name)}: irssi authentication failed`);
-			this.broadcastToAllBrowsers("irssi:auth_fail", {});
 		});
-	}
-
-	/**
-	 * Handle message from irssi
-	 */
-	private async handleIrssiMessage(data: any): Promise<void> {
-		// TODO: Implement with FeWebAdapter
-		// For now, just log
-		log.debug(`User ${colors.bold(this.name)}: irssi message: ${JSON.stringify(data).substring(0, 100)}`);
-
-		// Save to encrypted storage if enabled
-		if (this.messageStorage && data.type === "message") {
-			// TODO: Convert irssi message format to The Lounge format
-			// await this.messageStorage.index(network, channel, msg);
-		}
-
-		// Broadcast to all attached browsers
-		this.broadcastToAllBrowsers("msg", data);
 	}
 
 	/**
@@ -357,7 +331,8 @@ export class IrssiClient {
 				}
 
 				// Remove leading / if escaped (//)
-				const messageText = line.charAt(0) === "/" && line.charAt(1) === "/" ? line.substring(1) : line;
+				const messageText =
+					line.charAt(0) === "/" && line.charAt(1) === "/" ? line.substring(1) : line;
 
 				// Send message to channel
 				const command = `msg ${channel.name} ${messageText}`;
@@ -428,7 +403,11 @@ export class IrssiClient {
 			openChannel,
 		});
 
-		log.info(`User ${colors.bold(this.name)}: browser attached (${socketId}), total: ${this.attachedBrowsers.size}`);
+		log.info(
+			`User ${colors.bold(this.name)}: browser attached (${socketId}), total: ${
+				this.attachedBrowsers.size
+			}`
+		);
 
 		// Send initial state to browser
 		this.sendInitialState(socket);
@@ -440,7 +419,11 @@ export class IrssiClient {
 	detachBrowser(socketId: string): void {
 		this.attachedBrowsers.delete(socketId);
 
-		log.info(`User ${colors.bold(this.name)}: browser detached (${socketId}), remaining: ${this.attachedBrowsers.size}`);
+		log.info(
+			`User ${colors.bold(this.name)}: browser detached (${socketId}), remaining: ${
+				this.attachedBrowsers.size
+			}`
+		);
 
 		// Note: We keep the irssi connection alive even if no browsers are attached
 		// This is the key feature - persistent connection!
@@ -612,6 +595,7 @@ export class IrssiClient {
 		this.broadcastToAllBrowsers("network:status", {
 			network: network.uuid,
 			connected: network.connected,
+			secure: true, // irssi connection is always secure (wss:// + AES-256-GCM)
 		});
 	}
 
@@ -641,9 +625,12 @@ export class IrssiClient {
 		log.info(`[IrssiClient] Channel join: ${channel.name}`);
 
 		// Broadcast to all browsers
+		// Note: join event expects SharedNetworkChan which includes network info
 		this.broadcastToAllBrowsers("join", {
+			shouldOpen: false,
+			index: channel.id,
 			network: networkUuid,
-			chan: channel,
+			chan: channel.getFilteredClone(true) as any, // Convert to SharedNetworkChan
 		});
 	}
 
@@ -684,14 +671,26 @@ export class IrssiClient {
 		log.info(`[IrssiClient] Init with ${networks.length} networks`);
 		this.networks = networks;
 
+		// Convert NetworkData[] to SharedNetwork[] for Socket.IO
+		// Note: This is a simplified conversion - full implementation would need proper mapping
+		const sharedNetworks = networks.map((net) => ({
+			uuid: net.uuid,
+			name: net.name,
+			nick: net.nick,
+			serverOptions: {} as any,
+			status: {
+				connected: net.connected,
+				secure: true,
+			},
+			channels: net.channels.map((ch) => ch.getFilteredClone(true)),
+		})) as any[];
+
 		// Broadcast to all browsers
 		this.broadcastToAllBrowsers("init", {
-			networks: networks,
+			networks: sharedNetworks,
 			active: -1,
-			token: null, // TODO: implement token
 		});
 	}
 }
 
 export default IrssiClient;
-

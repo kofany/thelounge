@@ -13,8 +13,10 @@
 
 import type {FeWebSocket, FeWebMessage} from "./feWebSocket";
 import Chan from "../models/chan";
-import Msg, {MessageType} from "../models/msg";
+import Msg from "../models/msg";
 import User from "../models/user";
+import {ChanType} from "../../shared/types/chan";
+import {MessageType} from "../../shared/types/msg";
 import log from "../log";
 import colors from "chalk";
 
@@ -356,24 +358,24 @@ export class FeWebAdapter {
 			const nicklist: Array<{nick: string; prefix: string}> = JSON.parse(msg.text || "[]");
 
 			// Clear existing users
-			channel.users = [];
+			channel.users.clear();
 
 			// Add all users with their modes
-			nicklist.forEach((user) => {
-				const mode = this.prefixToMode(user.prefix);
-				channel.users.push(
-					new User({
-						nick: user.nick,
-						mode: mode,
-					})
-				);
+			nicklist.forEach((userEntry) => {
+				const mode = this.prefixToMode(userEntry.prefix);
+				const user = new User({
+					nick: userEntry.nick,
+					mode: mode,
+				});
+				channel.users.set(user.nick.toLowerCase(), user);
 			});
 
 			// Sort users by mode then nick
 			this.sortChannelUsers(channel);
 
-			// Emit nicklist update
-			this.callbacks.onNicklistUpdate(network.uuid, channel.id, channel.users);
+			// Emit nicklist update (convert Map to Array)
+			const usersArray = Array.from(channel.users.values());
+			this.callbacks.onNicklistUpdate(network.uuid, channel.id, usersArray);
 		} catch (error) {
 			log.error(`[FeWebAdapter] Failed to parse nicklist: ${error}`);
 		}
@@ -398,9 +400,12 @@ export class FeWebAdapter {
 
 		// Update nick in all channels
 		network.channels.forEach((channel) => {
-			const user = channel.users.find((u) => u.nick === oldNick);
+			const user = channel.users.get(oldNick.toLowerCase());
 			if (user) {
+				// Remove old entry and add new one
+				channel.users.delete(oldNick.toLowerCase());
 				user.nick = newNick;
+				channel.users.set(newNick.toLowerCase(), user);
 
 				const nickMsg = new Msg({
 					type: MessageType.NICK,
@@ -449,7 +454,7 @@ export class FeWebAdapter {
 
 		// Update away status in all channels
 		network.channels.forEach((channel) => {
-			const user = channel.users.find((u) => u.nick === nick);
+			const user = channel.users.get(nick.toLowerCase());
 			if (user) {
 				user.away = awayMessage;
 			}
@@ -635,13 +640,15 @@ export class FeWebAdapter {
 	}
 
 	private findChannel(network: NetworkData, channelName: string): Chan | null {
-		return network.channels.find((c) => c.name.toLowerCase() === channelName.toLowerCase()) || null;
+		return (
+			network.channels.find((c) => c.name.toLowerCase() === channelName.toLowerCase()) || null
+		);
 	}
 
 	private createChannel(network: NetworkData, channelName: string): Chan {
 		const channel = new Chan({
 			name: channelName,
-			type: channelName.startsWith("#") ? "channel" : "query",
+			type: channelName.startsWith("#") ? ChanType.CHANNEL : ChanType.QUERY,
 		});
 		channel.id = this.channelIdCounter++;
 		network.channels.push(channel);
@@ -651,7 +658,7 @@ export class FeWebAdapter {
 	private createQueryChannel(network: NetworkData, nick: string): Chan {
 		const channel = new Chan({
 			name: nick,
-			type: "query",
+			type: ChanType.QUERY,
 		});
 		channel.id = this.channelIdCounter++;
 		network.channels.push(channel);
@@ -660,19 +667,15 @@ export class FeWebAdapter {
 
 	private addUserToChannel(channel: Chan, nick: string): void {
 		// Check if user already exists
-		const existingUser = channel.users.find((u) => u.nick === nick);
+		const existingUser = channel.users.get(nick.toLowerCase());
 		if (!existingUser) {
-			channel.users.push(new User({nick}));
+			const user = new User({nick});
+			channel.users.set(nick.toLowerCase(), user);
 		}
 	}
 
 	private removeUserFromChannel(channel: Chan, nick: string): boolean {
-		const index = channel.users.findIndex((u) => u.nick === nick);
-		if (index !== -1) {
-			channel.users.splice(index, 1);
-			return true;
-		}
-		return false;
+		return channel.users.delete(nick.toLowerCase());
 	}
 
 	private generateUuid(): string {
@@ -701,7 +704,9 @@ export class FeWebAdapter {
 	private sortChannelUsers(channel: Chan): void {
 		const modeOrder = ["q", "a", "o", "h", "v", ""];
 
-		channel.users.sort((a, b) => {
+		// Convert Map to Array, sort, then recreate Map
+		const usersArray = Array.from(channel.users.values());
+		usersArray.sort((a, b) => {
 			const aModeIndex = modeOrder.indexOf(a.mode);
 			const bModeIndex = modeOrder.indexOf(b.mode);
 
@@ -712,6 +717,11 @@ export class FeWebAdapter {
 			// Same mode - sort by nick (case insensitive)
 			return a.nick.toLowerCase().localeCompare(b.nick.toLowerCase());
 		});
+
+		// Recreate Map with sorted users
+		channel.users.clear();
+		usersArray.forEach((user) => {
+			channel.users.set(user.nick.toLowerCase(), user);
+		});
 	}
 }
-
