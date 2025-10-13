@@ -695,12 +695,11 @@ export class IrssiClient {
 		this.networks = networks;
 
 		// Convert NetworkData[] to SharedNetwork[] for Socket.IO
-		// Note: This is a simplified conversion - full implementation would need proper mapping
 		const sharedNetworks = networks.map((net) => ({
 			uuid: net.uuid,
 			name: net.name,
 			nick: net.nick,
-			serverOptions: {} as any,
+			serverOptions: net.serverOptions, // Include serverOptions from NetworkData
 			status: {
 				connected: net.connected,
 				secure: true,
