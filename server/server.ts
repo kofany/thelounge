@@ -1100,7 +1100,7 @@ function initializeIrssiClient(
 	socket.emit("auth:success");
 
 	// Attach browser to IrssiClient
-	client.attachBrowser(socket.id, socket);
+	client.attachBrowser(socket, openChannel);
 
 	// TODO: Implement channel management for irssi
 	// For now, just send empty init event
@@ -1215,7 +1215,7 @@ function performAuthentication(this: Socket, data: AuthPerformData) {
 
 			socket.emit(
 				"push:issubscribed",
-				token && client.config.sessions[token].pushSubscription ? true : false
+				token && (client.config.sessions[token] as any).pushSubscription ? true : false
 			);
 		}
 
@@ -1293,9 +1293,9 @@ function performAuthentication(this: Socket, data: AuthPerformData) {
 
 		// For IrssiClient: login to derive encryption key and connect to irssi
 		// For Client: no-op (already connected in loadUser)
-		if (client instanceof IrssiClient && data.password) {
+		if (client instanceof IrssiClient && (data as any).password) {
 			try {
-				await manager!.loginUser(client, data.password);
+				await manager!.loginUser(client, (data as any).password);
 			} catch (error) {
 				log.error(`Failed to login irssi user ${colors.bold(data.user)}: ${error}`);
 				socket.emit("auth:failed");

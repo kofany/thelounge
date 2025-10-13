@@ -20,6 +20,7 @@ import Helper from "../../helper";
 import type {SearchableMessageStorage, DeletionRequest} from "./types";
 import Network from "../../models/network";
 import {SearchQuery, SearchResponse} from "../../../shared/types/storage";
+import {MessageType} from "../../../shared/types/msg";
 import crypto from "crypto";
 
 // LRU Cache for decrypted messages (performance optimization)
@@ -113,6 +114,13 @@ export class EncryptedMessageStorage implements SearchableMessageStorage {
 	updateEncryptionKey(newKey: Buffer): void {
 		this.encryptionKey = newKey;
 		this.cache.clear(); // Clear cache as old decrypted data is invalid
+	}
+
+	/**
+	 * Check if storage can provide messages
+	 */
+	canProvideMessages(): boolean {
+		return this.isEnabled;
 	}
 
 	/**
@@ -429,7 +437,7 @@ export class EncryptedMessageStorage implements SearchableMessageStorage {
 				log.error(`Failed to decrypt message: ${error}`);
 				// Return error message placeholder
 				return new Msg({
-					type: "error",
+					type: MessageType.UNHANDLED,
 					text: "[Decryption failed]",
 					time: row.time,
 				});

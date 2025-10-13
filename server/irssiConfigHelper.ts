@@ -12,16 +12,10 @@ import {FeWebEncryption} from "./feWebClient/feWebEncryption";
 import {IrssiUserConfig, IrssiConnectionConfig} from "./irssiClient";
 
 /**
- * Temporary salt for bootstrapping encryption
- * Used to encrypt irssi password before we know the irssi password itself
- */
-const TEMP_SALT = "thelounge_irssi_temp_salt_v1";
-
-/**
  * Encrypt irssi password with user's The Lounge password
  *
- * This uses a temporary salt because we need to encrypt the irssi password
- * before we can use it as a salt for the final encryption key.
+ * Uses FeWebEncryption with user's password to encrypt the irssi password.
+ * The encrypted password is stored in user.json.
  *
  * @param irssiPassword - Plain irssi WebSocket password
  * @param userPassword - User's The Lounge password
@@ -31,10 +25,10 @@ export async function encryptIrssiPassword(
 	irssiPassword: string,
 	userPassword: string
 ): Promise<string> {
-	const encryption = new FeWebEncryption(userPassword, TEMP_SALT, true);
+	const encryption = new FeWebEncryption(userPassword, true);
 	await encryption.deriveKey();
 
-	const encrypted = encryption.encrypt(irssiPassword);
+	const encrypted = await encryption.encrypt(irssiPassword);
 	return encrypted.toString("base64");
 }
 
@@ -49,7 +43,7 @@ export async function decryptIrssiPassword(
 	encryptedPassword: string,
 	userPassword: string
 ): Promise<string> {
-	const encryption = new FeWebEncryption(userPassword, TEMP_SALT, true);
+	const encryption = new FeWebEncryption(userPassword, true);
 	await encryption.deriveKey();
 
 	const encrypted = Buffer.from(encryptedPassword, "base64");
