@@ -761,34 +761,25 @@ function initializeClient(
 			socket.emit("setting:all", clientSettings);
 		});
 
-		// irssi connection configuration (only for IrssiClient)
+		// irssi connection configuration
+		// SINGLE MODE: All clients are IrssiClient, no need for instanceof check
 		// Custom irssi events (not in ServerToClientEvents type)
 		(socket as any).on("irssi:config:get", () => {
-			if (!(client instanceof IrssiClient)) {
-				(socket as any).emit("irssi:config:error", {
-					error: "Not in irssi mode",
-				});
-				return;
-			}
+			const irssiClient = client as unknown as IrssiClient;
 
 			// Return connection config (without password)
 			(socket as any).emit("irssi:config:info", {
-				host: client.config.irssiConnection.host,
-				port: client.config.irssiConnection.port,
-				useTLS: client.config.irssiConnection.useTLS,
-				rejectUnauthorized: client.config.irssiConnection.rejectUnauthorized,
-				encryption: client.config.irssiConnection.encryption,
-				connected: client.irssiConnection?.isConnected() || false,
+				host: irssiClient.config.irssiConnection.host,
+				port: irssiClient.config.irssiConnection.port,
+				useTLS: irssiClient.config.irssiConnection.useTLS,
+				rejectUnauthorized: irssiClient.config.irssiConnection.rejectUnauthorized,
+				encryption: irssiClient.config.irssiConnection.encryption,
+				connected: irssiClient.irssiConnection?.isConnected() || false,
 			});
 		});
 
 		(socket as any).on("irssi:config:save", async (data: any) => {
-			if (!(client instanceof IrssiClient)) {
-				(socket as any).emit("irssi:config:error", {
-					error: "Not in irssi mode",
-				});
-				return;
-			}
+			const irssiClient = client as unknown as IrssiClient;
 
 			if (!_.isPlainObject(data)) {
 				(socket as any).emit("irssi:config:error", {
@@ -811,28 +802,28 @@ function initializeClient(
 				const {updateIrssiConnection} = await import("./irssiConfigHelper");
 
 				// Update config with new connection settings
-				client.config = await updateIrssiConnection(
-					client.config,
+				irssiClient.config = await updateIrssiConnection(
+					irssiClient.config,
 					host,
 					port,
 					password,
-					client.userPassword! // User's The Lounge password (in memory)
+					irssiClient.userPassword! // User's The Lounge password (in memory)
 				);
 
 				// Update rejectUnauthorized if provided
 				if (typeof rejectUnauthorized === "boolean") {
-					client.config.irssiConnection.rejectUnauthorized = rejectUnauthorized;
+					irssiClient.config.irssiConnection.rejectUnauthorized = rejectUnauthorized;
 				}
 
 				// Save to disk
-				client.save();
+				irssiClient.save();
 
 				// Reconnect to irssi with new settings
-				if (client.irssiConnection) {
-					await client.irssiConnection.disconnect();
+				if (irssiClient.irssiConnection) {
+					await irssiClient.irssiConnection.disconnect();
 				}
 
-				await client.connectToIrssi();
+				await irssiClient.connectToIrssi();
 
 				(socket as any).emit("irssi:config:success", {
 					message: "Connection settings saved and reconnected",
@@ -846,13 +837,6 @@ function initializeClient(
 		});
 
 		(socket as any).on("irssi:config:test", async (data: any) => {
-			if (!(client instanceof IrssiClient)) {
-				(socket as any).emit("irssi:config:error", {
-					error: "Not in irssi mode",
-				});
-				return;
-			}
-
 			if (!_.isPlainObject(data)) {
 				(socket as any).emit("irssi:config:error", {
 					error: "Invalid data",
@@ -1195,12 +1179,14 @@ function performAuthentication(this: Socket, data: AuthPerformData) {
 			throw new Error("finalInit called with undefined client, this is a bug");
 		}
 
-		// Detect client type and call appropriate initialization function
-		if (client instanceof IrssiClient) {
-			initializeIrssiClient(socket, client, token, lastMessage, openChannel);
-		} else {
-			initializeClient(socket, client, token, lastMessage, openChannel);
-		}
+		// SINGLE MODE: All clients are IrssiClient
+		initializeIrssiClient(
+			socket,
+			client as unknown as IrssiClient,
+			token,
+			lastMessage,
+			openChannel
+		);
 	};
 
 	const initClient = () => {
@@ -1291,9 +1277,8 @@ function performAuthentication(this: Socket, data: AuthPerformData) {
 			}
 		}
 
-		// For IrssiClient: login to derive encryption key and connect to irssi
-		// For Client: no-op (already connected in loadUser)
-		if (client instanceof IrssiClient && (data as any).password) {
+		// SINGLE MODE: All clients are IrssiClient - login to derive encryption key
+		if ((data as any).password) {
 			try {
 				await manager!.loginUser(client, (data as any).password);
 			} catch (error) {

@@ -133,23 +133,25 @@ class ClientManager {
 				log.info(`Password for user ${colors.bold(name)} was reset.`);
 			}
 		} else {
-			// Detect mode: irssi proxy vs traditional IRC
-			const isIrssiMode = "irssiConnection" in userConfig;
-
-			if (isIrssiMode) {
-				// irssi proxy mode - create IrssiClient
-				log.info(`Loading user ${colors.bold(name)} in irssi proxy mode`);
-				const irssiClient = new IrssiClient(this, name, userConfig as IrssiUserConfig);
-				// Note: IrssiClient.login() will be called after authentication
-				this.clients.push(irssiClient);
-				client = irssiClient as any; // Type cast for compatibility
-			} else {
-				// Traditional IRC mode - create Client
-				log.info(`Loading user ${colors.bold(name)} in traditional IRC mode`);
-				client = new Client(this, name, userConfig);
-				client.connect();
-				this.clients.push(client);
+			// SINGLE MODE: Always create IrssiClient (this fork is irssi-only)
+			// Ensure irssiConnection exists in config
+			if (!("irssiConnection" in userConfig)) {
+				// Add empty irssiConnection for new users
+				(userConfig as any).irssiConnection = {
+					host: "localhost",
+					port: 9001,
+					passwordEncrypted: "",
+					encryption: true,
+					useTLS: true,
+					rejectUnauthorized: false,
+				};
 			}
+
+			log.info(`Loading user ${colors.bold(name)} in irssi proxy mode`);
+			const irssiClient = new IrssiClient(this, name, userConfig as IrssiUserConfig);
+			// Note: IrssiClient.login() will be called after authentication
+			this.clients.push(irssiClient);
+			client = irssiClient as any; // Type cast for compatibility
 		}
 
 		return client;
@@ -157,17 +159,12 @@ class ClientManager {
 
 	/**
 	 * Login user - called after successful authentication
-	 * For IrssiClient: calls login() to derive encryption key and connect to irssi
-	 * For Client: no-op (already connected in loadUser)
+	 * SINGLE MODE: All clients are IrssiClient
 	 */
 	async loginUser(client: Client | IrssiClient, password: string): Promise<void> {
-		if (client instanceof IrssiClient) {
-			log.info(`Logging in irssi user ${colors.bold(client.name)}...`);
-			await client.login(password);
-		} else {
-			// Traditional Client - already connected in loadUser
-			log.debug(`User ${colors.bold(client.name)} already connected (traditional IRC mode)`);
-		}
+		const irssiClient = client as IrssiClient;
+		log.info(`Logging in irssi user ${colors.bold(irssiClient.name)}...`);
+		await irssiClient.login(password);
 	}
 
 	getUsers = function () {
@@ -193,9 +190,21 @@ class ClientManager {
 			return false;
 		}
 
+		// SINGLE MODE: Always create with irssiConnection (empty, to be configured in UI)
 		const user = {
 			password: password || "",
 			log: enableLog,
+			irssiConnection: {
+				host: "localhost",
+				port: 9001,
+				passwordEncrypted: "",
+				encryption: true,
+				useTLS: true,
+				rejectUnauthorized: false,
+			},
+			sessions: {},
+			clientSettings: {},
+			browser: {},
 		};
 
 		try {
