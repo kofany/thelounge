@@ -331,21 +331,43 @@ export class IrssiClient {
 
 			// Check if it's a command (starts with /)
 			if (line.charAt(0) === "/" && line.charAt(1) !== "/") {
-				// Command - send to irssi
-				const command = line.substring(1); // Remove leading /
-				await this.irssiConnection.executeCommand(command);
-				log.debug(`User ${colors.bold(this.name)}: sent command: /${command}`);
-			} else {
-				// Regular message - find channel and send
-				const network = this.networks[0]; // TODO: support multiple networks
-				if (!network) {
-					log.warn(`User ${colors.bold(this.name)}: no network found`);
-					return;
+				// Command - find network for target channel to send server tag
+				let serverTag: string | undefined;
+
+				for (const net of this.networks) {
+					const channel = net.channels.find((c) => c.id === data.target);
+					if (channel) {
+						serverTag = net.serverTag;
+						break;
+					}
 				}
 
-				const channel = network.channels.find((c) => c.id === data.target);
-				if (!channel) {
-					log.warn(`User ${colors.bold(this.name)}: channel ${data.target} not found`);
+				const command = line.substring(1); // Remove leading /
+				await this.irssiConnection.executeCommand(command, serverTag);
+				log.debug(
+					`User ${colors.bold(this.name)}: sent command: /${command}${
+						serverTag ? ` on ${serverTag}` : ""
+					}`
+				);
+			} else {
+				// Regular message - find channel in ALL networks
+				let channel: Chan | undefined;
+				let network: NetworkData | undefined;
+
+				for (const net of this.networks) {
+					channel = net.channels.find((c) => c.id === data.target);
+					if (channel) {
+						network = net;
+						break;
+					}
+				}
+
+				if (!channel || !network) {
+					log.warn(
+						`User ${colors.bold(this.name)}: channel ${
+							data.target
+						} not found in any network`
+					);
 					return;
 				}
 
@@ -353,10 +375,14 @@ export class IrssiClient {
 				const messageText =
 					line.charAt(0) === "/" && line.charAt(1) === "/" ? line.substring(1) : line;
 
-				// Send message to channel
+				// Send message to channel with server tag
 				const command = `msg ${channel.name} ${messageText}`;
-				await this.irssiConnection.executeCommand(command);
-				log.debug(`User ${colors.bold(this.name)}: sent message to ${channel.name}`);
+				await this.irssiConnection.executeCommand(command, network.serverTag);
+				log.debug(
+					`User ${colors.bold(this.name)}: sent message to ${channel.name} on ${
+						network.serverTag
+					}`
+				);
 			}
 		}
 	}
@@ -695,17 +721,35 @@ export class IrssiClient {
 		this.networks = networks;
 
 		// Convert NetworkData[] to SharedNetwork[] for Socket.IO
-		const sharedNetworks = networks.map((net) => ({
-			uuid: net.uuid,
-			name: net.name,
-			nick: net.nick,
-			serverOptions: net.serverOptions, // Include serverOptions from NetworkData
-			status: {
-				connected: net.connected,
-				secure: true,
-			},
-			channels: net.channels.map((ch) => ch.getFilteredClone(true)),
-		})) as any[];
+		const sharedNetworks = networks.map((net) => {
+			// Serialize Prefix class to plain object for JSON
+			const serverOptions = {
+				CHANTYPES: net.serverOptions.CHANTYPES,
+				PREFIX: {
+					prefix: net.serverOptions.PREFIX.prefix, // Extract array from Prefix class
+					modeToSymbol: net.serverOptions.PREFIX.modeToSymbol,
+					symbols: net.serverOptions.PREFIX.symbols,
+				},
+				NETWORK: net.serverOptions.NETWORK,
+			};
+
+			log.debug(
+				`[IrssiClient] Network ${net.name} serverOptions:`,
+				JSON.stringify(serverOptions)
+			);
+
+			return {
+				uuid: net.uuid,
+				name: net.name,
+				nick: net.nick,
+				serverOptions: serverOptions,
+				status: {
+					connected: net.connected,
+					secure: true,
+				},
+				channels: net.channels.map((ch) => ch.getFilteredClone(true)),
+			};
+		}) as any[];
 
 		// Broadcast to all browsers
 		this.broadcastToAllBrowsers("init", {
