@@ -6,6 +6,7 @@
 			<SettingTabItem name="General" class-name="general" to="" />
 			<SettingTabItem name="Appearance" class-name="appearance" to="appearance" />
 			<SettingTabItem name="Notifications" class-name="notifications" to="notifications" />
+			<SettingTabItem name="irssi Connection" class-name="irssi" to="irssi" />
 			<SettingTabItem name="Account" class-name="account" to="account" />
 		</ul>
 	</aside>
@@ -78,6 +79,10 @@
 
 .settings-menu .general::before {
 	content: "\f013"; /* http://fontawesome.io/icon/cog/ */
+}
+
+.settings-menu .irssi::before {
+	content: "\f233"; /* http://fontawesome.io/icon/server/ */
 }
 
 .settings-menu button:hover,

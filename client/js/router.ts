@@ -15,6 +15,7 @@ import AppearanceSettings from "../components/Settings/Appearance.vue";
 import GeneralSettings from "../components/Settings/General.vue";
 import AccountSettings from "../components/Settings/Account.vue";
 import NotificationSettings from "../components/Settings/Notifications.vue";
+import IrssiConnectionSettings from "../components/Settings/IrssiConnection.vue";
 import {ClientChan} from "./types";
 
 const router = createRouter({
@@ -55,15 +56,20 @@ const router = createRouter({
 					component: AppearanceSettings,
 				},
 				{
+					name: "Notifications",
+					path: "notifications",
+					component: NotificationSettings,
+				},
+				{
+					name: "IrssiConnection",
+					path: "irssi",
+					component: IrssiConnectionSettings,
+				},
+				{
 					name: "Account",
 					path: "account",
 					component: AccountSettings,
 					props: true,
-				},
-				{
-					name: "Notifications",
-					path: "notifications",
-					component: NotificationSettings,
 				},
 			],
 		},
