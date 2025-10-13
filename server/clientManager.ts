@@ -6,13 +6,14 @@ import path from "path";
 
 import Auth from "./plugins/auth";
 import Client, {UserConfig} from "./client";
+import {IrssiClient, IrssiUserConfig} from "./irssiClient";
 import Config from "./config";
 import WebPush from "./plugins/webpush";
 import log from "./log";
 import {Server} from "./server";
 
 class ClientManager {
-	clients: Client[];
+	clients: (Client | IrssiClient)[];
 	sockets!: Server;
 	identHandler: any;
 	webPush!: WebPush;
@@ -132,12 +133,41 @@ class ClientManager {
 				log.info(`Password for user ${colors.bold(name)} was reset.`);
 			}
 		} else {
-			client = new Client(this, name, userConfig);
-			client.connect();
-			this.clients.push(client);
+			// Detect mode: irssi proxy vs traditional IRC
+			const isIrssiMode = "irssiConnection" in userConfig;
+
+			if (isIrssiMode) {
+				// irssi proxy mode - create IrssiClient
+				log.info(`Loading user ${colors.bold(name)} in irssi proxy mode`);
+				const irssiClient = new IrssiClient(this, name, userConfig as IrssiUserConfig);
+				// Note: IrssiClient.login() will be called after authentication
+				this.clients.push(irssiClient);
+				client = irssiClient as any; // Type cast for compatibility
+			} else {
+				// Traditional IRC mode - create Client
+				log.info(`Loading user ${colors.bold(name)} in traditional IRC mode`);
+				client = new Client(this, name, userConfig);
+				client.connect();
+				this.clients.push(client);
+			}
 		}
 
 		return client;
+	}
+
+	/**
+	 * Login user - called after successful authentication
+	 * For IrssiClient: calls login() to derive encryption key and connect to irssi
+	 * For Client: no-op (already connected in loadUser)
+	 */
+	async loginUser(client: Client | IrssiClient, password: string): Promise<void> {
+		if (client instanceof IrssiClient) {
+			log.info(`Logging in irssi user ${colors.bold(client.name)}...`);
+			await client.login(password);
+		} else {
+			// Traditional Client - already connected in loadUser
+			log.debug(`User ${colors.bold(client.name)} already connected (traditional IRC mode)`);
+		}
 	}
 
 	getUsers = function () {

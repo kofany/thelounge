@@ -10,6 +10,7 @@ import net from "net";
 
 import log from "./log";
 import Client from "./client";
+import {IrssiClient} from "./irssiClient";
 import ClientManager from "./clientManager";
 import Uploader from "./plugins/uploader";
 import Helper from "./helper";
@@ -917,13 +918,81 @@ function getServerConfiguration(): ServerConfiguration {
 	return {...Config.values, ...{stylesheets: packages.getStylesheets()}};
 }
 
+/**
+ * Initialize IrssiClient - attach browser session to persistent irssi connection
+ */
+function initializeIrssiClient(
+	socket: Socket,
+	client: IrssiClient,
+	token: string,
+	lastMessage: number,
+	openChannel: number
+) {
+	socket.off("auth:perform", performAuthentication);
+	socket.emit("auth:success");
+
+	// Attach browser to IrssiClient
+	client.attachBrowser(socket.id, socket);
+
+	// TODO: Implement channel management for irssi
+	// For now, just send empty init event
+	void socket.join(client.id);
+
+	const sendInitEvent = (tokenToSend?: string) => {
+		socket.emit("init", {
+			active: openChannel || -1,
+			networks: [], // TODO: Get networks from irssi
+			token: tokenToSend,
+		});
+		socket.emit("commands", inputs.getCommands());
+	};
+
+	if (Config.values.public) {
+		sendInitEvent();
+	} else if (!token) {
+		client.generateToken((newToken) => {
+			token = client.calculateTokenHash(newToken);
+			// TODO: Store token in IrssiClient
+			// client.attachedClients[socket.id].token = token;
+
+			// TODO: Update session
+			// client.updateSession(token, getClientIp(socket), socket.request);
+			sendInitEvent(newToken);
+		});
+	} else {
+		// TODO: Update session
+		// client.updateSession(token, getClientIp(socket), socket.request);
+		sendInitEvent();
+	}
+
+	// Handle disconnect
+	socket.on("disconnect", function () {
+		process.nextTick(() => client.detachBrowser(socket.id));
+	});
+
+	// Handle input (commands/messages)
+	socket.on("input", (data) => {
+		if (_.isPlainObject(data)) {
+			client.handleInput(socket.id, data);
+		}
+	});
+
+	// TODO: Implement other event handlers for irssi mode
+	// - more (message history)
+	// - network:new (not applicable for irssi)
+	// - network:get (not applicable for irssi)
+	// - etc.
+
+	log.info(`Browser ${colors.bold(socket.id)} attached to irssi user ${colors.bold(client.name)}`);
+}
+
 function performAuthentication(this: Socket, data: AuthPerformData) {
 	if (!_.isPlainObject(data)) {
 		return;
 	}
 
 	const socket = this;
-	let client: Client | undefined;
+	let client: Client | IrssiClient | undefined;
 	let token: string;
 
 	const finalInit = () => {
@@ -946,7 +1015,12 @@ function performAuthentication(this: Socket, data: AuthPerformData) {
 			throw new Error("finalInit called with undefined client, this is a bug");
 		}
 
-		initializeClient(socket, client, token, lastMessage, openChannel);
+		// Detect client type and call appropriate initialization function
+		if (client instanceof IrssiClient) {
+			initializeIrssiClient(socket, client, token, lastMessage, openChannel);
+		} else {
+			initializeClient(socket, client, token, lastMessage, openChannel);
+		}
 	};
 
 	const initClient = () => {
@@ -1006,7 +1080,7 @@ function performAuthentication(this: Socket, data: AuthPerformData) {
 		return;
 	}
 
-	const authCallback = (success: boolean) => {
+	const authCallback = async (success: boolean) => {
 		// Authorization failed
 		if (!success) {
 			if (!client) {
@@ -1034,6 +1108,20 @@ function performAuthentication(this: Socket, data: AuthPerformData) {
 
 			if (!client) {
 				throw new Error(`authCallback: ${data.user} not found after second lookup`);
+			}
+		}
+
+		// For IrssiClient: login to derive encryption key and connect to irssi
+		// For Client: no-op (already connected in loadUser)
+		if (client instanceof IrssiClient && data.password) {
+			try {
+				await manager!.loginUser(client, data.password);
+			} catch (error) {
+				log.error(
+					`Failed to login irssi user ${colors.bold(data.user)}: ${error}`
+				);
+				socket.emit("auth:failed");
+				return;
 			}
 		}
 
