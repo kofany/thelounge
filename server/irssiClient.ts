@@ -447,16 +447,20 @@ export class IrssiClient {
 	 * Send initial state to a newly attached browser
 	 */
 	private async sendInitialState(socket: Socket): Promise<void> {
-		// TODO: Implement with FeWebAdapter
-		// Send networks, channels, messages from irssi state
+		try {
+			// TODO: Implement with FeWebAdapter
+			// Send networks, channels, messages from irssi state
 
-		// For now, send empty state
-		socket.emit("init", {
-			networks: this.networks,
-			active: this.lastActiveChannel,
-		});
+			// For now, send empty state
+			socket.emit("init", {
+				networks: this.networks || [],
+				active: this.lastActiveChannel || -1,
+			});
 
-		log.info(`User ${colors.bold(this.name)}: sent initial state to browser ${socket.id}`);
+			log.info(`User ${colors.bold(this.name)}: sent initial state to browser ${socket.id}`);
+		} catch (error) {
+			log.error(`Failed to send initial state to browser ${socket.id}: ${error}`);
+		}
 	}
 
 	/**

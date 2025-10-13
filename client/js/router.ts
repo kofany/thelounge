@@ -22,6 +22,10 @@ const router = createRouter({
 	history: createWebHashHistory(),
 	routes: [
 		{
+			path: "/",
+			redirect: "/sign-in",
+		},
+		{
 			name: "SignIn",
 			path: "/sign-in",
 			component: SignIn,
