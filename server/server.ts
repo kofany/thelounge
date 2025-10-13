@@ -1221,6 +1221,38 @@ function initializeIrssiClient(
 			// Save to disk
 			client.save();
 
+			// Decrypt irssi password and derive encryption keys
+			// (same logic as in login() but without connecting)
+			const crypto = await import("crypto");
+			const tempSalt = "thelounge_irssi_temp_salt";
+			const tempKey = crypto.pbkdf2Sync(client.userPassword!, tempSalt, 10000, 32, "sha256");
+
+			const encryptedIrssiPassword = Buffer.from(
+				client.config.irssiConnection.passwordEncrypted,
+				"base64"
+			);
+
+			const iv = encryptedIrssiPassword.slice(0, 12);
+			const tag = encryptedIrssiPassword.slice(-16);
+			const ciphertext = encryptedIrssiPassword.slice(12, -16);
+
+			const decipher = crypto.createDecipheriv("aes-256-gcm", tempKey, iv);
+			decipher.setAuthTag(tag);
+
+			const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+			client.irssiPassword = decrypted.toString("utf8");
+
+			// Derive message storage encryption key
+			client.encryptionKey = crypto.pbkdf2Sync(
+				client.userPassword!,
+				client.irssiPassword,
+				10000,
+				32,
+				"sha256"
+			);
+
+			log.info(`Encryption keys re-derived for user ${client.name}`);
+
 			// Reconnect to irssi with new settings
 			if (client.irssiConnection) {
 				await client.irssiConnection.disconnect();
