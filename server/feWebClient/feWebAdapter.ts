@@ -335,6 +335,8 @@ export class FeWebAdapter {
 
 	/**
 	 * 9. channel_mode - Channel mode change
+	 * extra.mode: "+o", "-v", etc.
+	 * extra.params: ["nick1", "nick2", ...]
 	 */
 	private handleChannelMode(msg: FeWebMessage): void {
 		const network = this.getOrCreateNetwork(msg.server!);
@@ -343,11 +345,17 @@ export class FeWebAdapter {
 		const channel = this.findChannel(network, msg.channel!);
 		if (!channel) return;
 
+		// Build mode text from extra.mode and extra.params
+		// Example: "+o kofany`" or "+v alice bob"
+		const mode = msg.extra?.mode || "";
+		const params = msg.extra?.params || [];
+		const modeText = params.length > 0 ? `${mode} ${params.join(" ")}` : mode;
+
 		const modeMsg = new Msg({
 			type: MessageType.MODE_CHANNEL,
 			time: new Date(),
 			from: new User({nick: msg.nick || ""}),
-			text: msg.text || "",
+			text: modeText,
 			self: false,
 		});
 		modeMsg.id = this.messageIdCounter++;

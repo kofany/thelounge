@@ -2690,10 +2690,10 @@ caniuse-api@^3.0.0:
     lodash.memoize "^4.1.2"
     lodash.uniq "^4.5.0"
 
-caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001335, caniuse-lite@^1.0.30001646:
-  version "1.0.30001655"
-  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001655.tgz"
-  integrity sha512-jRGVy3iSGO5Uutn2owlb5gR6qsGngTw9ZTb4ali9f3glshcNmJ2noam4Mo9zia5P9Dk3jNNydy7vQjuE5dQmfg==
+caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001335, caniuse-lite@^1.0.30001646, caniuse-lite@1.0.30001750:
+  version "1.0.30001750"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001750.tgz"
+  integrity sha512-cuom0g5sdX6rw00qOoLNSFCJ9/mYIsuSOA+yzpDw8eopiFqcVwQvZHqov0vmEighRxX++cfC0Vg1G+1Iy/mSpQ==
 
 chai@4.3.7:
   version "4.3.7"
