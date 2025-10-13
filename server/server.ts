@@ -1188,11 +1188,11 @@ function initializeIrssiClient(
 			return;
 		}
 
-		const {host, port, password, rejectUnauthorized} = data;
+		const {host, port, password: irssiWebSocketPassword, rejectUnauthorized} = data;
 
-		if (!host || !port || !password) {
+		if (!host || !port || !irssiWebSocketPassword) {
 			log.error(
-				`[irssi:config:save] Missing fields: host=${host}, port=${port}, password=${!!password}`
+				`[irssi:config:save] Missing fields: host=${host}, port=${port}, irssiWebSocketPassword=${!!irssiWebSocketPassword}`
 			);
 			(socket as any).emit("irssi:config:error", {
 				error: "Missing required fields",
@@ -1209,7 +1209,7 @@ function initializeIrssiClient(
 				client.config,
 				host,
 				port,
-				password,
+				irssiWebSocketPassword, // irssi WebSocket password (NOT The Lounge password!)
 				client.userPassword! // User's The Lounge password (in memory)
 			);
 
@@ -1282,9 +1282,9 @@ function initializeIrssiClient(
 			return;
 		}
 
-		const {host, port, password, rejectUnauthorized} = data;
+		const {host, port, password: irssiWebSocketPassword, rejectUnauthorized} = data;
 
-		if (!host || !port || !password) {
+		if (!host || !port || !irssiWebSocketPassword) {
 			(socket as any).emit("irssi:config:error", {
 				error: "Missing required fields",
 			});
@@ -1299,7 +1299,7 @@ function initializeIrssiClient(
 			const testSocket = new FeWebSocket({
 				host,
 				port,
-				password,
+				password: irssiWebSocketPassword, // irssi WebSocket password (NOT The Lounge password!)
 				encryption: true,
 				useTLS: true,
 				rejectUnauthorized: rejectUnauthorized ?? false,
