@@ -343,3 +343,43 @@ setInterval(() => {
 - fe-web → Backend: ✅
 - Backend → Frontend: ✅
 
+---
+
+## SZCZEGÓŁOWA WERYFIKACJA MESSAGE TYPES
+
+### CLIENT → SERVER (4 typy)
+
+| # | Type | Handler | Status | Notatki |
+|---|------|---------|--------|---------|
+| 1 | `sync_server` | `syncServer()` | ✅ | Wysyła `{type, server: "*"}` |
+| 2 | `command` | `executeCommand()` | ✅ | Wysyła `{type, command, server}` |
+| 3 | `ping` | `ping()` | ✅ | Auto ping co 30s |
+| 4 | `close_query` | `closeQuery()` | ✅ | Zaimplementowane ale nie używane z UI |
+
+### SERVER → CLIENT (20 typów)
+
+| # | Type | Handler | Callback | Frontend Event | Status |
+|---|------|---------|----------|----------------|--------|
+| 1 | `auth_ok` | `handleAuthOk()` | `onAuthOk()` | - | ✅ |
+| 2 | `message` | `handleMessage()` | `onMessage()` | `msg` | ✅ |
+| 3 | `server_status` | `handleServerStatus()` | `onNetworkUpdate()` | `network:status` | ✅ |
+| 4 | `channel_join` | `handleChannelJoin()` | `onChannelJoin()` | `join` | ✅ |
+| 5 | `channel_part` | `handleChannelPart()` | `onChannelPart()` | `part` | ✅ |
+| 6 | `channel_kick` | `handleChannelKick()` | `onMessage()` | `msg` | ✅ |
+| 7 | `user_quit` | `handleUserQuit()` | `onUserQuit()` | `quit` | ✅ |
+| 8 | `topic` | `handleTopic()` | `onTopicUpdate()` | `topic` | ✅ |
+| 9 | `channel_mode` | `handleChannelMode()` | `onMessage()` | `msg` | ✅ |
+| 10 | `nicklist` | `handleNicklist()` | `onNicklistUpdate()` | `users`, `names` | ✅ |
+| 11 | `nick_change` | `handleNickChange()` | `onMessage()` | `msg` | ✅ |
+| 12 | `user_mode` | `handleUserMode()` | - | - | ✅ |
+| 13 | `away` | `handleAway()` | - | - | ✅ |
+| 14 | `whois` | `handleWhois()` | `onMessage()` | `msg` | ✅ |
+| 15 | `channel_list` | `handleChannelList()` | - | - | ✅ |
+| 16 | `state_dump` | `handleStateDump()` | `onNetworkUpdate()` | `network:status` | ✅ |
+| 17 | `query_opened` | `handleQueryOpened()` | `onChannelJoin()` | `join` | ✅ |
+| 18 | `query_closed` | `handleQueryClosed()` | `onChannelPart()` | `part` | ✅ |
+| 19 | `error` | `handleError()` | - | - | ✅ |
+| 20 | `pong` | `handlePong()` | - | - | ✅ |
+
+**WSZYSTKIE 20 TYPÓW ZAIMPLEMENTOWANE I ZWERYFIKOWANE!** ✅
+
