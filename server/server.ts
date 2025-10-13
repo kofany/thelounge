@@ -977,8 +977,18 @@ function initializeIrssiClient(
 		}
 	});
 
+	// Handle message history request
+	socket.on("more", (data) => {
+		if (_.isPlainObject(data)) {
+			const history = client.more(data);
+
+			if (history !== null) {
+				socket.emit("more", history);
+			}
+		}
+	});
+
 	// TODO: Implement other event handlers for irssi mode
-	// - more (message history)
 	// - network:new (not applicable for irssi)
 	// - network:get (not applicable for irssi)
 	// - etc.

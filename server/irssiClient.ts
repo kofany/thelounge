@@ -27,6 +27,7 @@ import {ServerToClientEvents} from "../shared/types/socket-events";
 import {FeWebSocket, FeWebConfig} from "./feWebClient/feWebSocket";
 import {FeWebEncryption} from "./feWebClient/feWebEncryption";
 import {FeWebAdapter, FeWebAdapterCallbacks, NetworkData} from "./feWebClient/feWebAdapter";
+import UAParser from "ua-parser-js";
 
 // irssi connection config (stored in user.json)
 export type IrssiConnectionConfig = {
@@ -322,17 +323,98 @@ export class IrssiClient {
 	/**
 	 * Handle input from browser (user command/message)
 	 */
-	async handleInput(target: number, text: string): Promise<void> {
+	async handleInput(socketId: string, data: {target: number; text: string}): Promise<void> {
 		if (!this.irssiConnection) {
 			log.error(`User ${colors.bold(this.name)}: cannot send input, not connected to irssi`);
 			return;
 		}
 
-		// TODO: Convert The Lounge input format to irssi command format
-		// For now, just send as command
-		await this.irssiConnection.executeCommand(text);
+		const text = data.text;
 
-		log.debug(`User ${colors.bold(this.name)}: sent input to irssi: ${text}`);
+		// Split multi-line input
+		const lines = text.split("\n");
+		for (const line of lines) {
+			if (!line.trim()) continue;
+
+			// Check if it's a command (starts with /)
+			if (line.charAt(0) === "/" && line.charAt(1) !== "/") {
+				// Command - send to irssi
+				const command = line.substring(1); // Remove leading /
+				await this.irssiConnection.executeCommand(command);
+				log.debug(`User ${colors.bold(this.name)}: sent command: /${command}`);
+			} else {
+				// Regular message - find channel and send
+				const network = this.networks[0]; // TODO: support multiple networks
+				if (!network) {
+					log.warn(`User ${colors.bold(this.name)}: no network found`);
+					return;
+				}
+
+				const channel = network.channels.find((c) => c.id === data.target);
+				if (!channel) {
+					log.warn(`User ${colors.bold(this.name)}: channel ${data.target} not found`);
+					return;
+				}
+
+				// Remove leading / if escaped (//)
+				const messageText = line.charAt(0) === "/" && line.charAt(1) === "/" ? line.substring(1) : line;
+
+				// Send message to channel
+				const command = `msg ${channel.name} ${messageText}`;
+				await this.irssiConnection.executeCommand(command);
+				log.debug(`User ${colors.bold(this.name)}: sent message to ${channel.name}`);
+			}
+		}
+	}
+
+	/**
+	 * Get message history for a channel
+	 */
+	more(data: {target: number; lastId: number; condensed?: boolean}): {
+		chan: number;
+		messages: Msg[];
+		totalMessages: number;
+	} | null {
+		// Find channel by ID across all networks
+		let targetChannel: Chan | null = null;
+		let targetNetwork: NetworkData | null = null;
+
+		for (const network of this.networks) {
+			const channel = network.channels.find((c) => c.id === data.target);
+			if (channel) {
+				targetChannel = channel;
+				targetNetwork = network;
+				break;
+			}
+		}
+
+		if (!targetChannel) {
+			log.warn(`User ${colors.bold(this.name)}: channel ${data.target} not found for more`);
+			return null;
+		}
+
+		const chan = targetChannel;
+		let messages: Msg[] = [];
+		let index = 0;
+
+		// If client requests -1, send last 100 messages
+		if (data.lastId < 0) {
+			index = chan.messages.length;
+		} else {
+			index = chan.messages.findIndex((val) => val.id === data.lastId);
+		}
+
+		// If requested id is not found, an empty array will be sent
+		if (index > 0) {
+			const startIndex = Math.max(0, index - 100); // Get up to 100 messages
+			messages = chan.messages.slice(startIndex, index);
+		}
+
+		return {
+			chan: data.target,
+			messages: messages,
+			totalMessages: chan.messages.length,
+		};
 	}
 
 	/**
@@ -456,6 +538,62 @@ export class IrssiClient {
 	 */
 	nextMessageId(): number {
 		return this.idMsg++;
+	}
+
+	/**
+	 * Generate authentication token
+	 */
+	generateToken(callback: (token: string) => void): void {
+		crypto.randomBytes(64, (err, buf) => {
+			if (err) {
+				throw err;
+			}
+			callback(buf.toString("hex"));
+		});
+	}
+
+	/**
+	 * Calculate token hash (SHA-512)
+	 */
+	calculateTokenHash(token: string): string {
+		return crypto.createHash("sha512").update(token).digest("hex");
+	}
+
+	/**
+	 * Update session information
+	 */
+	updateSession(token: string, ip: string, request: any): void {
+		const agent = UAParser(request.headers["user-agent"] || "");
+		let friendlyAgent = "";
+
+		if (agent.browser.name) {
+			friendlyAgent = `${agent.browser.name} ${agent.browser.major || ""}`;
+		} else {
+			friendlyAgent = "Unknown browser";
+		}
+
+		if (agent.os.name) {
+			friendlyAgent += ` on ${agent.os.name}`;
+
+			if (agent.os.version) {
+				friendlyAgent += ` ${agent.os.version}`;
+			}
+		}
+
+		this.config.sessions[token] = _.assign(this.config.sessions[token] || {}, {
+			lastUse: Date.now(),
+			ip: ip,
+			agent: friendlyAgent,
+		});
+
+		this.save();
+	}
+
+	/**
+	 * Save user config to disk
+	 */
+	save(): void {
+		this.manager.saveUser(this);
 	}
 
 	// FeWebAdapter callback handlers
