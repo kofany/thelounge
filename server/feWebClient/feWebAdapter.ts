@@ -369,7 +369,8 @@ export class FeWebAdapter {
 			// Add all users with their modes
 			nicklist.forEach((userEntry) => {
 				// Convert prefix symbol (@, +, %, !) to mode character (o, v, h, Y)
-				const modeChar = this.prefixToMode(userEntry.prefix);
+				// using network's PREFIX mapping
+				const modeChar = this.prefixToMode(userEntry.prefix, network);
 
 				// User constructor expects modes: string[] (mode characters)
 				// and will convert them to symbols using PREFIX.modeToSymbol
@@ -692,6 +693,7 @@ export class FeWebAdapter {
 		const channel = new Chan({
 			name: channelName,
 			type: channelName.startsWith("#") ? ChanType.CHANNEL : ChanType.QUERY,
+			state: ChanState.JOINED, // We only create channels we're joined to
 		});
 		channel.id = this.channelIdCounter++;
 		network.channels.push(channel);
@@ -702,6 +704,7 @@ export class FeWebAdapter {
 		const channel = new Chan({
 			name: nick,
 			type: ChanType.QUERY,
+			state: ChanState.JOINED, // Query is opened = joined
 		});
 		channel.id = this.channelIdCounter++;
 		network.channels.push(channel);
@@ -726,18 +729,24 @@ export class FeWebAdapter {
 	}
 
 	/**
-	 * Convert IRC prefix to mode character
-	 * @: op, +: voice, %: halfop, ~: owner, &: admin
+	 * Convert IRC prefix symbol to mode character
+	 * Uses the same mapping as network.serverOptions.PREFIX
+	 *
+	 * @param prefix - Symbol from fe-web nicklist (@, +, %, !, etc.)
+	 * @param network - Network to get PREFIX mapping from
+	 * @returns Mode character (o, v, h, Y, etc.) or empty string
 	 */
-	private prefixToMode(prefix: string): string {
-		const prefixMap: {[key: string]: string} = {
-			"@": "o", // op
-			"+": "v", // voice
-			"%": "h", // halfop
-			"~": "q", // owner
-			"&": "a", // admin
-		};
-		return prefixMap[prefix] || "";
+	private prefixToMode(prefix: string, network: NetworkData): string {
+		if (!prefix) return "";
+
+		// Find mode character for this symbol in PREFIX mapping
+		for (const p of network.serverOptions.PREFIX.prefix) {
+			if (p.symbol === prefix) {
+				return p.mode;
+			}
+		}
+
+		return "";
 	}
 
 	/**
