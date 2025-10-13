@@ -765,6 +765,7 @@ function initializeClient(
 		// SINGLE MODE: All clients are IrssiClient, no need for instanceof check
 		// Custom irssi events (not in ServerToClientEvents type)
 		(socket as any).on("irssi:config:get", () => {
+			log.info(`[irssi:config:get] Request from ${socket.id}`);
 			const irssiClient = client as unknown as IrssiClient;
 
 			// Return connection config (without password)
@@ -776,12 +777,15 @@ function initializeClient(
 				encryption: irssiClient.config.irssiConnection.encryption,
 				connected: irssiClient.irssiConnection?.isConnected() || false,
 			});
+			log.info(`[irssi:config:get] Sent config info to ${socket.id}`);
 		});
 
 		(socket as any).on("irssi:config:save", async (data: any) => {
+			log.info(`[irssi:config:save] Request from ${socket.id}:`, data);
 			const irssiClient = client as unknown as IrssiClient;
 
 			if (!_.isPlainObject(data)) {
+				log.error(`[irssi:config:save] Invalid data type`);
 				(socket as any).emit("irssi:config:error", {
 					error: "Invalid data",
 				});
@@ -791,6 +795,9 @@ function initializeClient(
 			const {host, port, password, rejectUnauthorized} = data;
 
 			if (!host || !port || !password) {
+				log.error(
+					`[irssi:config:save] Missing fields: host=${host}, port=${port}, password=${!!password}`
+				);
 				(socket as any).emit("irssi:config:error", {
 					error: "Missing required fields",
 				});
@@ -837,7 +844,10 @@ function initializeClient(
 		});
 
 		(socket as any).on("irssi:config:test", async (data: any) => {
+			log.info(`[irssi:config:test] Request from ${socket.id}:`, data);
+
 			if (!_.isPlainObject(data)) {
+				log.error(`[irssi:config:test] Invalid data type`);
 				(socket as any).emit("irssi:config:error", {
 					error: "Invalid data",
 				});
