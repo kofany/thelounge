@@ -47,13 +47,13 @@ Implementacja graficznego zarządzania sieciami IRC i serwerami w irssilounge po
 - [x] 1.4. Zaimplementować metodę `listNetworks()` zwracającą listę sieci
 - [x] 1.5. Sprawdzić kompilację TypeScript (`npx tsc --noEmit`)
 
-### Phase 2: Backend Network Management
-- [ ] 2.1. Zaimplementować metodę `addNetwork()` z komendą `/NETWORK ADD`
-- [ ] 2.2. Zaimplementować metodę `addServerToNetwork()` z komendą `/SERVER ADD`
-- [ ] 2.3. Zaimplementować metodę `connectToNetwork()` z komendą `/CONNECT`
-- [ ] 2.4. Zaimplementować metodę `disconnectFromNetwork()` z komendą `/DISCONNECT`
-- [ ] 2.5. Zaimplementować metodę `removeNetwork()` z komendami `/SERVER REMOVE` i `/NETWORK REMOVE`
-- [ ] 2.6. Sprawdzić kompilację TypeScript (`npx tsc --noEmit`)
+### Phase 2: Backend Network Management ✅ COMPLETED
+- [x] 2.1. Zaimplementować metodę `addNetwork()` z komendą `/NETWORK ADD`
+- [x] 2.2. Zaimplementować metodę `addServerToNetwork()` z komendą `/SERVER ADD`
+- [x] 2.3. Zaimplementować metodę `connectToNetwork()` z komendą `/CONNECT`
+- [x] 2.4. Zaimplementować metodę `disconnectFromNetwork()` z komendą `/DISCONNECT`
+- [x] 2.5. Zaimplementować metodę `removeNetwork()` z komendami `/SERVER REMOVE` i `/NETWORK REMOVE`
+- [x] 2.6. Sprawdzić kompilację TypeScript (`npx tsc --noEmit`)
 
 ### Phase 3: Socket.io Integration
 - [ ] 3.1. Dodać socket event `network:list` w server.ts
@@ -125,6 +125,6 @@ chatnets = {
 ---
 
 ## Status: 🟢 IN PROGRESS
-**Current Phase**: Phase 2 - Backend Network Management
-**Completed**: Phase 1 ✅
+**Current Phase**: Phase 3 - Socket.io Integration
+**Completed**: Phase 1 ✅, Phase 2 ✅
 **Last Updated**: 2025-10-15

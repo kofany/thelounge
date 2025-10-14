@@ -295,7 +295,64 @@ export class IrssiNetworkManager {
 		network: IrssiNetwork,
 		executeCommand: (cmd: string) => Promise<void>
 	): Promise<void> {
-		throw new Error("Not implemented yet");
+		if (!network.name || network.name.trim().length === 0) {
+			throw new Error("Network name is required");
+		}
+
+		if (network.servers.length === 0) {
+			throw new Error("At least one server is required");
+		}
+
+		const existingNetworks = await this.listNetworks();
+		const exists = existingNetworks.some((n) => n.name === network.name);
+
+		if (exists) {
+			throw new Error(`Network ${network.name} already exists`);
+		}
+
+		await executeCommand(`/NETWORK ADD ${this.escapeIrssiArg(network.name)}`);
+
+		if (network.nick) {
+			await executeCommand(
+				`/NETWORK MODIFY -nick ${this.escapeIrssiArg(network.nick)} ${this.escapeIrssiArg(network.name)}`
+			);
+		}
+
+		if (network.alternateNick) {
+			await executeCommand(
+				`/NETWORK MODIFY -alternate_nick ${this.escapeIrssiArg(network.alternateNick)} ${this.escapeIrssiArg(network.name)}`
+			);
+		}
+
+		if (network.username) {
+			await executeCommand(
+				`/NETWORK MODIFY -user ${this.escapeIrssiArg(network.username)} ${this.escapeIrssiArg(network.name)}`
+			);
+		}
+
+		if (network.realname) {
+			await executeCommand(
+				`/NETWORK MODIFY -realname ${this.escapeIrssiArg(network.realname)} ${this.escapeIrssiArg(network.name)}`
+			);
+		}
+
+		if (network.usermode) {
+			await executeCommand(
+				`/NETWORK MODIFY -usermode ${this.escapeIrssiArg(network.usermode)} ${this.escapeIrssiArg(network.name)}`
+			);
+		}
+
+		if (network.autoSendCmd) {
+			await executeCommand(
+				`/NETWORK MODIFY -autosendcmd ${this.escapeIrssiArg(network.autoSendCmd)} ${this.escapeIrssiArg(network.name)}`
+			);
+		}
+
+		for (const server of network.servers) {
+			await this.addServerToNetwork(server, executeCommand);
+		}
+
+		await executeCommand("/SAVE");
 	}
 
 	/**
@@ -308,7 +365,46 @@ export class IrssiNetworkManager {
 		server: IrssiServer,
 		executeCommand: (cmd: string) => Promise<void>
 	): Promise<void> {
-		throw new Error("Not implemented yet");
+		if (!server.address || server.address.trim().length === 0) {
+			throw new Error("Server address is required");
+		}
+
+		if (!server.port || server.port < 1 || server.port > 65535) {
+			throw new Error("Server port must be between 1 and 65535");
+		}
+
+		if (!server.chatnet || server.chatnet.trim().length === 0) {
+			throw new Error("Server chatnet (network) is required");
+		}
+
+		const flags: string[] = [];
+
+		if (server.useTLS) {
+			flags.push("-tls");
+		} else {
+			flags.push("-notls");
+		}
+
+		if (server.tlsVerify !== undefined) {
+			flags.push(server.tlsVerify ? "-tls_verify" : "-notls_verify");
+		}
+
+		if (server.autoConnect) {
+			flags.push("-auto");
+		} else {
+			flags.push("-noauto");
+		}
+
+		flags.push(`-network ${this.escapeIrssiArg(server.chatnet)}`);
+
+		if (server.password) {
+			flags.push(`-password ${this.escapeIrssiArg(server.password)}`);
+		}
+
+		const flagsStr = flags.join(" ");
+		const cmd = `/SERVER ADD ${flagsStr} ${this.escapeIrssiArg(server.address)} ${server.port}`;
+
+		await executeCommand(cmd);
 	}
 
 	/**
@@ -321,7 +417,18 @@ export class IrssiNetworkManager {
 		networkName: string,
 		executeCommand: (cmd: string) => Promise<void>
 	): Promise<void> {
-		throw new Error("Not implemented yet");
+		if (!networkName || networkName.trim().length === 0) {
+			throw new Error("Network name is required");
+		}
+
+		const networks = await this.listNetworks();
+		const network = networks.find((n) => n.name === networkName);
+
+		if (!network) {
+			throw new Error(`Network ${networkName} not found`);
+		}
+
+		await executeCommand(`/CONNECT ${this.escapeIrssiArg(networkName)}`);
 	}
 
 	/**
@@ -334,7 +441,11 @@ export class IrssiNetworkManager {
 		networkTag: string,
 		executeCommand: (cmd: string) => Promise<void>
 	): Promise<void> {
-		throw new Error("Not implemented yet");
+		if (!networkTag || networkTag.trim().length === 0) {
+			throw new Error("Network tag is required");
+		}
+
+		await executeCommand(`/DISCONNECT ${this.escapeIrssiArg(networkTag)}`);
 	}
 
 	/**
@@ -347,7 +458,34 @@ export class IrssiNetworkManager {
 		networkName: string,
 		executeCommand: (cmd: string) => Promise<void>
 	): Promise<void> {
-		throw new Error("Not implemented yet");
+		if (!networkName || networkName.trim().length === 0) {
+			throw new Error("Network name is required");
+		}
+
+		const networks = await this.listNetworks();
+		const network = networks.find((n) => n.name === networkName);
+
+		if (!network) {
+			throw new Error(`Network ${networkName} not found`);
+		}
+
+		for (const server of network.servers) {
+			await executeCommand(`/SERVER REMOVE ${this.escapeIrssiArg(server.address)}`);
+		}
+
+		await executeCommand(`/NETWORK REMOVE ${this.escapeIrssiArg(networkName)}`);
+		await executeCommand("/SAVE");
+	}
+
+	/**
+	 * Escape argument for irssi command
+	 * Prevents command injection by escaping special characters
+	 *
+	 * @param arg - Argument to escape
+	 * @returns Escaped argument
+	 */
+	private escapeIrssiArg(arg: string): string {
+		return arg.replace(/[;|&$`\\"\n\r]/g, "\\$&");
 	}
 }
 
