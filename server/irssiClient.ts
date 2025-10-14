@@ -70,6 +70,23 @@ type BrowserSession = {
 	openChannel: number;
 };
 
+// Unread marker (activity tracking)
+export enum DataLevel {
+	NONE = 0,        // No activity (read)
+	TEXT = 1,        // Normal text (gray)
+	MSG = 2,         // Message or highlight word (blue)
+	HILIGHT = 3      // Nick mention (red)
+}
+
+export interface UnreadMarker {
+	network: string;       // Network UUID
+	channel: string;       // Channel name (lowercase)
+	unreadCount: number;   // Number of unread messages
+	lastReadTime: number;  // Unix timestamp of last read
+	lastMessageTime: number; // Unix timestamp of last message
+	dataLevel: DataLevel;  // Activity level (from irssi)
+}
+
 export class IrssiClient {
 	// Basic properties
 	id: string;
@@ -92,6 +109,9 @@ export class IrssiClient {
 
 	// Message storage (encrypted)
 	messageStorage: EncryptedMessageStorage | null = null;
+
+	// Unread markers (activity tracking) - in-memory only!
+	private unreadMarkers: Map<string, UnreadMarker> = new Map();
 
 	// State
 	awayMessage: string = "";
@@ -347,6 +367,11 @@ export class IrssiClient {
 		(this.irssiConnection as any).on("auth_fail", () => {
 			log.error(`User ${colors.bold(this.name)}: irssi authentication failed`);
 		});
+
+		// Activity tracking (unread markers)
+		(this.irssiConnection as any).on("activity_update", (msg: FeWebMessage) => {
+			this.handleActivityUpdate(msg);
+		});
 	}
 
 	/**
@@ -592,9 +617,10 @@ export class IrssiClient {
 			}`
 		);
 
-		// If this is the FIRST browser (networks empty), wait for state_dump
-		// handleInit() will send init event after state_dump completes
-		// If networks already exist (second browser), send init NOW
+		// Three cases:
+		// 1. Networks exist (second+ browser) → send init NOW with cached data
+		// 2. No irssi password configured → send EMPTY init (allow user to configure in Settings)
+		// 3. Irssi password configured but not connected yet → wait for state_dump
 		if (this.networks.length > 0) {
 			log.info(
 				`User ${colors.bold(this.name)}: sending init to new browser ${socketId} (${
@@ -602,6 +628,17 @@ export class IrssiClient {
 				} networks)`
 			);
 			this.sendInitialState(socket);
+		} else if (!this.config.irssiConnection.passwordEncrypted) {
+			log.info(
+				`User ${colors.bold(
+					this.name
+				)}: no irssi password configured, sending empty init to ${socketId}`
+			);
+			// Send empty init - user can configure irssi in Settings
+			socket.emit("init", {
+				networks: [],
+				active: -1,
+			});
 		} else {
 			log.info(
 				`User ${colors.bold(
@@ -871,6 +908,121 @@ export class IrssiClient {
 	 */
 	save(): void {
 		this.manager.saveUser(this as any); // IrssiClient is compatible with Client interface
+	}
+
+	// Unread marker helpers
+
+	/**
+	 * Get marker key for Map lookup (network:channel lowercase)
+	 */
+	private getMarkerKey(network: string, channel: string): string {
+		return `${network}:${channel.toLowerCase()}`;
+	}
+
+	/**
+	 * Handle ACTIVITY_UPDATE from irssi (channel/query got new activity)
+	 * Updates unread marker and broadcasts to all browsers
+	 */
+	private handleActivityUpdate(msg: FeWebMessage): void {
+		if (!msg.server_tag || !msg.target) {
+			log.warn(`[IrssiClient] Invalid ACTIVITY_UPDATE message (missing server/target)`);
+			return;
+		}
+
+		// Find network by server_tag
+		const network = this.networks.find((n) => n.serverTag === msg.server_tag);
+		if (!network) {
+			log.warn(`[IrssiClient] ACTIVITY_UPDATE for unknown server: ${msg.server_tag}`);
+			return;
+		}
+
+		// Find channel by name
+		const channel = network.channels.find(
+			(c) => c.name.toLowerCase() === msg.target!.toLowerCase()
+		);
+		if (!channel) {
+			log.warn(
+				`[IrssiClient] ACTIVITY_UPDATE for unknown channel: ${msg.target} on ${msg.server_tag}`
+			);
+			return;
+		}
+
+		const key = this.getMarkerKey(network.uuid, channel.name);
+		const dataLevel = msg.level || DataLevel.NONE;
+
+		// Update or create unread marker
+		const marker = this.unreadMarkers.get(key) || {
+			network: network.uuid,
+			channel: channel.name,
+			unreadCount: 0,
+			lastReadTime: 0,
+			lastMessageTime: Date.now(),
+			dataLevel: DataLevel.NONE,
+		};
+
+		marker.dataLevel = dataLevel;
+		marker.lastMessageTime = Date.now();
+
+		// Increment unread count if not read
+		if (dataLevel > DataLevel.NONE) {
+			marker.unreadCount++;
+		}
+
+		this.unreadMarkers.set(key, marker);
+
+		log.debug(
+			`[IrssiClient] Activity update: ${network.name}/${channel.name} level=${dataLevel} unread=${marker.unreadCount}`
+		);
+
+		// Broadcast to all browsers
+		this.broadcastToAllBrowsers("activity:update" as any, {
+			network: network.uuid,
+			channel: channel.id,
+			dataLevel: dataLevel,
+			unreadCount: marker.unreadCount,
+		});
+	}
+
+	/**
+	 * Mark channel as read (from browser or irssi)
+	 * Clears unread marker and broadcasts to all browsers
+	 */
+	markAsRead(network: string, channel: string): void {
+		const key = this.getMarkerKey(network, channel);
+		const marker = this.unreadMarkers.get(key);
+
+		if (marker) {
+			marker.dataLevel = DataLevel.NONE;
+			marker.unreadCount = 0;
+			marker.lastReadTime = Date.now();
+			this.unreadMarkers.set(key, marker);
+		}
+
+		log.debug(`[IrssiClient] Marked as read: ${network}/${channel}`);
+
+		// Find network and channel IDs for broadcast
+		const net = this.networks.find((n) => n.uuid === network);
+		if (net) {
+			const chan = net.channels.find((c) => c.name.toLowerCase() === channel.toLowerCase());
+			if (chan) {
+				// Broadcast to all browsers
+				this.broadcastToAllBrowsers("activity:update" as any, {
+					network: net.uuid,
+					channel: chan.id,
+					dataLevel: DataLevel.NONE,
+					unreadCount: 0,
+				});
+
+				// Send mark_read to irssi to clear activity there too
+				if (this.irssiConnection) {
+					this.irssiConnection.send({
+						type: "mark_read" as any,
+						server: net.serverTag,
+						target: chan.name,
+					});
+				}
+			}
+		}
 	}
 
 	// FeWebAdapter callback handlers

@@ -17,10 +17,12 @@ export interface FeWebMessage {
 	type: string;
 	timestamp?: number;
 	server?: string;
+	server_tag?: string; // Server tag (for activity_update, mark_read)
 	channel?: string;
+	target?: string; // Channel/query name (for activity_update, mark_read)
 	nick?: string;
 	text?: string;
-	level?: number;
+	level?: number; // Activity level (for activity_update): 0=NONE, 1=TEXT, 2=MSG, 3=HILIGHT
 	is_own?: boolean;
 	response_to?: string;
 	extra?: Record<string, any>;
@@ -29,7 +31,7 @@ export interface FeWebMessage {
 }
 
 // Client → Server message types
-export type ClientMessageType = "sync_server" | "command" | "ping" | "close_query";
+export type ClientMessageType = "sync_server" | "command" | "ping" | "close_query" | "mark_read";
 
 // Server → Client message types
 export type ServerMessageType =
@@ -52,6 +54,7 @@ export type ServerMessageType =
 	| "state_dump"
 	| "query_opened"
 	| "query_closed"
+	| "activity_update" // Activity level changed (unread markers)
 	| "error"
 	| "pong";
 

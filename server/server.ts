@@ -1213,28 +1213,17 @@ function initializeIrssiClient(
 			// Save to disk
 			client.save();
 
-			// Decrypt irssi password and derive encryption keys
-			// (same logic as in login() but without connecting)
-			const crypto = await import("crypto");
-			const tempSalt = "thelounge_irssi_temp_salt";
-			const tempKey = crypto.pbkdf2Sync(client.userPassword!, tempSalt, 10000, 32, "sha256");
+			// Decrypt irssi password using IP+PORT salt (same as login())
+			const {decryptIrssiPassword} = await import("./irssiConfigHelper");
 
-			const encryptedIrssiPassword = Buffer.from(
+			client.irssiPassword = await decryptIrssiPassword(
 				client.config.irssiConnection.passwordEncrypted,
-				"base64"
+				client.config.irssiConnection.host,
+				client.config.irssiConnection.port
 			);
 
-			const iv = encryptedIrssiPassword.slice(0, 12);
-			const tag = encryptedIrssiPassword.slice(-16);
-			const ciphertext = encryptedIrssiPassword.slice(12, -16);
-
-			const decipher = crypto.createDecipheriv("aes-256-gcm", tempKey, iv);
-			decipher.setAuthTag(tag);
-
-			const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
-			client.irssiPassword = decrypted.toString("utf8");
-
 			// Derive message storage encryption key
+			const crypto = await import("crypto");
 			client.encryptionKey = crypto.pbkdf2Sync(
 				client.userPassword!,
 				client.irssiPassword,

@@ -68,17 +68,18 @@ try {
 	);
 }
 
-export const currentSchemaVersion = 1736697600000; // 2025-01-12 (encrypted schema)
+export const currentSchemaVersion = 1736842800000; // 2025-01-14 (added type column)
 
 // Schema for encrypted message storage
 const schema = [
 	"CREATE TABLE options (name TEXT, value TEXT, CONSTRAINT name_unique UNIQUE (name))",
 	// Encrypted messages table
-	// - network, channel, time are plaintext for indexing/sorting
+	// - network, channel, time, type are plaintext for indexing/sorting/filtering
 	// - encrypted_data contains: [IV 12B][Encrypted JSON][Tag 16B]
-	"CREATE TABLE messages (id INTEGER PRIMARY KEY AUTOINCREMENT, network TEXT, channel TEXT, time INTEGER, encrypted_data BLOB)",
+	"CREATE TABLE messages (id INTEGER PRIMARY KEY AUTOINCREMENT, network TEXT, channel TEXT, time INTEGER, type TEXT, encrypted_data BLOB)",
 	"CREATE INDEX network_channel ON messages (network, channel)",
 	"CREATE INDEX time ON messages (time)",
+	"CREATE INDEX type ON messages (type)",
 ];
 
 class Deferred {
@@ -352,10 +353,11 @@ export class EncryptedMessageStorage implements SearchableMessageStorage {
 		const encrypted = this.encrypt(plaintext);
 
 		await this.serialize_run(
-			"INSERT INTO messages(network, channel, time, encrypted_data) VALUES(?, ?, ?, ?)",
+			"INSERT INTO messages(network, channel, time, type, encrypted_data) VALUES(?, ?, ?, ?, ?)",
 			network.uuid,
 			channel.name.toLowerCase(),
 			msg.time.getTime(),
+			msg.type || MessageType.MESSAGE,
 			encrypted
 		);
 
@@ -416,7 +418,7 @@ export class EncryptedMessageStorage implements SearchableMessageStorage {
 		const limit = Config.values.maxHistory < 0 ? 100000 : Config.values.maxHistory;
 
 		const rows = await this.serialize_fetchall(
-			"SELECT encrypted_data, time FROM messages WHERE network = ? AND channel = ? ORDER BY time DESC LIMIT ?",
+			"SELECT encrypted_data, time, type FROM messages WHERE network = ? AND channel = ? ORDER BY time DESC LIMIT ?",
 			network.uuid,
 			channel.name.toLowerCase(),
 			limit
@@ -428,6 +430,7 @@ export class EncryptedMessageStorage implements SearchableMessageStorage {
 				const decrypted = this.decrypt(row.encrypted_data);
 				const msg = JSON.parse(decrypted);
 				msg.time = row.time;
+				msg.type = row.type; // Restore type from column
 
 				const newMsg = new Msg(msg);
 				newMsg.id = nextID();
@@ -568,7 +571,7 @@ export class EncryptedMessageStorage implements SearchableMessageStorage {
 		}
 
 		const rows = await this.serialize_fetchall(
-			"SELECT encrypted_data, time FROM messages WHERE network = ? AND channel = ? ORDER BY time DESC LIMIT ?",
+			"SELECT encrypted_data, time, type FROM messages WHERE network = ? AND channel = ? ORDER BY time DESC LIMIT ?",
 			networkUuid,
 			channelName.toLowerCase(),
 			limit
@@ -580,6 +583,7 @@ export class EncryptedMessageStorage implements SearchableMessageStorage {
 				const decrypted = this.decrypt(row.encrypted_data);
 				const msg = JSON.parse(decrypted);
 				msg.time = new Date(row.time);
+				msg.type = row.type; // Restore type from column
 
 				const newMsg = new Msg(msg);
 				// ID will be assigned by caller (nextMessageId())
@@ -616,7 +620,7 @@ export class EncryptedMessageStorage implements SearchableMessageStorage {
 		}
 
 		const rows = await this.serialize_fetchall(
-			"SELECT encrypted_data, time FROM messages WHERE network = ? AND channel = ? AND time < ? ORDER BY time DESC LIMIT ?",
+			"SELECT encrypted_data, time, type FROM messages WHERE network = ? AND channel = ? AND time < ? ORDER BY time DESC LIMIT ?",
 			networkUuid,
 			channelName.toLowerCase(),
 			beforeTime,
@@ -629,6 +633,7 @@ export class EncryptedMessageStorage implements SearchableMessageStorage {
 				const decrypted = this.decrypt(row.encrypted_data);
 				const msg = JSON.parse(decrypted);
 				msg.time = new Date(row.time);
+				msg.type = row.type; // Restore type from column
 
 				const newMsg = new Msg(msg);
 				// ID will be assigned by caller (nextMessageId())
