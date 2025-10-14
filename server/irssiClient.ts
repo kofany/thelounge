@@ -588,6 +588,47 @@ export class IrssiClient {
 				}
 				break;
 
+			case "kick":
+			case "kickban":
+				// /kick nick [reason] → /kick #channel nick [reason]
+				// /kickban nick [reason] → /kickban #channel nick [reason]
+				if (channel.type === ChanType.CHANNEL && args.length > 0) {
+					const translated = `${command} ${channel.name} ${args.join(" ")}`;
+					log.info(
+						`[CommandTranslator] /${command} ${args.join(" ")} → /${translated} on ${
+							network.serverTag
+						}`
+					);
+					return translated;
+				}
+				break;
+
+			case "ban":
+			case "unban":
+				// /ban nick → /ban #channel nick
+				// /unban nick → /unban #channel nick
+				if (channel.type === ChanType.CHANNEL && args.length > 0) {
+					const translated = `${command} ${channel.name} ${args.join(" ")}`;
+					log.info(
+						`[CommandTranslator] /${command} ${args.join(" ")} → /${translated} on ${
+							network.serverTag
+						}`
+					);
+					return translated;
+				}
+				break;
+
+			case "invite":
+				// /invite nick → /invite nick #channel
+				if (channel.type === ChanType.CHANNEL && args.length === 1) {
+					const translated = `invite ${args[0]} ${channel.name}`;
+					log.info(
+						`[CommandTranslator] /invite ${args[0]} → /${translated} on ${network.serverTag}`
+					);
+					return translated;
+				}
+				break;
+
 			case "banlist":
 				// /banlist → /mode #channel +b
 				log.info(
