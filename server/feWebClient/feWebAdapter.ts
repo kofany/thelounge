@@ -197,6 +197,14 @@ export class FeWebAdapter {
 		let channel = this.findChannel(network, channelName);
 		if (!channel) {
 			// Create channel - first join (our own)
+			// Set network.nick if not already set (from first channel join during state_dump)
+			if (!network.nick) {
+				network.nick = nick;
+				log.info(
+					`[FeWebAdapter] Set network nick for ${network.name}: ${nick} (from first channel join)`
+				);
+			}
+
 			channel = this.createChannel(network, channelName);
 			log.info(`[FeWebAdapter] Created channel ${channelName} on ${msg.server}`);
 			this.callbacks.onChannelJoin(network.uuid, channel);
@@ -229,13 +237,25 @@ export class FeWebAdapter {
 
 		const nick = msg.nick!;
 
+		log.debug(
+			`[FeWebAdapter] handleChannelPart: nick="${nick}", network.nick="${network.nick}", match=${
+				nick === network.nick
+			}`
+		);
+
 		// Check if it's our own part
 		if (nick === network.nick) {
+			log.info(
+				`[FeWebAdapter] Channel part (OWN): ${channel.name} on ${network.name} - calling onChannelPart callback`
+			);
 			this.callbacks.onChannelPart(network.uuid, channel.id);
 			// Remove channel from network
 			network.channels = network.channels.filter((c) => c.id !== channel.id);
 		} else {
 			// Someone else parted
+			log.debug(
+				`[FeWebAdapter] Channel part (OTHER): ${nick} from ${channel.name} on ${network.name} - sending part message`
+			);
 			this.removeUserFromChannel(channel, nick);
 			const partMsg = new Msg({
 				type: MessageType.PART,
