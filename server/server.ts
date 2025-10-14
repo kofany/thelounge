@@ -813,8 +813,7 @@ function initializeClient(
 					irssiClient.config,
 					host,
 					port,
-					password,
-					irssiClient.userPassword! // User's The Lounge password (in memory)
+					password // irssi WebSocket password
 				);
 
 				// Update rejectUnauthorized if provided
@@ -1203,8 +1202,7 @@ function initializeIrssiClient(
 				client.config,
 				host,
 				port,
-				irssiWebSocketPassword, // irssi WebSocket password (NOT The Lounge password!)
-				client.userPassword! // User's The Lounge password (in memory)
+				irssiWebSocketPassword // irssi WebSocket password
 			);
 
 			// Update rejectUnauthorized if provided

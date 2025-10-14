@@ -11,28 +11,30 @@ import crypto from "crypto";
 import {IrssiUserConfig, IrssiConnectionConfig} from "./irssiClient";
 
 /**
- * Encrypt irssi password with user's The Lounge password
+ * Encrypt irssi password using IP+PORT as salt (for autoconnect)
  *
- * Uses AES-256-GCM with PBKDF2(userPassword, "thelounge_irssi_temp_salt")
- * This MUST match the decryption in IrssiClient.login()
+ * Uses AES-256-GCM with PBKDF2(IP+PORT, "thelounge-irssi-autoconnect")
+ * This allows autoconnect without user password!
  *
  * @param irssiPassword - Plain irssi WebSocket password
- * @param userPassword - User's The Lounge password
+ * @param host - irssi fe-web host
+ * @param port - irssi fe-web port
  * @returns Base64-encoded encrypted password
  */
 export async function encryptIrssiPassword(
 	irssiPassword: string,
-	userPassword: string
+	host: string,
+	port: number
 ): Promise<string> {
-	// IMPORTANT: Use same salt as in IrssiClient.login()
-	const tempSalt = "thelounge_irssi_temp_salt";
-	const tempKey = crypto.pbkdf2Sync(userPassword, tempSalt, 10000, 32, "sha256");
+	// Use IP+PORT as salt for key derivation
+	const salt = `${host}:${port}`;
+	const key = crypto.pbkdf2Sync(salt, "thelounge-irssi-autoconnect", 10000, 32, "sha256");
 
 	// Generate random IV (12 bytes for GCM)
 	const iv = crypto.randomBytes(12);
 
 	// Encrypt with AES-256-GCM
-	const cipher = crypto.createCipheriv("aes-256-gcm", tempKey, iv);
+	const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
 	const encrypted = Buffer.concat([cipher.update(irssiPassword, "utf8"), cipher.final()]);
 	const tag = cipher.getAuthTag();
 
@@ -42,22 +44,24 @@ export async function encryptIrssiPassword(
 }
 
 /**
- * Decrypt irssi password with user's The Lounge password
+ * Decrypt irssi password using IP+PORT as salt (for autoconnect)
  *
- * Uses AES-256-GCM with PBKDF2(userPassword, "thelounge_irssi_temp_salt")
- * This MUST match the encryption in encryptIrssiPassword()
+ * Uses AES-256-GCM with PBKDF2(IP+PORT, "thelounge-irssi-autoconnect")
+ * This allows autoconnect without user password!
  *
  * @param encryptedPassword - Base64-encoded encrypted password
- * @param userPassword - User's The Lounge password
+ * @param host - irssi fe-web host
+ * @param port - irssi fe-web port
  * @returns Plain irssi WebSocket password
  */
 export async function decryptIrssiPassword(
 	encryptedPassword: string,
-	userPassword: string
+	host: string,
+	port: number
 ): Promise<string> {
-	// IMPORTANT: Use same salt as in encryptIrssiPassword()
-	const tempSalt = "thelounge_irssi_temp_salt";
-	const tempKey = crypto.pbkdf2Sync(userPassword, tempSalt, 10000, 32, "sha256");
+	// Use IP+PORT as salt for key derivation (same as encryption)
+	const salt = `${host}:${port}`;
+	const key = crypto.pbkdf2Sync(salt, "thelounge-irssi-autoconnect", 10000, 32, "sha256");
 
 	const encryptedBuffer = Buffer.from(encryptedPassword, "base64");
 
@@ -67,7 +71,7 @@ export async function decryptIrssiPassword(
 	const ciphertext = encryptedBuffer.slice(12, -16);
 
 	// Decrypt with AES-256-GCM
-	const decipher = crypto.createDecipheriv("aes-256-gcm", tempKey, iv);
+	const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
 	decipher.setAuthTag(tag);
 
 	const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
@@ -79,7 +83,6 @@ export async function decryptIrssiPassword(
  *
  * @param username - Username
  * @param passwordHash - bcrypt hash of user's password (for authentication)
- * @param userPassword - Plain user password (for encrypting irssi password)
  * @param irssiHost - irssi fe-web host
  * @param irssiPort - irssi fe-web port
  * @param irssiPassword - Plain irssi WebSocket password
@@ -88,13 +91,12 @@ export async function decryptIrssiPassword(
 export async function createIrssiUserConfig(
 	username: string,
 	passwordHash: string,
-	userPassword: string,
 	irssiHost: string,
 	irssiPort: number,
 	irssiPassword: string
 ): Promise<IrssiUserConfig> {
-	// Encrypt irssi password
-	const encryptedIrssiPassword = await encryptIrssiPassword(irssiPassword, userPassword);
+	// Encrypt irssi password using IP+PORT salt
+	const encryptedIrssiPassword = await encryptIrssiPassword(irssiPassword, irssiHost, irssiPort);
 
 	const config: IrssiUserConfig = {
 		log: true,
@@ -122,15 +124,17 @@ export async function createIrssiUserConfig(
  *
  * @param config - Current user config
  * @param newIrssiPassword - New plain irssi WebSocket password
- * @param userPassword - User's The Lounge password
  * @returns Updated config
  */
 export async function updateIrssiPassword(
 	config: IrssiUserConfig,
-	newIrssiPassword: string,
-	userPassword: string
+	newIrssiPassword: string
 ): Promise<IrssiUserConfig> {
-	const encryptedIrssiPassword = await encryptIrssiPassword(newIrssiPassword, userPassword);
+	const encryptedIrssiPassword = await encryptIrssiPassword(
+		newIrssiPassword,
+		config.irssiConnection.host,
+		config.irssiConnection.port
+	);
 
 	return {
 		...config,
@@ -148,17 +152,15 @@ export async function updateIrssiPassword(
  * @param newHost - New irssi host
  * @param newPort - New irssi port
  * @param newIrssiPassword - New plain irssi WebSocket password
- * @param userPassword - User's The Lounge password
  * @returns Updated config
  */
 export async function updateIrssiConnection(
 	config: IrssiUserConfig,
 	newHost: string,
 	newPort: number,
-	newIrssiPassword: string,
-	userPassword: string
+	newIrssiPassword: string
 ): Promise<IrssiUserConfig> {
-	const encryptedIrssiPassword = await encryptIrssiPassword(newIrssiPassword, userPassword);
+	const encryptedIrssiPassword = await encryptIrssiPassword(newIrssiPassword, newHost, newPort);
 
 	return {
 		...config,
@@ -208,37 +210,6 @@ export function deriveEncryptionKey(userPassword: string, irssiPassword: string)
 	return crypto.pbkdf2Sync(userPassword, irssiPassword, 10000, 32, "sha256");
 }
 
-/**
- * Re-encrypt irssi password when user changes their The Lounge password
- *
- * @param config - Current user config
- * @param oldUserPassword - Old user password
- * @param newUserPassword - New user password
- * @returns Updated config with re-encrypted irssi password
- */
-export async function reEncryptIrssiPassword(
-	config: IrssiUserConfig,
-	oldUserPassword: string,
-	newUserPassword: string
-): Promise<IrssiUserConfig> {
-	// Decrypt with old password
-	const irssiPassword = await decryptIrssiPassword(
-		config.irssiConnection.passwordEncrypted,
-		oldUserPassword
-	);
-
-	// Encrypt with new password
-	const encryptedIrssiPassword = await encryptIrssiPassword(irssiPassword, newUserPassword);
-
-	return {
-		...config,
-		irssiConnection: {
-			...config.irssiConnection,
-			passwordEncrypted: encryptedIrssiPassword,
-		},
-	};
-}
-
 export default {
 	encryptIrssiPassword,
 	decryptIrssiPassword,
@@ -247,5 +218,4 @@ export default {
 	updateIrssiConnection,
 	validateIrssiConnectionConfig,
 	deriveEncryptionKey,
-	reEncryptIrssiPassword,
 };
