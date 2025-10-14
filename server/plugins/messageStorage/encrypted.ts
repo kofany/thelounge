@@ -244,10 +244,16 @@ export class EncryptedMessageStorage implements SearchableMessageStorage {
 			if (version === 0) {
 				await this.setup_new_db();
 			} else {
-				// TODO: Add migrations if schema changes in future
+				// Schema is outdated - drop old tables and recreate
 				log.warn(
-					`Encrypted message storage schema version ${version} is outdated. Creating new database.`
+					`Encrypted message storage schema version ${version} is outdated (current: ${currentSchemaVersion}). Dropping old tables and creating new database.`
 				);
+
+				// Drop old tables
+				await this.serialize_run("DROP TABLE IF EXISTS messages");
+				await this.serialize_run("DROP TABLE IF EXISTS options");
+
+				// Create new schema
 				await this.setup_new_db();
 			}
 		} catch (err) {
