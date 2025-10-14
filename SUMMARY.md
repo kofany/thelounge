@@ -800,9 +800,72 @@ signal_add("window changed", (SIGNAL_FUNC)sig_window_changed);
 - Badge w The Lounge znika
 - Statusbar Act: aktualizowany poprawnie
 
+### 🐛 Bugfix #2: Duplikaty activity_update z irssi
+
+**Problem:**
+Irssi core emituje **DWA** sygnały dla tej samej wiadomości:
+1. `"window hilight"` → `sig_window_hilight()` → wysyła `activity_update`
+2. `"window activity"` → `sig_window_activity()` → **DUPLIKAT** wysyła znowu `activity_update`
+
+**Dowód z logów:**
+```
+15:10:18 Activity HILIGHT for #irc.al (level=2)      ← pierwszy activity_update
+15:10:18 Activity UPDATE for #irc.al (level=2, old=1) ← DUPLIKAT (level się nie zmienił!)
+```
+
+**Rozwiązanie:**
+Dodano deduplikację w `sig_window_activity()`:
+```c
+/* Skip if level didn't change (avoid duplicates with window hilight) */
+if (data_level == old_level) {
+    return;  // Nie wysyłaj duplikatu
+}
+```
+
+**Commit:** `c41186c4b` (2025-10-14 15:26:23)
+
+### 🐛 Bugfix #3: unreadCount zawsze 0
+
+**Problem:**
+Backend otrzymywał `activity_update` z irssi, ale licznik `unreadCount` zawsze wynosił 0.
+
+**Przyczyna:**
+```typescript
+// server/irssiClient.ts - handleActivityUpdate()
+if (dataLevel === DataLevel.NONE) {
+    marker.unreadCount = 0;
+}
+// ❌ Brak inkrementacji gdy dataLevel > 0!
+```
+
+**Rozwiązanie:**
+```typescript
+if (dataLevel === DataLevel.NONE) {
+    marker.unreadCount = 0;
+} else {
+    marker.unreadCount++;  // ✅ Dodano
+}
+```
+
+**Commit:** `d8935020` (2025-10-14 15:23:13)
+
+### 🔍 DEBUG: sig_window_changed
+
+**Status:** W trakcie debugowania
+
+Dodano szczegółowe logi do `sig_window_changed()` żeby zdiagnozować dlaczego handler nie jest wywoływany:
+- Log przy wywołaniu funkcji
+- Log przy każdym warunku (no active item, no server, data_level)
+- Log gdy wysyłamy activity_update
+- Log gdy pomijamy (brak activity)
+
+**Commit:** `b214baea6` (2025-10-14 15:28:23)
+
+**Następne kroki:** Restart irssi i test przełączania okien z nowymi logami.
+
 ---
 
 **Data utworzenia:** 2025-10-13
-**Ostatnia aktualizacja:** 2025-10-14 11:06
-**Status:** Message storage ready for implementation, Unread markers DONE + bugfix window changed
+**Ostatnia aktualizacja:** 2025-10-14 15:28
+**Status:** Message storage ready, Unread markers - bugfixes in progress
 
