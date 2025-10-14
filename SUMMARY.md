@@ -764,9 +764,45 @@ przeglądarka → The Lounge Backend → irssi → wszystkie przeglądarki:
 
 **Status:** ✅ Wszystkie 3 fazy zakończone (irssi C, Backend TypeScript, Frontend Vue.js)
 
+### 🐛 Bugfix: Automatyczne czyszczenie activity przy przełączaniu okien w irssi
+
+**Problem:**
+Gdy użytkownik przełączał okna w irssi (np. `/window 5`), activity dla tego okna **NIE było czyszczone** w statusbar (Act:). Badge w The Lounge również pozostawał.
+
+**Przyczyna:**
+- irssi core emituje sygnał `"window changed"` gdy user przełącza okna
+- fe-web **NIE** obsługiwał tego sygnału
+- Czyszczenie activity działało TYLKO gdy:
+  1. Przeglądarka wysyłała `mark_read` (kliknięcie w kanał)
+  2. irssi core emitował `"window dehilight"` (ale to się działo tylko w niektórych przypadkach)
+
+**Rozwiązanie:**
+Dodano handler `sig_window_changed()` w `fe-web-signals.c`:
+
+```c
+static void sig_window_changed(WINDOW_REC *new_window, WINDOW_REC *old_window)
+{
+    // Sprawdza czy nowe aktywne okno ma activity (data_level > 0)
+    // Jeśli tak, wysyła ACTIVITY_UPDATE z level=0 do wszystkich klientów
+    // Czyści badge w The Lounge i usuwa z Act: w irssi statusbar
+}
+```
+
+Zarejestrowano sygnał:
+```c
+signal_add("window changed", (SIGNAL_FUNC)sig_window_changed);
+```
+
+**Commit:** `cb5033a0d` (2025-10-14 11:06:26)
+
+**Teraz działa:**
+- User przełącza okno w irssi → activity automatycznie czyszczone
+- Badge w The Lounge znika
+- Statusbar Act: aktualizowany poprawnie
+
 ---
 
 **Data utworzenia:** 2025-10-13
-**Ostatnia aktualizacja:** 2025-10-14
-**Status:** Message storage ready for implementation, Unread markers DONE
+**Ostatnia aktualizacja:** 2025-10-14 11:06
+**Status:** Message storage ready for implementation, Unread markers DONE + bugfix window changed
 
