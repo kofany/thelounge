@@ -1124,9 +1124,64 @@ window_activity(window, 0, NULL);  // Czyści activity + aktualizuje statusbar
 
 **Commit:** `d79986590` (irssi, 2025-10-14 16:38:49)
 
+### 🐛 Bugfix #11: Zamykanie kanałów/query nie synchronizowało się między irssi a Vue
+
+**Problem:**
+```
+User w Vue: Leave channel (#polska)
+  ↓
+Backend → irssi: /part #polska
+  ↓
+irssi: Wychodzi z kanału, zamyka okno ✅
+  ↓
+Vue: Okno kanału NADAL WIDOCZNE ❌
+```
+
+**I odwrotnie:**
+```
+User w irssi: /wc (window close)
+  ↓
+irssi: Zamyka okno kanału/query ✅
+  ↓
+Vue: Okno NADAL WIDOCZNE ❌
+```
+
+**Przyczyna:**
+fe-web **NIE MIAŁ** handlerów dla sygnałów:
+- `"window item remove"` - emitowany gdy kanał/query jest usuwany z okna (np. `/wc`, `/part`)
+- `"window destroyed"` - emitowany gdy całe okno jest zamykane
+
+**Istniejące handlery były tylko dla INNYCH userów:**
+- `"message part"` - gdy **KTOŚ INNY** wychodzi z kanału (otrzymujemy IRC PART message od serwera)
+- `"query destroyed"` - gdy query jest niszczony (ale to też dla innych userów)
+
+**Rozwiązanie:**
+Dodano nowe handlery w `fe-web-signals.c`:
+
+1. **`sig_window_item_remove()`** - obsługuje `"window item remove"`:
+   - Sprawdza czy item to kanał (`IRC_CHANNEL`) czy query (`QUERY`)
+   - Dla kanału: wysyła `WEB_MSG_CHANNEL_PART` z `nick = server->nick` (MY wychodzimy)
+   - Dla query: wysyła `WEB_MSG_QUERY_CLOSED`
+
+2. **`sig_window_destroyed()`** - obsługuje `"window destroyed"`:
+   - Tylko loguje (bo `"window item remove"` jest emitowany PRZED `"window destroyed"` dla każdego item)
+
+**Backend już miał implementację:**
+- `handleChannelPart()` sprawdza `if (nick === network.nick)` → usuwa kanał z UI
+- `handleQueryClosed()` usuwa query z UI
+
+**Teraz działa:**
+```
+User w Vue: Leave → /part → irssi zamyka okno → window item remove → channel_part → Vue usuwa kanał ✅
+User w irssi: /wc → window item remove → channel_part/query_closed → Vue usuwa kanał/query ✅
+User w irssi: /part → IRC PART → window item remove → channel_part → Vue usuwa kanał ✅
+```
+
+**Commit:** `a2086894a` (irssi, 2025-10-14 17:06:28)
+
 ---
 
 **Data utworzenia:** 2025-10-13
-**Ostatnia aktualizacja:** 2025-10-14 16:38
-**Status:** Message storage ready, Unread markers FIXED, Command translator FIXED, Act: statusbar FIXED
+**Ostatnia aktualizacja:** 2025-10-14 17:06
+**Status:** Message storage ready, Unread markers FIXED, Command translator FIXED, Act: statusbar FIXED, Window close sync FIXED
 
