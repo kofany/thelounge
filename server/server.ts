@@ -1143,6 +1143,15 @@ function initializeIrssiClient(
 		}
 	});
 
+	// Handle open event (browser switched to a channel)
+	socket.on("open", (data) => {
+		if (typeof data !== "number") {
+			return;
+		}
+
+		client.open(socket.id, data);
+	});
+
 	// Handle mark_read request (mark channel as read in irssi)
 	socket.on("mark_read", (data) => {
 		if (!_.isPlainObject(data) || typeof data.target !== "number") {
@@ -1161,7 +1170,11 @@ function initializeIrssiClient(
 
 	// Handle part_channel request (client-driven channel/query close)
 	socket.on("part_channel", (data) => {
-		if (!_.isPlainObject(data) || typeof data.networkUuid !== "string" || typeof data.channelId !== "number") {
+		if (
+			!_.isPlainObject(data) ||
+			typeof data.networkUuid !== "string" ||
+			typeof data.channelId !== "number"
+		) {
 			return;
 		}
 

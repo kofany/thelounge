@@ -1154,6 +1154,16 @@ export class IrssiClient {
 			return;
 		}
 
+		// Check if channel is open in any browser (for 1:1 sync)
+		// If channel is open anywhere, ignore activity_update from irssi
+		const isChannelOpen = this.isChannelOpenInAnyBrowser(channel.id);
+		if (isChannelOpen) {
+			log.debug(
+				`[IrssiClient] Ignoring activity_update for ${network.name}/${channel.name} (channel is open in browser)`
+			);
+			return;
+		}
+
 		const key = this.getMarkerKey(network.uuid, channel.name);
 		const dataLevel = msg.level || DataLevel.NONE;
 
@@ -1243,6 +1253,46 @@ export class IrssiClient {
 			unread: marker.unreadCount,
 			highlight: dataLevel === DataLevel.HILIGHT ? marker.unreadCount : 0,
 		});
+	}
+
+	/**
+	 * Check if channel is open in any browser
+	 */
+	private isChannelOpenInAnyBrowser(channelId: number): boolean {
+		for (const [socketId, session] of this.attachedBrowsers) {
+			if (session.openChannel === channelId) {
+				log.debug(`[IrssiClient] Channel ${channelId} is open in browser ${socketId}`);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Handle browser opening a channel (switching to a channel)
+	 * Updates openChannel and marks as read
+	 */
+	open(socketId: string, channelId: number): void {
+		const session = this.attachedBrowsers.get(socketId);
+		if (!session) {
+			log.warn(`[IrssiClient] open() called for unknown browser ${socketId}`);
+			return;
+		}
+
+		// Update openChannel for this browser
+		session.openChannel = channelId;
+
+		log.debug(`[IrssiClient] Browser ${socketId} opened channel ${channelId}`);
+
+		// Find network and channel by channel ID
+		for (const network of this.networks) {
+			const channel = network.channels.find((c) => c.id === channelId);
+			if (channel) {
+				// Mark as read (this will broadcast to all browsers and send to irssi)
+				this.markAsRead(network.uuid, channel.name);
+				return;
+			}
+		}
 	}
 
 	/**
@@ -1393,13 +1443,24 @@ export class IrssiClient {
 				? msg.text.toLowerCase().includes(network.nick.toLowerCase())
 				: false;
 
+		// Check if channel is open in any browser (for 1:1 sync)
+		// If channel is open anywhere, treat as read for ALL clients
+		const isChannelOpen = this.isChannelOpenInAnyBrowser(channelId);
+
 		// Broadcast to all browsers (live update)
 		this.broadcastToAllBrowsers("msg", {
 			chan: channelId,
 			msg: msg,
-			unread: msg.self ? 0 : 1,
+			unread: msg.self || isChannelOpen ? 0 : 1, // If open anywhere, unread=0
 			highlight: isHighlight && !msg.self ? 1 : 0,
 		});
+
+		// If channel is open in any browser, mark as read in irssi immediately
+		// This prevents irssi from sending activity_update
+		if (isChannelOpen && network && channel && !msg.self) {
+			log.debug(`[IrssiClient] Channel ${channelId} is open, marking as read in irssi`);
+			this.markAsRead(network.uuid, channel.name);
+		}
 	}
 
 	private handleChannelJoin(networkUuid: string, channel: Chan): void {
@@ -1430,7 +1491,9 @@ export class IrssiClient {
 		const network = this.networks.find((n) => n.uuid === data.networkUuid);
 		if (!network) {
 			log.warn(
-				`User ${colors.bold(this.name)}: Network ${data.networkUuid} not found for part_channel`
+				`User ${colors.bold(this.name)}: Network ${
+					data.networkUuid
+				} not found for part_channel`
 			);
 			return;
 		}
@@ -1438,7 +1501,9 @@ export class IrssiClient {
 		const channel = network.channels.find((c) => c.id === data.channelId);
 		if (!channel) {
 			log.debug(
-				`User ${colors.bold(this.name)}: Channel ${data.channelId} already removed (idempotent)`
+				`User ${colors.bold(this.name)}: Channel ${
+					data.channelId
+				} already removed (idempotent)`
 			);
 			return; // Already removed - idempotent!
 		}
@@ -1446,7 +1511,9 @@ export class IrssiClient {
 		const {ChanType} = await import("../shared/types/chan");
 
 		log.info(
-			`User ${colors.bold(this.name)}: Part channel ${channel.name} on ${network.name} (client-driven)`
+			`User ${colors.bold(this.name)}: Part channel ${channel.name} on ${
+				network.name
+			} (client-driven)`
 		);
 
 		// STEP 1: Remove from cache IMMEDIATELY
@@ -1466,7 +1533,9 @@ export class IrssiClient {
 				// Send /part for channels (executeCommand returns void)
 				this.irssiConnection.executeCommand(`part ${channel.name}`, network.serverTag);
 				log.debug(
-					`User ${colors.bold(this.name)}: Sent /part ${channel.name} to irssi in background`
+					`User ${colors.bold(this.name)}: Sent /part ${
+						channel.name
+					} to irssi in background`
 				);
 			} else if (channel.type === ChanType.QUERY) {
 				// Send close_query for queries
@@ -1476,7 +1545,9 @@ export class IrssiClient {
 					nick: channel.name,
 				});
 				log.debug(
-					`User ${colors.bold(this.name)}: Sent close_query for ${channel.name} to irssi in background`
+					`User ${colors.bold(this.name)}: Sent close_query for ${
+						channel.name
+					} to irssi in background`
 				);
 			}
 		}
