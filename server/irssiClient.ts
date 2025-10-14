@@ -159,29 +159,15 @@ export class IrssiClient {
 			return;
 		}
 
-		// Step 1: Decrypt irssi password using temporary encryption
-		// Używamy userPassword do odszyfrowania irssiPassword z config
-		const tempSalt = "thelounge_irssi_temp_salt"; // Temporary salt for bootstrapping
+		// Step 1: Decrypt irssi password using IP+PORT salt
+		// Import decryptIrssiPassword from irssiConfigHelper
+		const {decryptIrssiPassword} = await import("./irssiConfigHelper");
 
-		// Create temp encryption with userPassword
-		const tempKey = crypto.pbkdf2Sync(userPassword, tempSalt, 10000, 32, "sha256");
-
-		// Decrypt irssi password
-		const encryptedIrssiPassword = Buffer.from(
+		this.irssiPassword = await decryptIrssiPassword(
 			this.config.irssiConnection.passwordEncrypted,
-			"base64"
+			this.config.irssiConnection.host,
+			this.config.irssiConnection.port
 		);
-
-		// Manual decrypt (since we can't use FeWebEncryption with custom salt easily)
-		const iv = encryptedIrssiPassword.slice(0, 12);
-		const tag = encryptedIrssiPassword.slice(-16);
-		const ciphertext = encryptedIrssiPassword.slice(12, -16);
-
-		const decipher = crypto.createDecipheriv("aes-256-gcm", tempKey, iv);
-		decipher.setAuthTag(tag);
-
-		const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
-		this.irssiPassword = decrypted.toString("utf8");
 
 		log.info(`irssi password decrypted for user ${colors.bold(this.name)}`);
 
