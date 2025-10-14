@@ -4,6 +4,30 @@
 
 Dostosowanie implementacji **The Lounge** do łączenia się z WebSocket modułem **fe-web dla irssi** (budowanym równolegle).
 
+### ⚠️ WAŻNE - AUTOCONNECT NA STARCIE!
+
+**PROBLEM DO ROZWIĄZANIA (PRIORYTET #1):**
+
+Jeśli user ma już skonfigurowane irssi proxy (host, port, password), to backend **POWINIEN ŁĄCZYĆ SIĘ DO IRSSI OD RAZU** przy starcie The Lounge (`npm start`), **NIE CZEKAJĄC** na pierwszą przeglądarkę!
+
+**Obecny flow (ZŁY):**
+```
+npm start → Backend startuje → Czeka na login → User loguje się → Backend łączy do irssi
+```
+
+**Docelowy flow (DOBRY):**
+```
+npm start → Backend startuje → Sprawdza config → Jeśli passwordEncrypted != "" → Łączy do irssi OD RAZU
+                                                                                    ↓
+                                                                    User loguje się → Dostaje init z cache!
+```
+
+**Rozwiązanie encryption:**
+- Używamy **IP+PORT** jako salt do szyfrowania hasła irssi
+- `PBKDF2(irssiPassword, "${host}:${port}", 10k iter, 256-bit)` → Encryption Key
+- Zapisujemy encrypted password w config
+- Przy starcie: odczytujemy IP+PORT z config → derive key → decrypt password → connect!
+
 ### Architektura:
 ```
 ┌─────────────┐         ┌──────────────────┐         ┌─────────────┐
@@ -106,44 +130,101 @@ Dostosowanie implementacji **The Lounge** do łączenia się z WebSocket modułe
 - Jeśli cache nie ma → pobiera z storage (SQLite)
 - Max 5000 messages w cache (po lazy load)
 
-### 2. Implementacja - Krok po kroku
+### 2. Backend Cache - CO TRZYMAMY W PAMIĘCI
 
-#### A. Włączyć message storage
+**WAŻNE:** Backend cache **NIE TRZYMA MESSAGES**!
+
+```typescript
+this.networks = [
+  {
+    uuid: "...",
+    name: "IRCnet",
+    nick: "kofany",
+    channels: [
+      {
+        id: 1,
+        name: "#polska",
+        users: Map<nick, User>,  // ✅ ZAWSZE AKTUALNY (nicklist)
+        messages: []              // ❌ PUSTE! Nie cachujemy messages!
+      }
+    ]
+  }
+]
+```
+
+**Co trzymamy:**
+- ✅ Networks (uuid, name, nick, serverOptions)
+- ✅ Channels (id, name, topic, state)
+- ✅ Users (nicklist - Map<nick, User>)
+- ✅ Open queries (prywatne rozmowy)
+- ❌ Messages (tylko w SQLite storage!)
+
+**Dlaczego nie cachujemy messages:**
+- Pamięć: 1000 messages × 100 kanałów × 10 users = dużo RAM!
+- Storage jest szybki (SQLite + encryption)
+- Frontend ładuje lazy (100 messages per request)
+
+### 3. Initial Load - Nowa Przeglądarka
+
+**Flow dla drugiej/trzeciej przeglądarki:**
+
+```
+Browser 2 podłącza się
+    ↓
+Backend: attachBrowser()
+    ↓
+Wysyła init event:
+  - networks (z cache)
+  - channels (z cache)
+  - users (z cache)
+  - messages: [] (PUSTE!)
+    ↓
+Frontend otrzymuje init
+    ↓
+Frontend dla KAŻDEGO OTWARTEGO kanału/query:
+  socket.emit("more", {target: channelId, lastId: -1})
+    ↓
+Backend: more()
+  - Pobiera z STORAGE (SQLite)
+  - Zwraca 100 ostatnich messages
+    ↓
+Frontend wyświetla messages
+```
+
+**WAŻNE:** Open queries też muszą być w cache! Jeśli ktoś napisał do nas godzinę temu, query musi być w `this.networks[].channels[]` żeby frontend mógł pobrać messages!
+
+### 4. Implementacja - Krok po kroku
+
+#### A. Zapisywać messages do storage (BEZ CACHE!)
+
 ```typescript
 // server/irssiClient.ts - handleMessage()
 
 private handleMessage(networkUuid: string, channelId: number, msg: Msg): void {
     const network = this.networks.find((n) => n.uuid === networkUuid);
     const channel = network?.channels.find((c) => c.id === channelId);
-    
+
     if (!channel) return;
-    
-    // 1. ADD TO CACHE (memory)
-    channel.messages.push(msg);
-    
-    // Keep only last 1000 in cache
-    if (channel.messages.length > 1000) {
-        channel.messages.shift(); // Remove oldest
-    }
-    
-    // 2. SAVE TO STORAGE (disk) - ASYNC!
+
+    // 1. SAVE TO STORAGE (disk) - ASYNC!
+    // NIE DODAJEMY DO channel.messages - to zostaje PUSTE!
     if (this.messageStorage) {
         // Create minimal Network/Channel objects for storage
         const networkForStorage = {
             uuid: network.uuid,
             name: network.name,
         } as Network;
-        
+
         const channelForStorage = {
             name: channel.name,
         } as Channel;
-        
+
         // Save encrypted to SQLite
         this.messageStorage.index(networkForStorage, channelForStorage, msg)
             .catch(err => log.error(`Failed to save message: ${err}`));
     }
-    
-    // 3. BROADCAST to all browsers
+
+    // 2. BROADCAST to all browsers (live update)
     this.broadcastToAllBrowsers("msg", {
         chan: channelId,
         msg: msg,
@@ -153,34 +234,18 @@ private handleMessage(networkUuid: string, channelId: number, msg: Msg): void {
 }
 ```
 
-#### B. Loadować messages przy init
+#### B. NIE loadować messages przy init!
+
 ```typescript
 // server/irssiClient.ts - handleInit()
 
 private async handleInit(networks: NetworkData[]): Promise<void> {
     this.networks = networks;
-    
-    // Load last 1000 messages from storage for each channel
-    if (this.messageStorage) {
-        for (const network of networks) {
-            for (const channel of network.channels) {
-                try {
-                    const messages = await this.messageStorage.getMessages(
-                        {uuid: network.uuid} as Network,
-                        {name: channel.name} as Channel,
-                        () => this.idMsg++
-                    );
-                    
-                    // Keep only last 1000 in cache
-                    channel.messages = messages.slice(-1000);
-                } catch (err) {
-                    log.error(`Failed to load messages for ${channel.name}: ${err}`);
-                    channel.messages = [];
-                }
-            }
-        }
-    }
-    
+
+    // NIE ŁADUJEMY MESSAGES!
+    // channel.messages pozostaje PUSTE []
+    // Frontend pobierze przez "more" event
+
     // Send init to all browsers
     this.broadcastToAllBrowsers("init", {...});
 }
@@ -225,55 +290,88 @@ private sendInitToSocket(socket: Socket): void {
 }
 ```
 
-#### D. Rozszerzyć `more()` o storage fallback
+#### D. Zmienić `more()` - ZAWSZE pobierać z storage
+
 ```typescript
 // server/irssiClient.ts - more()
 
 async more(data: {target: number; lastId: number}): Promise<{...} | null> {
     const channel = ...; // Find channel
-    if (!channel) return null;
-    
-    let messages: Msg[] = [];
-    let index = data.lastId < 0 
-        ? channel.messages.length 
-        : channel.messages.findIndex(m => m.id === data.lastId);
-    
-    if (index > 0) {
-        const startIndex = Math.max(0, index - 100);
-        messages = channel.messages.slice(startIndex, index);
+    const network = ...; // Find network
+    if (!channel || !network) return null;
+
+    // ZAWSZE pobieramy z storage (NIE Z CACHE!)
+    if (!this.messageStorage) {
+        return {chan: data.target, messages: [], totalMessages: 0};
     }
-    
-    // If cache doesn't have enough, load from storage
-    if (messages.length < 100 && this.messageStorage) {
-        const oldestCachedTime = channel.messages[0]?.time.getTime() || Date.now();
-        
-        // Load 100 older messages from storage
-        const olderMessages = await this.messageStorage.getMessagesBefore(
+
+    let messages: Msg[] = [];
+
+    if (data.lastId < 0) {
+        // Initial load - last 100 messages
+        messages = await this.messageStorage.getLastMessages(
             network.uuid,
             channel.name,
-            oldestCachedTime,
             100
         );
-        
-        // Add to cache (prepend)
-        channel.messages.unshift(...olderMessages);
-        
-        // Keep max 5000 in cache
-        if (channel.messages.length > 5000) {
-            channel.messages = channel.messages.slice(-5000);
+    } else {
+        // Lazy load - 100 messages before lastId
+        const lastMsg = await this.messageStorage.getMessageById(data.lastId);
+        if (lastMsg) {
+            messages = await this.messageStorage.getMessagesBefore(
+                network.uuid,
+                channel.name,
+                lastMsg.time.getTime(),
+                100
+            );
         }
-        
-        messages = olderMessages;
     }
-    
-    return {chan: data.target, messages, totalMessages: ...};
+
+    // Get total count for "moreHistoryAvailable"
+    const totalMessages = await this.messageStorage.getMessageCount(
+        network.uuid,
+        channel.name
+    );
+
+    return {
+        chan: data.target,
+        messages,
+        totalMessages
+    };
 }
 ```
 
-#### E. Dodać metodę do EncryptedMessageStorage
+#### E. Dodać metody do EncryptedMessageStorage
+
 ```typescript
 // server/plugins/messageStorage/encrypted.ts
 
+// Get last N messages
+async getLastMessages(
+    networkUuid: string,
+    channelName: string,
+    limit: number
+): Promise<Message[]> {
+    await this.initDone.promise;
+    if (!this.isEnabled) return [];
+
+    const rows = await this.serialize_fetchall(
+        "SELECT encrypted_data, time FROM messages WHERE network = ? AND channel = ? ORDER BY time DESC LIMIT ?",
+        networkUuid,
+        channelName.toLowerCase(),
+        limit
+    );
+
+    return rows.reverse().map(row => {
+        const decrypted = this.decrypt(row.encrypted_data);
+        const msg = JSON.parse(decrypted);
+        msg.time = row.time;
+        msg.id = this.nextId(); // Generate new ID
+        return new Msg(msg);
+    });
+}
+
+// Get messages before timestamp
 async getMessagesBefore(
     networkUuid: string,
     channelName: string,
@@ -281,9 +379,8 @@ async getMessagesBefore(
     limit: number
 ): Promise<Message[]> {
     await this.initDone.promise;
-    
     if (!this.isEnabled) return [];
-    
+
     const rows = await this.serialize_fetchall(
         "SELECT encrypted_data, time FROM messages WHERE network = ? AND channel = ? AND time < ? ORDER BY time DESC LIMIT ?",
         networkUuid,
@@ -291,41 +388,189 @@ async getMessagesBefore(
         beforeTime,
         limit
     );
-    
-    // Decrypt and return
+
     return rows.reverse().map(row => {
         const decrypted = this.decrypt(row.encrypted_data);
         const msg = JSON.parse(decrypted);
         msg.time = row.time;
+        msg.id = this.nextId();
         return new Msg(msg);
     });
+}
+
+// Get total message count
+async getMessageCount(
+    networkUuid: string,
+    channelName: string
+): Promise<number> {
+    await this.initDone.promise;
+    if (!this.isEnabled) return 0;
+
+    const row = await this.serialize_get(
+        "SELECT COUNT(*) as count FROM messages WHERE network = ? AND channel = ?",
+        networkUuid,
+        channelName.toLowerCase()
+    );
+
+    return row?.count || 0;
+}
+
+// Get message by ID (for lazy loading)
+async getMessageById(messageId: number): Promise<Message | null> {
+    // This requires storing message ID in database
+    // For now, we can skip this and use timestamp-based approach
+    return null;
+}
+```
+
+#### F. Autoconnect przy starcie The Lounge
+
+```typescript
+// server/clientManager.ts - loadUser()
+
+loadUser(name: string): IrssiClient {
+    const userConfig = this.readUserConfig(name);
+    const client = new IrssiClient(this, name, userConfig);
+
+    this.clients.push(client);
+
+    // ✅ AUTOCONNECT: Jeśli user ma skonfigurowane irssi, połącz OD RAZU!
+    if (userConfig.irssiConnection?.passwordEncrypted) {
+        log.info(`User ${name} has irssi config - autoconnecting...`);
+
+        // Decrypt password using IP+PORT as salt
+        const host = userConfig.irssiConnection.host;
+        const port = userConfig.irssiConnection.port;
+        const salt = `${host}:${port}`;
+
+        try {
+            const key = crypto.pbkdf2Sync(
+                userConfig.irssiConnection.passwordEncrypted,
+                salt,
+                10000,
+                32,
+                "sha256"
+            );
+
+            // Decrypt password
+            const decrypted = this.decryptWithKey(
+                userConfig.irssiConnection.passwordEncrypted,
+                key
+            );
+
+            // Connect to irssi
+            client.autoConnect(decrypted).catch(err => {
+                log.error(`Autoconnect failed for ${name}: ${err}`);
+            });
+        } catch (err) {
+            log.error(`Failed to decrypt irssi password for ${name}: ${err}`);
+        }
+    }
+
+    return client;
+}
+```
+
+#### G. Zmienić encryption na IP+PORT salt
+
+```typescript
+// server/irssiConfigHelper.ts
+
+export async function encryptIrssiPassword(
+    irssiPassword: string,
+    host: string,
+    port: number
+): Promise<string> {
+    // Use IP+PORT as salt
+    const salt = `${host}:${port}`;
+    const key = crypto.pbkdf2Sync(irssiPassword, salt, 10000, 32, "sha256");
+
+    // Generate random IV (12 bytes for GCM)
+    const iv = crypto.randomBytes(12);
+
+    // Encrypt with AES-256-GCM
+    const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+    const encrypted = Buffer.concat([cipher.update(irssiPassword, "utf8"), cipher.final()]);
+    const tag = cipher.getAuthTag();
+
+    // Format: [IV (12 bytes)] [Ciphertext] [Tag (16 bytes)]
+    const result = Buffer.concat([iv, encrypted, tag]);
+    return result.toString("base64");
+}
+
+export async function decryptIrssiPassword(
+    encryptedPassword: string,
+    host: string,
+    port: number
+): Promise<string> {
+    // Use IP+PORT as salt
+    const salt = `${host}:${port}`;
+    const key = crypto.pbkdf2Sync(encryptedPassword, salt, 10000, 32, "sha256");
+
+    const encryptedBuffer = Buffer.from(encryptedPassword, "base64");
+
+    // Parse: [IV (12 bytes)] [Ciphertext] [Tag (16 bytes)]
+    const iv = encryptedBuffer.slice(0, 12);
+    const tag = encryptedBuffer.slice(-16);
+    const ciphertext = encryptedBuffer.slice(12, -16);
+
+    // Decrypt with AES-256-GCM
+    const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
+    decipher.setAuthTag(tag);
+
+    const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+    return decrypted.toString("utf8");
 }
 ```
 
 ---
 
-## 🔐 ENCRYPTION
+## 🔐 ENCRYPTION - NOWA ARCHITEKTURA
 
-### Hasło użytkownika → Klucze:
+### ⚠️ ZMIANA: IP+PORT jako salt (zamiast user password)
+
+**STARA METODA (wymagała user password przy starcie):**
+```
+User Password → PBKDF2 → Encryption Key → Decrypt irssi password
+```
+❌ Problem: Nie możemy autoconnect przy starcie (nie mamy user password)
+
+**NOWA METODA (używa IP+PORT):**
+```
+irssi Password + IP+PORT → PBKDF2 → Encrypted Password → Save to config
+```
+✅ Rozwiązanie: IP+PORT są w config (plaintext), możemy decrypt przy starcie!
+
+### Encryption flow:
 
 ```
-User Password (bcrypt hash w config.password)
-    ↓
-PBKDF2(password, "thelounge_irssi_temp_salt", 10k iter, 256-bit)
-    ↓
-Encryption Key (32 bytes)
-    ↓
-    ├─→ Encrypt irssi WebSocket password → config.irssiConnection.passwordEncrypted
-    ├─→ Encrypt messages → SQLite encrypted_data column
-    └─→ Derive fe-web key → PBKDF2(irssi_password, "irssi-fe-web-v1", 10k iter)
+1. User zapisuje irssi config (host, port, password):
+   PBKDF2(irssiPassword, "${host}:${port}", 10k iter, 256-bit) → Encryption Key
+   Encrypt(irssiPassword, key) → passwordEncrypted → Save to config
+
+2. Backend startuje (npm start):
+   Read config → host, port, passwordEncrypted
+   PBKDF2(passwordEncrypted, "${host}:${port}", 10k iter) → Encryption Key
+   Decrypt(passwordEncrypted, key) → irssiPassword
+   Connect to irssi!
+
+3. User zmienia IP/PORT:
+   Re-encrypt password z nowym salt "${newHost}:${newPort}"
 ```
 
-### Message encryption format:
+### Message encryption (bez zmian):
+
 ```
 [IV 12 bytes][Ciphertext][Auth Tag 16 bytes]
 ```
 
-### SQLite schema:
+Używamy user password do encryption key dla messages:
+```
+User Password → PBKDF2("thelounge_irssi_temp_salt") → Message Encryption Key
+```
+
+### SQLite schema (bez zmian):
+
 ```sql
 CREATE TABLE messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -410,12 +655,14 @@ Browser → "Show older messages" → socket.emit("more", {target, lastId})
 
 ## 📝 NOTATKI
 
-- **Buffer size:** 1000 messages w cache, max 5000 po lazy load
+- **Backend cache:** NIE TRZYMA MESSAGES! Tylko networks, channels, users
 - **Storage retention:** 10 lat (wszystko!)
-- **Lazy load:** 100 messages per request
-- **Encryption:** AES-256-GCM (to samo hasło co fe-web)
+- **Lazy load:** 100 messages per request (ZAWSZE z storage)
+- **Encryption irssi password:** IP+PORT jako salt (autoconnect!)
+- **Encryption messages:** User password jako salt (jak dotychczas)
 - **Message types:** WSZYSTKO (MESSAGE, JOIN, PART, QUIT, KICK, MODE, TOPIC, etc.)
 - **Timestamps:** TAK - wszystkie messages mają `time` field
+- **Open queries:** Muszą być w cache (channels[]) żeby frontend mógł pobrać messages!
 
 ---
 
