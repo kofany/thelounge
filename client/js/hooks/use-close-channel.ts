@@ -2,6 +2,8 @@ import eventbus from "../eventbus";
 import socket from "../socket";
 import {ClientChan} from "../types";
 import {ChanType} from "../../../shared/types/chan";
+import {store} from "../store";
+import {switchToChannel} from "../router";
 
 export default function useCloseChannel(channel: ClientChan) {
 	return () => {
@@ -29,11 +31,34 @@ export default function useCloseChannel(channel: ClientChan) {
 			return;
 		}
 
-		channel.closed = true;
+		// CLIENT-DRIVEN ARCHITECTURE: Update UI immediately, then notify backend
 
-		socket.emit("input", {
-			target: Number(channel.id),
-			text: "/close",
+		// STEP 1: Find the network
+		const netChan = store.getters.findChannel(channel.id);
+
+		if (!netChan) {
+			// Channel already removed (idempotent)
+			return;
+		}
+
+		// STEP 2: Switch to lobby if this was the active channel
+		if (store.state.activeChannel && store.state.activeChannel.channel.id === channel.id) {
+			switchToChannel(netChan.network.channels[0]);
+		}
+
+		// STEP 3: Remove channel from local state IMMEDIATELY
+		const index = netChan.network.channels.findIndex((c) => c.id === channel.id);
+		if (index !== -1) {
+			netChan.network.channels.splice(index, 1);
+		}
+
+		// STEP 4: Dispatch store action (clean up mentions, etc.)
+		store.dispatch("partChannel", netChan);
+
+		// STEP 5: Emit new part_channel event to backend (async confirmation)
+		socket.emit("part_channel", {
+			networkUuid: netChan.network.uuid,
+			channelId: channel.id,
 		});
 	};
 }

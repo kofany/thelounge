@@ -178,6 +178,9 @@ interface ClientToServerEvents {
 
 	// Mark channel as read (send to irssi)
 	mark_read: EventHandler<{target: number}>;
+
+	// Client-driven channel/query close
+	part_channel: EventHandler<{networkUuid: string; channelId: number}>;
 }
 
 interface InterServerEvents {}

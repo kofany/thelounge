@@ -1415,6 +1415,73 @@ export class IrssiClient {
 		});
 	}
 
+	/**
+	 * Handle part_channel from browser (client-driven channel/query close)
+	 * This is the NEW client-driven flow:
+	 * 1. Remove from cache IMMEDIATELY
+	 * 2. Broadcast to ALL browsers IMMEDIATELY
+	 * 3. Send to irssi in BACKGROUND (async confirmation)
+	 */
+	async handlePartChannel(
+		socketId: string,
+		data: {networkUuid: string; channelId: number}
+	): Promise<void> {
+		// Find network + channel
+		const network = this.networks.find((n) => n.uuid === data.networkUuid);
+		if (!network) {
+			log.warn(
+				`User ${colors.bold(this.name)}: Network ${data.networkUuid} not found for part_channel`
+			);
+			return;
+		}
+
+		const channel = network.channels.find((c) => c.id === data.channelId);
+		if (!channel) {
+			log.debug(
+				`User ${colors.bold(this.name)}: Channel ${data.channelId} already removed (idempotent)`
+			);
+			return; // Already removed - idempotent!
+		}
+
+		const {ChanType} = await import("../shared/types/chan");
+
+		log.info(
+			`User ${colors.bold(this.name)}: Part channel ${channel.name} on ${network.name} (client-driven)`
+		);
+
+		// STEP 1: Remove from cache IMMEDIATELY
+		const index = network.channels.indexOf(channel);
+		if (index !== -1) {
+			network.channels.splice(index, 1);
+		}
+
+		// STEP 2: Broadcast to ALL browsers IMMEDIATELY (including initiator - idempotent!)
+		this.broadcastToAllBrowsers("part", {
+			chan: data.channelId,
+		});
+
+		// STEP 3: Send to irssi in BACKGROUND (fire-and-forget)
+		if (this.irssiConnection) {
+			if (channel.type === ChanType.CHANNEL) {
+				// Send /part for channels (executeCommand returns void)
+				this.irssiConnection.executeCommand(`part ${channel.name}`, network.serverTag);
+				log.debug(
+					`User ${colors.bold(this.name)}: Sent /part ${channel.name} to irssi in background`
+				);
+			} else if (channel.type === ChanType.QUERY) {
+				// Send close_query for queries
+				this.irssiConnection.send({
+					type: "close_query" as any,
+					server: network.serverTag,
+					nick: channel.name,
+				});
+				log.debug(
+					`User ${colors.bold(this.name)}: Sent close_query for ${channel.name} to irssi in background`
+				);
+			}
+		}
+	}
+
 	private handleChannelPart(networkUuid: string, channelId: number): void {
 		log.info(`[IrssiClient] Channel part: ${channelId}`);
 

@@ -1159,6 +1159,15 @@ function initializeIrssiClient(
 		}
 	});
 
+	// Handle part_channel request (client-driven channel/query close)
+	socket.on("part_channel", (data) => {
+		if (!_.isPlainObject(data) || typeof data.networkUuid !== "string" || typeof data.channelId !== "number") {
+			return;
+		}
+
+		client.handlePartChannel(socket.id, data);
+	});
+
 	// Handle settings
 	socket.on("setting:get", () => {
 		if (!Object.prototype.hasOwnProperty.call(client.config, "clientSettings")) {
