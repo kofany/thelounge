@@ -192,22 +192,29 @@ export class IrssiClient {
 		log.info(`irssi password decrypted for user ${colors.bold(this.name)}`);
 
 		// Step 2: Derive message storage encryption key
-		// Use userPassword + irssiPassword as salt (RÓŻNY od WebSocket encryption!)
-		this.encryptionKey = crypto.pbkdf2Sync(
-			userPassword,
-			this.irssiPassword,
-			10000,
-			32,
-			"sha256"
-		);
+		// NOTE: If autoconnect already initialized storage with irssiPassword,
+		// we continue using that key. Only derive new key if not already set.
+		if (!this.encryptionKey) {
+			// Use irssiPassword for encryption (same as autoconnect)
+			this.encryptionKey = crypto.pbkdf2Sync(
+				this.irssiPassword,
+				"irssi-message-storage-v1", // Fixed salt (same as autoconnect)
+				10000,
+				32,
+				"sha256"
+			);
+			log.info(`Message storage encryption key derived for user ${colors.bold(this.name)}`);
+		} else {
+			log.info(`Message storage encryption key already exists (from autoconnect)`);
+		}
 
-		log.info(`Message storage encryption key derived for user ${colors.bold(this.name)}`);
-
-		// Step 3: Initialize encrypted message storage
-		if (this.config.log && !Config.values.public) {
+		// Step 3: Initialize encrypted message storage (if not already enabled by autoconnect)
+		if (this.config.log && !Config.values.public && !this.messageStorage) {
 			this.messageStorage = new EncryptedMessageStorage(this.name, this.encryptionKey);
 			await this.messageStorage.enable();
 			log.info(`Encrypted message storage enabled for user ${colors.bold(this.name)}`);
+		} else if (this.messageStorage) {
+			log.info(`Message storage already enabled (from autoconnect)`);
 		}
 
 		// Step 4: Connect to irssi fe-web (ASYNCHRONOUSLY - don't block login!)
@@ -227,7 +234,7 @@ export class IrssiClient {
 	/**
 	 * Auto-connect to irssi at startup (without user password)
 	 * Uses IP+PORT encryption to decrypt irssi password
-	 * Message storage will be enabled later when user logs in
+	 * Message storage is enabled using irssiPassword (no userPassword needed!)
 	 */
 	async autoConnectToIrssi(): Promise<void> {
 		log.info(`User ${colors.bold(this.name)} auto-connecting to irssi...`);
@@ -253,7 +260,26 @@ export class IrssiClient {
 
 		log.info(`irssi password decrypted for user ${colors.bold(this.name)}`);
 
-		// Connect to irssi (without message storage - will be enabled on login)
+		// Derive message storage encryption key from irssiPassword
+		// Use fixed salt since we don't have userPassword during autoconnect
+		this.encryptionKey = crypto.pbkdf2Sync(
+			this.irssiPassword,
+			"irssi-message-storage-v1", // Fixed salt
+			10000,
+			32,
+			"sha256"
+		);
+
+		log.info(`Message storage encryption key derived for user ${colors.bold(this.name)}`);
+
+		// Initialize encrypted message storage
+		if (this.config.log && !Config.values.public) {
+			this.messageStorage = new EncryptedMessageStorage(this.name, this.encryptionKey);
+			await this.messageStorage.enable();
+			log.info(`Encrypted message storage enabled for user ${colors.bold(this.name)}`);
+		}
+
+		// Connect to irssi (with message storage enabled!)
 		await this.connectToIrssiInternal();
 	}
 
@@ -372,6 +398,11 @@ export class IrssiClient {
 		(this.irssiConnection as any).on("activity_update", (msg: FeWebMessage) => {
 			this.handleActivityUpdate(msg);
 		});
+
+		// Query closed in irssi (2-way sync)
+		(this.irssiConnection as any).on("query_closed", (msg: FeWebMessage) => {
+			this.handleQueryClosed(msg);
+		});
 	}
 
 	/**
@@ -420,6 +451,7 @@ export class IrssiClient {
 
 	/**
 	 * Handle input from browser (user command/message)
+	 * Includes command translation layer for Vue-specific commands
 	 */
 	async handleInput(socketId: string, data: {target: number; text: string}): Promise<void> {
 		if (!this.irssiConnection) {
@@ -436,22 +468,52 @@ export class IrssiClient {
 
 			// Check if it's a command (starts with /)
 			if (line.charAt(0) === "/" && line.charAt(1) !== "/") {
-				// Command - find network for target channel to send server tag
-				let serverTag: string | undefined;
+				// Find channel and network for this target
+				let channel: Chan | undefined;
+				let network: NetworkData | undefined;
 
 				for (const net of this.networks) {
-					const channel = net.channels.find((c) => c.id === data.target);
+					channel = net.channels.find((c) => c.id === data.target);
 					if (channel) {
-						serverTag = net.serverTag;
+						network = net;
 						break;
 					}
 				}
 
-				const command = line.substring(1); // Remove leading /
-				await this.irssiConnection.executeCommand(command, serverTag);
+				if (!channel || !network) {
+					log.warn(
+						`User ${colors.bold(this.name)}: channel ${
+							data.target
+						} not found for command`
+					);
+					return;
+				}
+
+				// Parse command and args
+				const parts = line.substring(1).split(" ");
+				const commandName = parts[0].toLowerCase();
+				const args = parts.slice(1);
+
+				// Command translation layer
+				const translated = await this.translateCommand(
+					commandName,
+					args,
+					channel,
+					network
+				);
+
+				if (translated === false) {
+					// Command was handled by translator, don't forward to irssi
+					continue;
+				}
+
+				// Use translated command if available, otherwise use original
+				const finalCommand = translated || line.substring(1);
+
+				await this.irssiConnection.executeCommand(finalCommand, network.serverTag);
 				log.debug(
-					`User ${colors.bold(this.name)}: sent command: /${command}${
-						serverTag ? ` on ${serverTag}` : ""
+					`User ${colors.bold(this.name)}: sent command: /${finalCommand} on ${
+						network.serverTag
 					}`
 				);
 			} else {
@@ -490,6 +552,68 @@ export class IrssiClient {
 				);
 			}
 		}
+	}
+
+	/**
+	 * Command Translation Layer
+	 * Translates Vue/The Lounge specific commands to irssi-compatible commands
+	 * Returns:
+	 * - null: no translation needed, use original command
+	 * - string: translated command to send to irssi
+	 * - false: command was handled, don't forward to irssi
+	 */
+	private async translateCommand(
+		command: string,
+		args: string[],
+		channel: Chan,
+		network: NetworkData
+	): Promise<string | false | null> {
+		const {ChanType} = await import("../shared/types/chan");
+
+		switch (command) {
+			case "close":
+				// /close → translate based on channel type
+				if (channel.type === ChanType.CHANNEL) {
+					// For channels: /part #channel
+					log.info(
+						`[CommandTranslator] /close → /part ${channel.name} (channel) on ${network.serverTag}`
+					);
+					return `part ${channel.name}`;
+				} else if (channel.type === ChanType.QUERY) {
+					// For queries: send close_query message to irssi
+					log.info(
+						`[CommandTranslator] /close → close_query ${channel.name} (query) on ${network.serverTag}`
+					);
+					this.irssiConnection?.send({
+						type: "close_query" as any,
+						server: network.serverTag,
+						nick: channel.name,
+					});
+					return false; // Handled
+				}
+				break;
+
+			case "banlist":
+				// /banlist → /mode #channel +b
+				log.info(
+					`[CommandTranslator] /banlist → /mode ${channel.name} +b on ${network.serverTag}`
+				);
+				return `mode ${channel.name} +b`;
+
+			case "quit":
+				// /quit in lobby → /disconnect (for this network only!)
+				if (channel.type === ChanType.LOBBY) {
+					log.info(
+						`[CommandTranslator] /quit → /disconnect (lobby) on ${network.serverTag}`
+					);
+					// irssi command: /disconnect <server_tag>
+					return `disconnect ${network.serverTag}`;
+				}
+				// /quit in channel/query → pass through (normal IRC quit)
+				break;
+		}
+
+		return null; // No translation needed
 	}
 
 	/**
@@ -770,6 +894,26 @@ export class IrssiClient {
 				}
 			}
 
+			// STEP 5: Send activity_update for channels with unread markers
+			// This ensures frontend shows activity status from irssi immediately
+			for (const net of this.networks) {
+				for (const channel of net.channels) {
+					const key = this.getMarkerKey(net.uuid, channel.name);
+					const marker = this.unreadMarkers.get(key);
+
+					if (marker && marker.dataLevel > DataLevel.NONE) {
+						socket.emit("activity_update", {
+							chan: channel.id,
+							unread: marker.unreadCount,
+							highlight: marker.dataLevel === DataLevel.HILIGHT ? marker.unreadCount : 0,
+						});
+						log.debug(
+							`[IrssiClient] Sent activity_update for channel ${channel.id} (unread=${marker.unreadCount}, level=${marker.dataLevel}) in init`
+						);
+					}
+				}
+			}
+
 			log.info(`User ${colors.bold(this.name)}: sent initial state to browser ${socket.id}`);
 		} catch (error) {
 			log.error(`Failed to send initial state to browser ${socket.id}: ${error}`);
@@ -971,9 +1115,11 @@ export class IrssiClient {
 		marker.dataLevel = dataLevel;
 		marker.lastMessageTime = Date.now();
 
-		// Increment unread count if not read
-		if (dataLevel > DataLevel.NONE) {
-			marker.unreadCount++;
+		// Clear unread count if marked as read (level=0), otherwise keep as is
+		// NOTE: irssi sends activity LEVEL (0-3), not message COUNT
+		// The frontend only cares about level for color coding, not exact count
+		if (dataLevel === DataLevel.NONE) {
+			marker.unreadCount = 0;
 		}
 
 		this.unreadMarkers.set(key, marker);
@@ -1029,6 +1175,63 @@ export class IrssiClient {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Handle query_closed from irssi (query window closed in irssi)
+	 * Removes query from network and broadcasts to all browsers (2-way sync)
+	 */
+	private async handleQueryClosed(msg: FeWebMessage): Promise<void> {
+		const serverTag = msg.server || msg.server_tag;
+		const nick = msg.nick;
+
+		if (!serverTag || !nick) {
+			log.warn(
+				`[IrssiClient] Invalid query_closed message (missing server/nick): ${JSON.stringify(
+					msg
+				)}`
+			);
+			return;
+		}
+
+		// Find network by server_tag
+		const network = this.networks.find((n) => n.serverTag === serverTag);
+		if (!network) {
+			log.warn(`[IrssiClient] query_closed for unknown server: ${serverTag}`);
+			return;
+		}
+
+		// Import ChanType dynamically
+		const {ChanType} = await import("../shared/types/chan");
+
+		// Find query by nick
+		const query = network.channels.find(
+			(c) => c.type === ChanType.QUERY && c.name.toLowerCase() === nick.toLowerCase()
+		);
+
+		if (!query) {
+			log.warn(
+				`[IrssiClient] query_closed for unknown query: ${nick} on ${serverTag}`
+			);
+			return;
+		}
+
+		log.info(`[IrssiClient] Query closed in irssi: ${nick} on ${serverTag}`);
+
+		// Remove query from network
+		const index = network.channels.indexOf(query);
+		if (index !== -1) {
+			network.channels.splice(index, 1);
+		}
+
+		// Broadcast to all browsers (close query window in frontend)
+		this.broadcastToAllBrowsers("part", {
+			chan: query.id,
+		});
+
+		log.debug(
+			`[IrssiClient] Broadcasted part for query ${query.id} (${nick}) to all browsers`
+		);
 	}
 
 	// FeWebAdapter callback handlers
