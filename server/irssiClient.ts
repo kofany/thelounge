@@ -113,6 +113,11 @@ export class IrssiClient {
 	// Unread markers (activity tracking) - in-memory only!
 	private unreadMarkers: Map<string, UnreadMarker> = new Map();
 
+	// Active window in irssi (network:channel) - for proper activity tracking
+	// When user switches windows in irssi, this gets updated
+	// This prevents activity_update being sent/processed for active window
+	private activeWindowInIrssi: string | null = null; // Format: "network_uuid:channel_name"
+
 	// State
 	awayMessage: string = "";
 	lastActiveChannel: number = -1;
@@ -1167,6 +1172,15 @@ export class IrssiClient {
 		const key = this.getMarkerKey(network.uuid, channel.name);
 		const dataLevel = msg.level || DataLevel.NONE;
 
+		// Check if this channel is active in irssi
+		// If it is, IGNORE activity_update from irssi (user is already reading it in irssi)
+		if (this.activeWindowInIrssi === key) {
+			log.debug(
+				`[IrssiClient] Ignoring activity_update for ${network.name}/${channel.name} (active in irssi)`
+			);
+			return;
+		}
+
 		// Update or create unread marker
 		const marker = this.unreadMarkers.get(key) || {
 			network: network.uuid,
@@ -1185,12 +1199,16 @@ export class IrssiClient {
 		// We DON'T increment here - instead we count messages in DB that are newer than lastReadTime
 		if (dataLevel === DataLevel.NONE) {
 			// Marked as read - update lastReadTime and clear count
+			// This is sent when user switches to this window in irssi (sig_window_changed)
 			marker.lastReadTime = Date.now();
 			marker.unreadCount = 0;
 			this.unreadMarkers.set(key, marker);
 
+			// Update activeWindowInIrssi (user switched to this window in irssi)
+			this.activeWindowInIrssi = key;
+
 			log.debug(
-				`[IrssiClient] Activity cleared: ${network.name}/${channel.name} level=0 unread=0`
+				`[IrssiClient] Activity cleared: ${network.name}/${channel.name} level=0 unread=0 (active in irssi)`
 			);
 
 			// Broadcast to all browsers - clear activity
@@ -1298,8 +1316,10 @@ export class IrssiClient {
 	/**
 	 * Mark channel as read (from browser or irssi)
 	 * Clears unread marker and broadcasts to all browsers
+	 *
+	 * @param fromIrssi - true if mark_read came from irssi (window switch), false if from browser
 	 */
-	markAsRead(network: string, channel: string): void {
+	markAsRead(network: string, channel: string, fromIrssi: boolean = false): void {
 		const key = this.getMarkerKey(network, channel);
 		const marker = this.unreadMarkers.get(key);
 
@@ -1310,7 +1330,13 @@ export class IrssiClient {
 			this.unreadMarkers.set(key, marker);
 		}
 
-		log.debug(`[IrssiClient] Marked as read: ${network}/${channel}`);
+		log.debug(`[IrssiClient] Marked as read: ${network}/${channel} (fromIrssi=${fromIrssi})`);
+
+		// If mark_read came from irssi, update activeWindowInIrssi
+		if (fromIrssi) {
+			this.activeWindowInIrssi = key;
+			log.debug(`[IrssiClient] Active window in irssi: ${key}`);
+		}
 
 		// Find network and channel IDs for broadcast
 		const net = this.networks.find((n) => n.uuid === network);
@@ -1324,13 +1350,15 @@ export class IrssiClient {
 					highlight: 0,
 				});
 
-				// Send mark_read to irssi to clear activity there too
-				if (this.irssiConnection) {
+				// Send mark_read to irssi ONLY if NOT from irssi
+				// This prevents infinite loop and unnecessary window switches
+				if (this.irssiConnection && !fromIrssi) {
 					this.irssiConnection.send({
 						type: "mark_read" as any,
 						server: net.serverTag,
 						target: chan.name,
 					});
+					log.debug(`[IrssiClient] Sent mark_read to irssi for ${net.serverTag}/${chan.name}`);
 				}
 			}
 		}
@@ -1443,23 +1471,29 @@ export class IrssiClient {
 				? msg.text.toLowerCase().includes(network.nick.toLowerCase())
 				: false;
 
-		// Check if channel is open in any browser (for 1:1 sync)
-		// If channel is open anywhere, treat as read for ALL clients
-		const isChannelOpen = this.isChannelOpenInAnyBrowser(channelId);
+		// Check if channel is open in any browser OR active in irssi
+		// If channel is open anywhere (browser or irssi), treat as read for ALL clients
+		const isChannelOpenInBrowser = this.isChannelOpenInAnyBrowser(channelId);
+		const key = network && channel ? this.getMarkerKey(network.uuid, channel.name) : null;
+		const isChannelActiveInIrssi = key === this.activeWindowInIrssi;
+		const isChannelOpen = isChannelOpenInBrowser || isChannelActiveInIrssi;
 
 		// Broadcast to all browsers (live update)
 		this.broadcastToAllBrowsers("msg", {
 			chan: channelId,
 			msg: msg,
-			unread: msg.self || isChannelOpen ? 0 : 1, // If open anywhere, unread=0
+			unread: msg.self || isChannelOpen ? 0 : 1, // If open anywhere (browser OR irssi), unread=0
 			highlight: isHighlight && !msg.self ? 1 : 0,
 		});
 
-		// If channel is open in any browser, mark as read in irssi immediately
+		// If channel is open in browser (NOT irssi), mark as read in irssi immediately
 		// This prevents irssi from sending activity_update
-		if (isChannelOpen && network && channel && !msg.self) {
-			log.debug(`[IrssiClient] Channel ${channelId} is open, marking as read in irssi`);
-			this.markAsRead(network.uuid, channel.name);
+		// DON'T send mark_read if channel is already active in irssi!
+		if (isChannelOpenInBrowser && !isChannelActiveInIrssi && network && channel && !msg.self) {
+			log.debug(
+				`[IrssiClient] Channel ${channelId} is open in browser, marking as read in irssi`
+			);
+			this.markAsRead(network.uuid, channel.name, false); // fromIrssi=false
 		}
 	}
 
