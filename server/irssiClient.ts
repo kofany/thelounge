@@ -20,6 +20,7 @@ import log from "./log";
 import Chan from "./models/chan";
 import Msg from "./models/msg";
 import User from "./models/user";
+import Network from "./models/network";
 import Config from "./config";
 import {SharedMention} from "../shared/types/mention";
 import ClientManager from "./clientManager";
@@ -755,30 +756,38 @@ export class IrssiClient {
 	private handleMessage(networkUuid: string, channelId: number, msg: Msg): void {
 		log.debug(`[IrssiClient] Message: ${msg.text?.substring(0, 50)}`);
 
-		// Save to encrypted storage
-		// NOTE: Message storage for irssi proxy mode is currently disabled because:
-		// 1. NetworkData is a simplified structure, not a full Network model
-		// 2. messageStorage.index() expects Network/Channel from models
-		// 3. irssi already stores messages - we're just a proxy
-		// 4. If needed in future, create adapter to convert NetworkData → Network
-		if (this.messageStorage && false) {
-			// Disabled for irssi proxy mode
-			const network = this.networks.find((n) => n.uuid === networkUuid);
-			const channel = network?.channels.find((c) => c.id === channelId);
-			if (network && channel) {
-				// Would need to convert NetworkData to Network model
-				// await this.messageStorage.index(network as any, channel, msg);
-			}
+		const network = this.networks.find((n) => n.uuid === networkUuid);
+		const channel = network?.channels.find((c) => c.id === channelId);
+
+		// Save to encrypted storage (ASYNC - don't block!)
+		// Create minimal Network/Channel objects for storage
+		if (this.messageStorage && network && channel) {
+			// Create minimal Network object (only uuid and name needed for storage)
+			const networkForStorage = {
+				uuid: network.uuid,
+				name: network.name,
+			} as Network;
+
+			// Create minimal Channel object (only name needed for storage)
+			const channelForStorage = {
+				name: channel.name,
+			} as Chan;
+
+			// Save encrypted to SQLite (async - don't await!)
+			this.messageStorage.index(networkForStorage, channelForStorage, msg).catch((err) => {
+				log.error(
+					`Failed to save message to storage for ${network.name}/${channel.name}: ${err}`
+				);
+			});
 		}
 
 		// Detect highlight (mention of user's nick)
-		const network = this.networks.find((n) => n.uuid === networkUuid);
 		const isHighlight =
 			network && msg.text
 				? msg.text.toLowerCase().includes(network.nick.toLowerCase())
 				: false;
 
-		// Broadcast to all browsers
+		// Broadcast to all browsers (live update)
 		this.broadcastToAllBrowsers("msg", {
 			chan: channelId,
 			msg: msg,
