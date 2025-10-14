@@ -891,20 +891,38 @@ export class IrssiClient {
 
 			// STEP 5: Send activity_update for channels with unread markers
 			// This ensures frontend shows activity status from irssi immediately
+			// Count unread from message storage (messages newer than lastReadTime)
 			for (const net of this.networks) {
 				for (const channel of net.channels) {
 					const key = this.getMarkerKey(net.uuid, channel.name);
 					const marker = this.unreadMarkers.get(key);
 
 					if (marker && marker.dataLevel > DataLevel.NONE) {
+						// Count unread from DB (messages after lastReadTime)
+						let unreadCount = marker.unreadCount;
+						if (this.messageStorage) {
+							try {
+								unreadCount = await this.messageStorage.getUnreadCount(
+									net.uuid,
+									channel.name,
+									marker.lastReadTime
+								);
+								marker.unreadCount = unreadCount;
+								this.unreadMarkers.set(key, marker);
+							} catch (err) {
+								log.error(
+									`Failed to get unread count for ${net.name}/${channel.name}: ${err}`
+								);
+							}
+						}
+
 						socket.emit("activity_update", {
 							chan: channel.id,
-							unread: marker.unreadCount,
-							highlight:
-								marker.dataLevel === DataLevel.HILIGHT ? marker.unreadCount : 0,
+							unread: unreadCount,
+							highlight: marker.dataLevel === DataLevel.HILIGHT ? unreadCount : 0,
 						});
 						log.debug(
-							`[IrssiClient] Sent activity_update for channel ${channel.id} (unread=${marker.unreadCount}, level=${marker.dataLevel}) in init`
+							`[IrssiClient] Sent activity_update for channel ${channel.id} (unread=${unreadCount}, level=${marker.dataLevel}) in init`
 						);
 					}
 				}
@@ -1113,13 +1131,50 @@ export class IrssiClient {
 
 		// Update unread count based on activity level
 		// NOTE: irssi sends activity LEVEL (0-3), not message COUNT
-		// We increment count when activity increases, clear when level=0
+		// We DON'T increment here - instead we count messages in DB that are newer than lastReadTime
 		if (dataLevel === DataLevel.NONE) {
-			// Marked as read - clear count
+			// Marked as read - update lastReadTime and clear count
+			marker.lastReadTime = Date.now();
 			marker.unreadCount = 0;
 		} else {
-			// New activity - increment count
-			marker.unreadCount++;
+			// New activity - count unread from message storage
+			if (this.messageStorage) {
+				this.messageStorage
+					.getUnreadCount(network.uuid, channel.name, marker.lastReadTime)
+					.then((count) => {
+						marker.unreadCount = count;
+						this.unreadMarkers.set(key, marker);
+
+						log.debug(
+							`[IrssiClient] Activity update: ${network.name}/${channel.name} level=${dataLevel} unread=${count} (from DB)`
+						);
+
+						// Broadcast to all browsers with actual count from DB
+						this.broadcastToAllBrowsers("activity_update" as any, {
+							chan: channel.id,
+							unread: count,
+							highlight: dataLevel === DataLevel.HILIGHT ? count : 0,
+						});
+					})
+					.catch((err) => {
+						log.error(
+							`Failed to get unread count for ${network.name}/${channel.name}: ${err}`
+						);
+						// Fallback: use old increment logic
+						marker.unreadCount++;
+						this.unreadMarkers.set(key, marker);
+
+						this.broadcastToAllBrowsers("activity_update" as any, {
+							chan: channel.id,
+							unread: marker.unreadCount,
+							highlight: dataLevel === DataLevel.HILIGHT ? marker.unreadCount : 0,
+						});
+					});
+				return; // Don't broadcast yet - wait for DB query
+			} else {
+				// No message storage - fallback to increment
+				marker.unreadCount++;
+			}
 		}
 
 		this.unreadMarkers.set(key, marker);
@@ -1129,13 +1184,6 @@ export class IrssiClient {
 		);
 
 		// Broadcast to all browsers
-		log.debug(
-			`[IrssiClient] Broadcasting activity_update to ${
-				this.attachedBrowsers.size
-			} browser(s): chan=${channel.id} unread=${marker.unreadCount} highlight=${
-				dataLevel === DataLevel.HILIGHT ? marker.unreadCount : 0
-			}`
-		);
 		this.broadcastToAllBrowsers("activity_update" as any, {
 			chan: channel.id,
 			unread: marker.unreadCount,

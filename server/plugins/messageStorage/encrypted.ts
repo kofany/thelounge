@@ -660,6 +660,31 @@ export class EncryptedMessageStorage implements SearchableMessageStorage {
 	}
 
 	/**
+	 * Get count of unread messages (messages after lastReadTime)
+	 * Used for activity tracking
+	 */
+	async getUnreadCount(
+		networkUuid: string,
+		channelName: string,
+		lastReadTime: number
+	): Promise<number> {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			return 0;
+		}
+
+		const row = await this.serialize_get(
+			"SELECT COUNT(*) as count FROM messages WHERE network = ? AND channel = ? AND time > ?",
+			networkUuid,
+			channelName.toLowerCase(),
+			lastReadTime
+		);
+
+		return row ? row.count : 0;
+	}
+
+	/**
 	 * Get total message count for a channel
 	 * Used to determine if "Show older messages" button should be shown
 	 */

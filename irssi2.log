@@ -1,0 +1,160 @@
+15:32:43 -!- Irssi: fe-web-ssl: Successfully wrote 185 bytes
+15:32:43 -!- Irssi: fe-web: [1760448682-0019] Sent message (185 bytes frame) [SSL] [ENCRYPTED]
+15:32:43 -!- Irssi: fe-web: Activity UPDATE SKIPPED for #polska on IRCnet (level=2 unchanged)
+15:32:49 -!- Irssi: fe-web: [1760448682-0019] Sending message: {"id":"1760448769-0061","type":"message","server":"IRCnet","channel":"#polska","nick":"yooz","text":"kofany i komisarze ...","timestamp":1760448769,"level":4,"is_own":false}
+15:32:49 -!- Irssi: fe-web: [1760448682-0019] Encrypted message (173 -> 201 bytes)
+15:32:49 -!- Irssi: fe-web-ssl: Attempting SSL_write (205 bytes)...
+15:32:49 -!- Irssi: fe-web-ssl: SSL_write returned 205
+15:32:49 -!- Irssi: fe-web-ssl: Successfully wrote 205 bytes
+15:32:49 -!- Irssi: fe-web: [1760448682-0019] Sent message (205 bytes frame) [SSL] [ENCRYPTED]
+15:32:49 -!- Irssi: fe-web: Activity UPDATE SKIPPED for #polska on IRCnet (level=2 unchanged)
+15:32:52 -!- Irssi: fe-web: [1760448682-0019] sig_listen called (use_ssl=1, handshake_done=1)
+15:32:52 -!- Irssi: fe-web: [1760448682-0019] Reading from SSL channel...
+15:32:52 -!- Irssi: fe-web-ssl: Attempting SSL_read (max 8192 bytes)...
+15:32:52 -!- Irssi: fe-web-ssl: SSL_read returned 75
+15:32:52 -!- Irssi: fe-web-ssl: Successfully read 75 bytes
+15:32:52 -!- Irssi: fe-web: [1760448682-0019] SSL read returned: 75
+15:32:52 -!- Irssi: fe-web: [1760448682-0019] Received 75 bytes
+15:32:52 -!- Irssi: fe-web: [1760448682-0019] Processing WebSocket frames...
+15:32:52 -!- Irssi: fe-web: [1760448682-0019] Decrypted message (41 bytes)
+15:32:52 -!- Irssi: fe-web: [1760448682-0019] Sending pong: {"id":"1760448772-0062","type":"pong","response_to":"ping-1760448772339","timestamp":1760448772}
+15:32:52 -!- Irssi: fe-web: [1760448682-0019] Encrypted pong (96 -> 124 bytes)
+15:32:52 -!- Irssi: fe-web-ssl: Attempting SSL_write (126 bytes)...
+15:32:52 -!- Irssi: fe-web-ssl: SSL_write returned 126
+15:32:52 -!- Irssi: fe-web-ssl: Successfully wrote 126 bytes
+15:32:52 -!- Irssi: fe-web: [1760448682-0019] Sent pong (126 bytes frame) [SSL] [ENCRYPTED]
+15:33:05 -!- Irssi: fe-web: [1760448682-0019] sig_listen called (use_ssl=1, handshake_done=1)
+15:33:05 -!- Irssi: fe-web: [1760448682-0019] Reading from SSL channel...
+15:33:05 -!- Irssi: fe-web-ssl: Attempting SSL_read (max 8192 bytes)...
+15:33:05 -!- Irssi: fe-web-ssl: SSL_read returned 115
+15:33:05 -!- Irssi: fe-web-ssl: Successfully read 115 bytes
+15:33:05 -!- Irssi: fe-web: [1760448682-0019] SSL read returned: 115
+15:33:05 -!- Irssi: fe-web: [1760448682-0019] Received 115 bytes
+15:33:05 -!- Irssi: fe-web: [1760448682-0019] Processing WebSocket frames...
+15:33:05 -!- Irssi: fe-web: [1760448682-0019] Decrypted message (81 bytes)
+15:33:05 -!- Irssi: fe-web: [1760448682-0019] Received mark_read: target=IRCal server=IRCal
+15:33:05 -!- Irssi: fe-web: [1760448682-0019] ERROR: Target IRCal not found
+15:33:09 -!- Irssi: fe-web: [1760448682-0019] sig_listen called (use_ssl=1, handshake_done=1)
+15:33:09 -!- Irssi: fe-web: [1760448682-0019] Reading from SSL channel...
+15:33:09 -!- Irssi: fe-web-ssl: Attempting SSL_read (max 8192 bytes)...
+15:33:09 -!- Irssi: fe-web-ssl: SSL_read returned 118
+15:33:09 -!- Irssi: fe-web-ssl: Successfully read 118 bytes
+15:33:09 -!- Irssi: fe-web: [1760448682-0019] SSL read returned: 118
+15:33:09 -!- Irssi: fe-web: [1760448682-0019] Received 118 bytes
+15:33:09 -!- Irssi: fe-web: [1760448682-0019] Processing WebSocket frames...
+15:33:09 -!- Irssi: fe-web: [1760448682-0019] Decrypted message (84 bytes)
+15:33:09 -!- Irssi: fe-web: [1760448682-0019] Received mark_read: target=#polska server=IRCnet
+15:33:09 -!- Irssi: fe-web: Activity CLEAR (dehilight) for #polska on IRCnet
+15:33:09 -!- Irssi: fe-web: [1760448682-0019] Sending activity_update: {"id":"1760448789-0063","type":"activity_update","server":"IRCnet","channel":"#polska","timestamp":1760448789,"level":0}
+15:33:09 -!- Irssi: fe-web: [1760448682-0019] Encrypted activity_update (120 -> 148 bytes)
+15:33:09 -!- Irssi: fe-web-ssl: Attempting SSL_write (152 bytes)...
+15:33:09 -!- Irssi: fe-web-ssl: SSL_write returned 152
+15:33:09 -!- Irssi: fe-web-ssl: Successfully wrote 152 bytes
+15:33:09 -!- Irssi: fe-web: [1760448682-0019] Sent activity_update (152 bytes frame) [SSL] [ENCRYPTED]
+15:33:09 -!- Irssi: fe-web: [1760448682-0019] Marked #polska as read
+15:33:12 -!- Irssi: fe-web: [1760448682-0019] sig_listen called (use_ssl=1, handshake_done=1)
+15:33:12 -!- Irssi: fe-web: [1760448682-0019] Reading from SSL channel...
+15:33:12 -!- Irssi: fe-web-ssl: Attempting SSL_read (max 8192 bytes)...
+15:33:12 -!- Irssi: fe-web-ssl: SSL_read returned 122
+15:33:12 -!- Irssi: fe-web-ssl: Successfully read 122 bytes
+15:33:12 -!- Irssi: fe-web: [1760448682-0019] SSL read returned: 122
+15:33:12 -!- Irssi: fe-web: [1760448682-0019] Received 122 bytes
+15:33:12 -!- Irssi: fe-web: [1760448682-0019] Processing WebSocket frames...
+15:33:12 -!- Irssi: fe-web: [1760448682-0019] Decrypted message (88 bytes)
+15:33:12 -!- Irssi: fe-web: [1760448682-0019] Received mark_read: target=#libera server=liberachat
+15:33:12 -!- Irssi: fe-web: Activity CLEAR (dehilight) for #libera on liberachat
+15:33:12 -!- Irssi: fe-web: [1760448682-0019] Sending activity_update: {"id":"1760448792-0064","type":"activity_update","server":"liberachat","channel":"#libera","timestamp":1760448792,"level":0}
+15:33:12 -!- Irssi: fe-web: [1760448682-0019] Encrypted activity_update (124 -> 152 bytes)
+15:33:12 -!- Irssi: fe-web-ssl: Attempting SSL_write (156 bytes)...
+15:33:12 -!- Irssi: fe-web-ssl: SSL_write returned 156
+15:33:12 -!- Irssi: fe-web-ssl: Successfully wrote 156 bytes
+15:33:12 -!- Irssi: fe-web: [1760448682-0019] Sent activity_update (156 bytes frame) [SSL] [ENCRYPTED]
+15:33:12 -!- Irssi: fe-web: [1760448682-0019] Marked #libera as read
+15:33:15 -!- Irssi: fe-web: [1760448682-0019] sig_listen called (use_ssl=1, handshake_done=1)
+15:33:15 -!- Irssi: fe-web: [1760448682-0019] Reading from SSL channel...
+15:33:15 -!- Irssi: fe-web-ssl: Attempting SSL_read (max 8192 bytes)...
+15:33:15 -!- Irssi: fe-web-ssl: SSL_read returned 117
+15:33:15 -!- Irssi: fe-web-ssl: Successfully read 117 bytes
+15:33:15 -!- Irssi: fe-web: [1760448682-0019] SSL read returned: 117
+15:33:15 -!- Irssi: fe-web: [1760448682-0019] Received 117 bytes
+15:33:15 -!- Irssi: fe-web: [1760448682-0019] Processing WebSocket frames...
+15:33:15 -!- Irssi: fe-web: [1760448682-0019] Decrypted message (83 bytes)
+15:33:15 -!- Irssi: fe-web: [1760448682-0019] Received mark_read: target=#irc.al server=IRCal
+15:33:15 -!- Irssi: fe-web: Activity CLEAR (dehilight) for #irc.al on IRCal
+15:33:15 -!- Irssi: fe-web: [1760448682-0019] Sending activity_update: {"id":"1760448795-0065","type":"activity_update","server":"IRCal","channel":"#irc.al","timestamp":1760448795,"level":0}
+15:33:15 -!- Irssi: fe-web: [1760448682-0019] Encrypted activity_update (119 -> 147 bytes)
+15:33:15 -!- Irssi: fe-web-ssl: Attempting SSL_write (151 bytes)...
+15:33:15 -!- Irssi: fe-web-ssl: SSL_write returned 151
+15:33:15 -!- Irssi: fe-web-ssl: Successfully wrote 151 bytes
+15:33:15 -!- Irssi: fe-web: [1760448682-0019] Sent activity_update (151 bytes frame) [SSL] [ENCRYPTED]
+15:33:15 -!- Irssi: fe-web: [1760448682-0019] Marked #irc.al as read
+15:33:20 -!- Irssi: fe-web: [1760448682-0019] sig_listen called (use_ssl=1, handshake_done=1)
+15:33:20 -!- Irssi: fe-web: [1760448682-0019] Reading from SSL channel...
+15:33:20 -!- Irssi: fe-web-ssl: Attempting SSL_read (max 8192 bytes)...
+15:33:20 -!- Irssi: fe-web-ssl: SSL_read returned 118
+15:33:20 -!- Irssi: fe-web-ssl: Successfully read 118 bytes
+15:33:20 -!- Irssi: fe-web: [1760448682-0019] SSL read returned: 118
+15:33:20 -!- Irssi: fe-web: [1760448682-0019] Received 118 bytes
+15:33:20 -!- Irssi: fe-web: [1760448682-0019] Processing WebSocket frames...
+15:33:20 -!- Irssi: fe-web: [1760448682-0019] Decrypted message (84 bytes)
+15:33:20 -!- Irssi: fe-web: [1760448682-0019] Received mark_read: target=#polska server=IRCnet
+15:33:20 -!- Irssi: fe-web: Activity CLEAR (dehilight) for #polska on IRCnet
+15:33:20 -!- Irssi: fe-web: [1760448682-0019] Sending activity_update: {"id":"1760448800-0066","type":"activity_update","server":"IRCnet","channel":"#polska","timestamp":1760448800,"level":0}
+15:33:20 -!- Irssi: fe-web: [1760448682-0019] Encrypted activity_update (120 -> 148 bytes)
+15:33:20 -!- Irssi: fe-web-ssl: Attempting SSL_write (152 bytes)...
+15:33:20 -!- Irssi: fe-web-ssl: SSL_write returned 152
+15:33:20 -!- Irssi: fe-web-ssl: Successfully wrote 152 bytes
+15:33:20 -!- Irssi: fe-web: [1760448682-0019] Sent activity_update (152 bytes frame) [SSL] [ENCRYPTED]
+15:33:20 -!- Irssi: fe-web: [1760448682-0019] Marked #polska as read
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] sig_listen called (use_ssl=1, handshake_done=1)
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Reading from SSL channel...
+15:33:22 -!- Irssi: fe-web-ssl: Attempting SSL_read (max 8192 bytes)...
+15:33:22 -!- Irssi: fe-web-ssl: SSL_read returned 122
+15:33:22 -!- Irssi: fe-web-ssl: Successfully read 122 bytes
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] SSL read returned: 122
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Received 122 bytes
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Processing WebSocket frames...
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Decrypted message (88 bytes)
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Received mark_read: target=#libera server=liberachat
+15:33:22 -!- Irssi: fe-web: Activity CLEAR (dehilight) for #libera on liberachat
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Sending activity_update: {"id":"1760448802-0067","type":"activity_update","server":"liberachat","channel":"#libera","timestamp":1760448802,"level":0}
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Encrypted activity_update (124 -> 152 bytes)
+15:33:22 -!- Irssi: fe-web-ssl: Attempting SSL_write (156 bytes)...
+15:33:22 -!- Irssi: fe-web-ssl: SSL_write returned 156
+15:33:22 -!- Irssi: fe-web-ssl: Successfully wrote 156 bytes
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Sent activity_update (156 bytes frame) [SSL] [ENCRYPTED]
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Marked #libera as read
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] sig_listen called (use_ssl=1, handshake_done=1)
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Reading from SSL channel...
+15:33:22 -!- Irssi: fe-web-ssl: Attempting SSL_read (max 8192 bytes)...
+15:33:22 -!- Irssi: fe-web-ssl: SSL_read returned 75
+15:33:22 -!- Irssi: fe-web-ssl: Successfully read 75 bytes
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] SSL read returned: 75
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Received 75 bytes
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Processing WebSocket frames...
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Decrypted message (41 bytes)
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Sending pong: {"id":"1760448802-0068","type":"pong","response_to":"ping-1760448802338","timestamp":1760448802}
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Encrypted pong (96 -> 124 bytes)
+15:33:22 -!- Irssi: fe-web-ssl: Attempting SSL_write (126 bytes)...
+15:33:22 -!- Irssi: fe-web-ssl: SSL_write returned 126
+15:33:22 -!- Irssi: fe-web-ssl: Successfully wrote 126 bytes
+15:33:22 -!- Irssi: fe-web: [1760448682-0019] Sent pong (126 bytes frame) [SSL] [ENCRYPTED]
+15:33:24 -!- Irssi: fe-web: [1760448682-0019] sig_listen called (use_ssl=1, handshake_done=1)
+15:33:24 -!- Irssi: fe-web: [1760448682-0019] Reading from SSL channel...
+15:33:24 -!- Irssi: fe-web-ssl: Attempting SSL_read (max 8192 bytes)...
+15:33:24 -!- Irssi: fe-web-ssl: SSL_read returned 118
+15:33:24 -!- Irssi: fe-web-ssl: Successfully read 118 bytes
+15:33:24 -!- Irssi: fe-web: [1760448682-0019] SSL read returned: 118
+15:33:24 -!- Irssi: fe-web: [1760448682-0019] Received 118 bytes
+15:33:24 -!- Irssi: fe-web: [1760448682-0019] Processing WebSocket frames...
+15:33:24 -!- Irssi: fe-web: [1760448682-0019] Decrypted message (84 bytes)
+15:33:24 -!- Irssi: fe-web: [1760448682-0019] Received mark_read: target=#polska server=IRCnet
+15:33:24 -!- Irssi: fe-web: Activity CLEAR (dehilight) for #polska on IRCnet
+15:33:24 -!- Irssi: fe-web: [1760448682-0019] Sending activity_update: {"id":"1760448804-0069","type":"activity_update","server":"IRCnet","channel":"#polska","timestamp":1760448804,"level":0}
+15:33:24 -!- Irssi: fe-web: [1760448682-0019] Encrypted activity_update (120 -> 148 bytes)
+15:33:24 -!- Irssi: fe-web-ssl: Attempting SSL_write (152 bytes)...
+15:33:24 -!- Irssi: fe-web-ssl: SSL_write returned 152
+15:33:24 -!- Irssi: fe-web-ssl: Successfully wrote 152 bytes
+15:33:24 -!- Irssi: fe-web: [1760448682-0019] Sent activity_update (152 bytes frame) [SSL] [ENCRYPTED]
+15:33:24 -!- Irssi: fe-web: [1760448682-0019] Marked #polska as read
+15:33:39 -!- Irssi: fe-web: [1760448682-0019] sig_listen called (use_ssl=1, handshake_done=1)
