@@ -495,12 +495,7 @@ export class IrssiClient {
 				const args = parts.slice(1);
 
 				// Command translation layer
-				const translated = await this.translateCommand(
-					commandName,
-					args,
-					channel,
-					network
-				);
+				const translated = await this.translateCommand(commandName, args, channel, network);
 
 				if (translated === false) {
 					// Command was handled by translator, don't forward to irssi
@@ -905,7 +900,8 @@ export class IrssiClient {
 						socket.emit("activity_update", {
 							chan: channel.id,
 							unread: marker.unreadCount,
-							highlight: marker.dataLevel === DataLevel.HILIGHT ? marker.unreadCount : 0,
+							highlight:
+								marker.dataLevel === DataLevel.HILIGHT ? marker.unreadCount : 0,
 						});
 						log.debug(
 							`[IrssiClient] Sent activity_update for channel ${channel.id} (unread=${marker.unreadCount}, level=${marker.dataLevel}) in init`
@@ -1115,11 +1111,15 @@ export class IrssiClient {
 		marker.dataLevel = dataLevel;
 		marker.lastMessageTime = Date.now();
 
-		// Clear unread count if marked as read (level=0), otherwise keep as is
+		// Update unread count based on activity level
 		// NOTE: irssi sends activity LEVEL (0-3), not message COUNT
-		// The frontend only cares about level for color coding, not exact count
+		// We increment count when activity increases, clear when level=0
 		if (dataLevel === DataLevel.NONE) {
+			// Marked as read - clear count
 			marker.unreadCount = 0;
+		} else {
+			// New activity - increment count
+			marker.unreadCount++;
 		}
 
 		this.unreadMarkers.set(key, marker);
@@ -1129,6 +1129,13 @@ export class IrssiClient {
 		);
 
 		// Broadcast to all browsers
+		log.debug(
+			`[IrssiClient] Broadcasting activity_update to ${
+				this.attachedBrowsers.size
+			} browser(s): chan=${channel.id} unread=${marker.unreadCount} highlight=${
+				dataLevel === DataLevel.HILIGHT ? marker.unreadCount : 0
+			}`
+		);
 		this.broadcastToAllBrowsers("activity_update" as any, {
 			chan: channel.id,
 			unread: marker.unreadCount,
@@ -1210,9 +1217,7 @@ export class IrssiClient {
 		);
 
 		if (!query) {
-			log.warn(
-				`[IrssiClient] query_closed for unknown query: ${nick} on ${serverTag}`
-			);
+			log.warn(`[IrssiClient] query_closed for unknown query: ${nick} on ${serverTag}`);
 			return;
 		}
 
@@ -1229,9 +1234,7 @@ export class IrssiClient {
 			chan: query.id,
 		});
 
-		log.debug(
-			`[IrssiClient] Broadcasted part for query ${query.id} (${nick}) to all browsers`
-		);
+		log.debug(`[IrssiClient] Broadcasted part for query ${query.id} (${nick}) to all browsers`);
 	}
 
 	// FeWebAdapter callback handlers
