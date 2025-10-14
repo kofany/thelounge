@@ -993,9 +993,47 @@ if (dataLevel === DataLevel.NONE) {
 
 **Commit:** `5b68d635` (2025-10-14 16:01:49)
 
+### 🐛 Bugfix #8: CRITICAL - fe-web blokował czyszczenie Act: w irssi
+
+**Problem:**
+Gdy user przełączał okna w irssi (ESC+nr lub `/window N`):
+- W **czystym irssi** (bez fe-web): Act: [2,3,4,5] → numer znika ✅
+- Z **załadowanym fe-web**: Act: [2,3,4,5] → **numer NIE ZNIKA** ❌
+
+**Przyczyna:**
+Gdy core irssi czyści activity:
+1. Core wywołuje `window_activity(window, 0, NULL)` ✅
+2. Core ustawia `window->data_level = 0` ✅
+3. Core emituje `"window hilight"` signal ✅
+4. **fe-web `sig_window_hilight()` jest wywołany** ✅
+5. fe-web czyta: `data_level = item->data_level > 0 ? item->data_level : window->data_level;`
+6. **PROBLEM**: `item->data_level` może być **JESZCZE NIEZEROWANY** (core zeruje item później) ❌
+7. fe-web wysyła `activity_update` z **STARYM LEVELEM** (np. level=2) ❌
+8. Backend otrzymuje level=2 → **NIE CZYŚCI** badge ❌
+9. **Act: w irssi NIE ZNIKA** bo statusbar czeka na kolejny update ❌
+
+**Rozwiązanie:**
+Sprawdzać `window->data_level` zamiast `item->data_level` w `sig_window_hilight()`:
+
+```c
+// fe-web-signals.c - sig_window_hilight()
+/* CRITICAL FIX: Skip if window->data_level is 0 (being cleared by core) */
+if (window->data_level == 0) {
+    printtext(NULL, NULL, MSGLEVEL_CLIENTNOTICE,
+              "fe-web: Activity HILIGHT SKIPPED (window level=0, being cleared)");
+    return;  // ✅ Nie wysyłaj stale activity_update!
+}
+```
+
+**Teraz działa:**
+- User przełącza okno w irssi → core czyści `window->data_level = 0` → fe-web **SKIPUJE** wysyłanie → Act: znika ✅
+- User klika w Vue → irssi przełącza okno → Act: znika ✅
+
+**Commit:** `ec5d09d0a` (irssi, 2025-10-14 16:19:31)
+
 ---
 
 **Data utworzenia:** 2025-10-13
-**Ostatnia aktualizacja:** 2025-10-14 16:01
-**Status:** Message storage ready, Unread markers - FIXED (liczenie z bazy + broadcast level=0)
+**Ostatnia aktualizacja:** 2025-10-14 16:19
+**Status:** Message storage ready, Unread markers - FIXED (liczenie z bazy + broadcast level=0 + fe-web nie blokuje Act:)
 
