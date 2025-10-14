@@ -498,9 +498,23 @@ export class IrssiClient {
 			}`
 		);
 
-		// DON'T send init here - handleInit() will send it after state_dump completes!
-		// If we send init now, this.networks is empty (state_dump hasn't arrived yet)
-		// handleInit() is called by FeWebAdapter after state_dump + 100ms delay
+		// If this is the FIRST browser (networks empty), wait for state_dump
+		// handleInit() will send init event after state_dump completes
+		// If networks already exist (second browser), send init NOW
+		if (this.networks.length > 0) {
+			log.info(
+				`User ${colors.bold(this.name)}: sending init to new browser ${socketId} (${
+					this.networks.length
+				} networks)`
+			);
+			this.sendInitialState(socket);
+		} else {
+			log.info(
+				`User ${colors.bold(
+					this.name
+				)}: waiting for state_dump before sending init to ${socketId}`
+			);
+		}
 	}
 
 	/**

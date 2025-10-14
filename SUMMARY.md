@@ -586,7 +586,7 @@ irssi Password + IP+PORT → PBKDF2 → Encrypted Password → Save to config
 ### Encryption flow:
 
 ```
-1. User zapisuje irssi config (host, port, password):
+1. User zapisuje irssi config (host, port, irssi_websocket_password):
    PBKDF2(irssiPassword, "${host}:${port}", 10k iter, 256-bit) → Encryption Key
    Encrypt(irssiPassword, key) → passwordEncrypted → Save to config
 
@@ -606,9 +606,9 @@ irssi Password + IP+PORT → PBKDF2 → Encrypted Password → Save to config
 [IV 12 bytes][Ciphertext][Auth Tag 16 bytes]
 ```
 
-Używamy user password do encryption key dla messages:
+Używamy irssi_websocket_password do encryption key dla messages:
 ```
-User Password → PBKDF2("thelounge_irssi_temp_salt") → Message Encryption Key
+User irssi_websocket_password → PBKDF2("thelounge_irssi_temp_salt") → Message Encryption Key
 ```
 
 ### SQLite schema (bez zmian):

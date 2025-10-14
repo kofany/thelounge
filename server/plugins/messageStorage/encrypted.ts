@@ -553,6 +553,122 @@ export class EncryptedMessageStorage implements SearchableMessageStorage {
 	}
 
 	/**
+	 * Get last N messages for a channel (for initial load)
+	 * Used by irssi proxy mode to load messages when browser connects
+	 */
+	async getLastMessages(
+		networkUuid: string,
+		channelName: string,
+		limit: number
+	): Promise<Message[]> {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			return [];
+		}
+
+		const rows = await this.serialize_fetchall(
+			"SELECT encrypted_data, time FROM messages WHERE network = ? AND channel = ? ORDER BY time DESC LIMIT ?",
+			networkUuid,
+			channelName.toLowerCase(),
+			limit
+		);
+
+		// Decrypt messages (reverse to get chronological order)
+		const messages = rows.reverse().map((row: any): Message => {
+			try {
+				const decrypted = this.decrypt(row.encrypted_data);
+				const msg = JSON.parse(decrypted);
+				msg.time = new Date(row.time);
+
+				const newMsg = new Msg(msg);
+				// ID will be assigned by caller (nextMessageId())
+
+				return newMsg;
+			} catch (error) {
+				log.error(`Failed to decrypt message: ${error}`);
+				// Return error message placeholder
+				return new Msg({
+					type: MessageType.UNHANDLED,
+					text: "[Decryption failed]",
+					time: new Date(row.time),
+				});
+			}
+		});
+
+		return messages;
+	}
+
+	/**
+	 * Get messages before a specific timestamp (for lazy loading)
+	 * Used when user scrolls up and clicks "Show older messages"
+	 */
+	async getMessagesBefore(
+		networkUuid: string,
+		channelName: string,
+		beforeTime: number,
+		limit: number
+	): Promise<Message[]> {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			return [];
+		}
+
+		const rows = await this.serialize_fetchall(
+			"SELECT encrypted_data, time FROM messages WHERE network = ? AND channel = ? AND time < ? ORDER BY time DESC LIMIT ?",
+			networkUuid,
+			channelName.toLowerCase(),
+			beforeTime,
+			limit
+		);
+
+		// Decrypt messages (reverse to get chronological order)
+		const messages = rows.reverse().map((row: any): Message => {
+			try {
+				const decrypted = this.decrypt(row.encrypted_data);
+				const msg = JSON.parse(decrypted);
+				msg.time = new Date(row.time);
+
+				const newMsg = new Msg(msg);
+				// ID will be assigned by caller (nextMessageId())
+
+				return newMsg;
+			} catch (error) {
+				log.error(`Failed to decrypt message: ${error}`);
+				// Return error message placeholder
+				return new Msg({
+					type: MessageType.UNHANDLED,
+					text: "[Decryption failed]",
+					time: new Date(row.time),
+				});
+			}
+		});
+
+		return messages;
+	}
+
+	/**
+	 * Get total message count for a channel
+	 * Used to determine if "Show older messages" button should be shown
+	 */
+	async getMessageCount(networkUuid: string, channelName: string): Promise<number> {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			return 0;
+		}
+
+		const row = await this.serialize_get(
+			"SELECT COUNT(*) as count FROM messages WHERE network = ? AND channel = ?",
+			networkUuid,
+			channelName.toLowerCase()
+		);
+
+		return row?.count || 0;
+	}
+
+	/**
 	 * Re-encrypt all messages with new encryption key
 	 * Used when user changes password
 	 */
