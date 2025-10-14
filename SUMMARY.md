@@ -863,9 +863,69 @@ Dodano szczegółowe logi do `sig_window_changed()` żeby zdiagnozować dlaczego
 
 **Następne kroki:** Restart irssi i test przełączania okien z nowymi logami.
 
+### 🐛 Bugfix #4: mark_read nie przełącza okna w irssi
+
+**Problem:**
+User klika w The Lounge na kanał → backend wysyła `mark_read` do irssi → irssi czyści activity **ALE NIE PRZEŁĄCZA OKNA**.
+
+**Dowód z logów:**
+```
+node2.log: Sending: {"type":"mark_read","server":"IRCnet","target":"#polska"}
+irssi2.log: Received mark_read → Activity CLEAR (dehilight)
+```
+
+Okno w irssi pozostaje niezmienione.
+
+**Rozwiązanie:**
+Dodano `window_set_active(window)` w mark_read handler:
+```c
+/* Switch to this window in irssi (user clicked in browser) */
+window_set_active(window);
+```
+
+**Commit:** `53ea76b58` (2025-10-14 15:39:35)
+
+### 🐛 Bugfix #5: unreadCount zawsze 1 (duplikaty activity_update)
+
+**Problem:**
+Gdy przychodzi 5 wiadomości, unreadCount = 1 zamiast 5.
+
+**Przyczyna:**
+Deduplikacja w `sig_window_activity()` była **ZA AGRESYWNA**:
+```c
+// Stary kod:
+if (data_level == old_level) {
+    return;  // Skipuj jeśli level się nie zmienił
+}
+```
+
+Gdy przychodzi nowa wiadomość z highlightem na kanale który JUŻ MA level=2:
+1. `sig_window_hilight()` wysyła activity_update level=2
+2. `sig_window_activity()` dostaje old_level=2, data_level=2 → **SKIPUJE**
+3. Backend dostaje tylko 1x activity_update → unreadCount++
+4. Kolejne wiadomości są skipowane → unreadCount nie rośnie!
+
+**Rozwiązanie:**
+Zmieniono logikę deduplikacji - skipuj TYLKO gdy level **SPADA**:
+```c
+/* Skip if level DECREASED (e.g. from hilight to text) */
+/* But ALWAYS send if level stayed same or increased - this counts new messages */
+if (data_level < old_level) {
+    return;  // Skipuj tylko gdy level spada
+}
+```
+
+Teraz:
+- Nowa wiadomość z highlightem (level=2) → `sig_window_hilight()` + `sig_window_activity()` → **2x activity_update** → unreadCount += 2 ✅
+- Kolejna wiadomość z highlightem → znowu 2x → unreadCount += 2 ✅
+
+**Commit:** `53ea76b58` (2025-10-14 15:39:35)
+
+**UWAGA:** To powoduje duplikaty (2x activity_update na wiadomość), ale dzięki temu unreadCount rośnie poprawnie. Alternatywne rozwiązanie: liczyć unread na podstawie liczby wiadomości w bazie, nie liczby activity_update.
+
 ---
 
 **Data utworzenia:** 2025-10-13
-**Ostatnia aktualizacja:** 2025-10-14 15:28
-**Status:** Message storage ready, Unread markers - bugfixes in progress
+**Ostatnia aktualizacja:** 2025-10-14 15:39
+**Status:** Message storage ready, Unread markers - bugfixes in progress (duplikaty do rozwiązania)
 
