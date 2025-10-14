@@ -537,11 +537,50 @@ export class IrssiClient {
 	/**
 	 * Send initial state to a newly attached browser
 	 * Converts NetworkData[] to SharedNetwork[] format for frontend
+	 * LOADS 100 LAST MESSAGES from storage for each channel/query
 	 */
 	private async sendInitialState(socket: Socket): Promise<void> {
 		try {
 			log.info(`[IrssiClient] ⏰ TIMING: sendInitialState() START for socket ${socket.id}`);
-			// Convert NetworkData[] to SharedNetwork[] for Socket.IO
+
+			// STEP 1: Load messages from storage for each channel/query
+			if (this.messageStorage) {
+				log.info(
+					`[IrssiClient] Loading messages from storage for ${this.networks.length} networks...`
+				);
+
+				for (const network of this.networks) {
+					for (const channel of network.channels) {
+						try {
+							// Load last 100 messages from encrypted storage
+							const messages = await this.messageStorage.getLastMessages(
+								network.uuid,
+								channel.name,
+								100
+							);
+
+							// Assign IDs to messages
+							for (const msg of messages) {
+								msg.id = this.nextMessageId();
+							}
+
+							// TEMPORARILY add to channel.messages (only for this init!)
+							channel.messages = messages;
+
+							log.debug(
+								`[IrssiClient] Loaded ${messages.length} messages for ${network.name}/${channel.name}`
+							);
+						} catch (err) {
+							log.error(
+								`Failed to load messages for ${network.name}/${channel.name}: ${err}`
+							);
+							channel.messages = [];
+						}
+					}
+				}
+			}
+
+			// STEP 2: Convert NetworkData[] to SharedNetwork[] for Socket.IO
 			const sharedNetworks = this.networks.map((net) => {
 				// Serialize Prefix class to plain object for JSON
 				const serverOptions = {
@@ -563,10 +602,18 @@ export class IrssiClient {
 						connected: net.connected,
 						secure: true,
 					},
-					channels: net.channels.map((ch) => ch.getFilteredClone(true)),
+					channels: net.channels.map((ch) => ch.getFilteredClone(true)), // Contains messages!
 				};
 			}) as any[];
 
+			// STEP 3: Clear messages from cache (we don't keep them in memory!)
+			for (const network of this.networks) {
+				for (const channel of network.channels) {
+					channel.messages = [];
+				}
+			}
+
+			// STEP 4: Send init event to browser
 			socket.emit("init", {
 				networks: sharedNetworks,
 				active: this.lastActiveChannel || -1,
