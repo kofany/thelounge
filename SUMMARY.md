@@ -961,9 +961,41 @@ if (dataLevel === DataLevel.NONE) {
 
 **Commit:** `2090099b` (2025-10-14 15:45:01)
 
+### 🐛 Bugfix #7: activity_update level=0 nie był broadcastowany
+
+**Problem:**
+Gdy user klikał w Vue na kanał:
+1. Backend wysyłał `mark_read` do irssi ✅
+2. irssi przełączał okno i wysyłał `activity_update level=0` ✅
+3. Backend otrzymywał `level=0` i ustawiał `marker.unreadCount = 0` ✅
+4. **ALE NIE BROADCASTOWAŁ** do przeglądarek! ❌
+5. Badge w Vue **NIE ZNIKAŁ** ❌
+
+**Rozwiązanie:**
+```typescript
+if (dataLevel === DataLevel.NONE) {
+    marker.lastReadTime = Date.now();
+    marker.unreadCount = 0;
+    this.unreadMarkers.set(key, marker);
+
+    // ✅ DODANO: Broadcast do przeglądarek
+    this.broadcastToAllBrowsers("activity_update" as any, {
+        chan: channel.id,
+        unread: 0,
+        highlight: 0,
+    });
+    return;
+}
+```
+
+**Teraz działa:**
+- User klika w Vue → irssi przełącza okno → wysyła level=0 → backend broadcastuje → badge znika ✅
+
+**Commit:** `5b68d635` (2025-10-14 16:01:49)
+
 ---
 
 **Data utworzenia:** 2025-10-13
-**Ostatnia aktualizacja:** 2025-10-14 15:45
-**Status:** Message storage ready, Unread markers - FIXED (liczenie z bazy)
+**Ostatnia aktualizacja:** 2025-10-14 16:01
+**Status:** Message storage ready, Unread markers - FIXED (liczenie z bazy + broadcast level=0)
 
