@@ -923,9 +923,47 @@ Teraz:
 
 **UWAGA:** To powoduje duplikaty (2x activity_update na wiadomość), ale dzięki temu unreadCount rośnie poprawnie. Alternatywne rozwiązanie: liczyć unread na podstawie liczby wiadomości w bazie, nie liczby activity_update.
 
+### 🐛 Bugfix #6: unreadCount liczony z bazy zamiast increment
+
+**Problem z poprzednim rozwiązaniem (#5):**
+- Duplikaty activity_update (2x na wiadomość) powodowały że unreadCount rósł 2x za szybko
+- `msg.level` to **POZIOM** aktywności (0-3), NIE liczba wiadomości
+- Increment przy każdym activity_update był błędny
+
+**Nowe rozwiązanie:**
+Liczyć unread na podstawie **liczby wiadomości w bazie** które są nowsze niż `lastReadTime`:
+
+```typescript
+// EncryptedMessageStorage - nowa funkcja
+async getUnreadCount(networkUuid: string, channelName: string, lastReadTime: number): Promise<number> {
+    const row = await this.serialize_get(
+        "SELECT COUNT(*) as count FROM messages WHERE network = ? AND channel = ? AND time > ?",
+        networkUuid, channelName.toLowerCase(), lastReadTime
+    );
+    return row ? row.count : 0;
+}
+
+// IrssiClient - handleActivityUpdate()
+if (dataLevel === DataLevel.NONE) {
+    marker.lastReadTime = Date.now();  // Aktualizuj timestamp
+    marker.unreadCount = 0;
+} else {
+    // Policz z bazy ile wiadomości jest nowszych niż lastReadTime
+    const count = await this.messageStorage.getUnreadCount(network.uuid, channel.name, marker.lastReadTime);
+    marker.unreadCount = count;  // Prawdziwa liczba!
+}
+```
+
+**Teraz działa:**
+- Każda wiadomość zapisana w bazie z `time > lastReadTime` jest liczona jako unread ✅
+- Nie ma znaczenia ile razy irssi wysyła activity_update (duplikaty nie szkodzą) ✅
+- unreadCount zawsze pokazuje **prawdziwą liczbę** nieprzeczytanych wiadomości ✅
+
+**Commit:** `2090099b` (2025-10-14 15:45:01)
+
 ---
 
 **Data utworzenia:** 2025-10-13
-**Ostatnia aktualizacja:** 2025-10-14 15:39
-**Status:** Message storage ready, Unread markers - bugfixes in progress (duplikaty do rozwiązania)
+**Ostatnia aktualizacja:** 2025-10-14 15:45
+**Status:** Message storage ready, Unread markers - FIXED (liczenie z bazy)
 
