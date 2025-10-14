@@ -29,6 +29,7 @@ import {ServerToClientEvents} from "../shared/types/socket-events";
 import {FeWebSocket, FeWebConfig, FeWebMessage} from "./feWebClient/feWebSocket";
 import {FeWebEncryption} from "./feWebClient/feWebEncryption";
 import {FeWebAdapter, FeWebAdapterCallbacks, NetworkData} from "./feWebClient/feWebAdapter";
+import {IrssiNetworkManager} from "./irssiNetworkManager";
 import UAParser from "ua-parser-js";
 
 // irssi connection config (stored in user.json)
@@ -97,6 +98,7 @@ export class IrssiClient {
 	// irssi connection (persistent!)
 	irssiConnection: FeWebSocket | null = null;
 	feWebAdapter: FeWebAdapter | null = null;
+	networkManager: IrssiNetworkManager;
 	encryptionKey: Buffer | null = null;
 	irssiPassword: string | null = null; // Decrypted irssi password (in memory)
 	userPassword: string | null = null; // User's The Lounge password (in memory, for encryption)
@@ -133,6 +135,9 @@ export class IrssiClient {
 		this.name = name;
 		this.manager = manager;
 		this.config = config;
+
+		// Initialize network manager for IRC network/server management
+		this.networkManager = new IrssiNetworkManager();
 
 		// Ensure config has required fields
 		this.config.log = Boolean(this.config.log);
