@@ -924,25 +924,33 @@ export class IrssiClient {
 	 * Updates unread marker and broadcasts to all browsers
 	 */
 	private handleActivityUpdate(msg: FeWebMessage): void {
-		if (!msg.server_tag || !msg.target) {
-			log.warn(`[IrssiClient] Invalid ACTIVITY_UPDATE message (missing server/target)`);
+		// irssi sends "server" and "channel" fields (not "server_tag" and "target")
+		const serverTag = msg.server || msg.server_tag;
+		const channelName = msg.channel || msg.target;
+
+		if (!serverTag || !channelName) {
+			log.warn(
+				`[IrssiClient] Invalid ACTIVITY_UPDATE message (missing server/channel): ${JSON.stringify(
+					msg
+				)}`
+			);
 			return;
 		}
 
 		// Find network by server_tag
-		const network = this.networks.find((n) => n.serverTag === msg.server_tag);
+		const network = this.networks.find((n) => n.serverTag === serverTag);
 		if (!network) {
-			log.warn(`[IrssiClient] ACTIVITY_UPDATE for unknown server: ${msg.server_tag}`);
+			log.warn(`[IrssiClient] ACTIVITY_UPDATE for unknown server: ${serverTag}`);
 			return;
 		}
 
 		// Find channel by name
 		const channel = network.channels.find(
-			(c) => c.name.toLowerCase() === msg.target!.toLowerCase()
+			(c) => c.name.toLowerCase() === channelName.toLowerCase()
 		);
 		if (!channel) {
 			log.warn(
-				`[IrssiClient] ACTIVITY_UPDATE for unknown channel: ${msg.target} on ${msg.server_tag}`
+				`[IrssiClient] ACTIVITY_UPDATE for unknown channel: ${channelName} on ${serverTag}`
 			);
 			return;
 		}
