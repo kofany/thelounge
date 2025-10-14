@@ -1136,6 +1136,19 @@ export class IrssiClient {
 			// Marked as read - update lastReadTime and clear count
 			marker.lastReadTime = Date.now();
 			marker.unreadCount = 0;
+			this.unreadMarkers.set(key, marker);
+
+			log.debug(
+				`[IrssiClient] Activity cleared: ${network.name}/${channel.name} level=0 unread=0`
+			);
+
+			// Broadcast to all browsers - clear activity
+			this.broadcastToAllBrowsers("activity_update" as any, {
+				chan: channel.id,
+				unread: 0,
+				highlight: 0,
+			});
+			return; // Done - no need to query DB
 		} else {
 			// New activity - count unread from message storage
 			if (this.messageStorage) {
