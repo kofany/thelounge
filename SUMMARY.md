@@ -164,34 +164,47 @@ this.networks = [
 - Storage jest szybki (SQLite + encryption)
 - Frontend ładuje lazy (100 messages per request)
 
-### 3. Initial Load - Nowa Przeglądarka
+### 3. Initial Load - KAŻDA Przeglądarka (1sza, 2ga, 5ta - bez różnicy!)
 
-**Flow dla drugiej/trzeciej przeglądarki:**
+**WAŻNE:** Initial load robi **BACKEND**, nie frontend! Każda przeglądarka jest obsługiwana **IDENTYCZNIE**!
+
+**Flow dla KAŻDEJ przeglądarki:**
 
 ```
-Browser 2 podłącza się
+Browser podłącza się (obojętnie która - 1sza, 2ga, 5ta)
     ↓
 Backend: attachBrowser()
     ↓
+Backend: sendInitToSocket(socket)
+    ↓
+Dla KAŻDEGO kanału/query w this.networks[].channels[]:
+  - Pobiera 100 ostatnich messages z STORAGE (SQLite)
+  - Dodaje do channel.messages (tymczasowo, tylko dla tego init)
+    ↓
 Wysyła init event:
   - networks (z cache)
-  - channels (z cache)
+  - channels (z cache + 100 messages z storage dla każdego!)
   - users (z cache)
-  - messages: [] (PUSTE!)
     ↓
 Frontend otrzymuje init
     ↓
-Frontend dla KAŻDEGO OTWARTEGO kanału/query:
-  socket.emit("more", {target: channelId, lastId: -1})
+Frontend wyświetla wszystko OD RAZU:
+  - Networks, channels, nicklist
+  - 100 ostatnich messages dla każdego kanału/query
     ↓
-Backend: more()
-  - Pobiera z STORAGE (SQLite)
-  - Zwraca 100 ostatnich messages
+User scrolluje w górę → "Show older messages" button
     ↓
-Frontend wyświetla messages
+Frontend: socket.emit("more", {target: channelId, lastId: oldestId})
+    ↓
+Backend: more() - pobiera kolejne 100 z storage
+    ↓
+Frontend: dodaje starsze messages na początek listy
 ```
 
-**WAŻNE:** Open queries też muszą być w cache! Jeśli ktoś napisał do nas godzinę temu, query musi być w `this.networks[].channels[]` żeby frontend mógł pobrać messages!
+**WAŻNE:**
+- Open queries też muszą być w cache (`this.networks[].channels[]`)!
+- Jeśli ktoś napisał do nas godzinę temu, query **MUSI BYĆ** w channels[] żeby backend mógł załadować messages przy init!
+- Backend ładuje messages **PRZY KAŻDYM INIT** (dla każdej przeglądarki osobno)
 
 ### 4. Implementacja - Krok po kroku
 
@@ -234,7 +247,7 @@ private handleMessage(networkUuid: string, channelId: number, msg: Msg): void {
 }
 ```
 
-#### B. NIE loadować messages przy init!
+#### B. Loadować messages przy KAŻDYM sendInitToSocket()
 
 ```typescript
 // server/irssiClient.ts - handleInit()
@@ -242,46 +255,75 @@ private handleMessage(networkUuid: string, channelId: number, msg: Msg): void {
 private async handleInit(networks: NetworkData[]): Promise<void> {
     this.networks = networks;
 
-    // NIE ŁADUJEMY MESSAGES!
-    // channel.messages pozostaje PUSTE []
-    // Frontend pobierze przez "more" event
+    // NIE ŁADUJEMY MESSAGES tutaj!
+    // Będziemy ładować przy sendInitToSocket() dla każdej przeglądarki osobno
 
-    // Send init to all browsers
+    // Send init to all browsers (jeśli są już podłączone)
     this.broadcastToAllBrowsers("init", {...});
 }
 ```
 
-#### C. Wysyłać init do nowych przeglądarek
+#### C. Wysyłać init do KAŻDEJ przeglądarki (z messages!)
+
 ```typescript
 // server/irssiClient.ts - attachBrowser()
 
 attachBrowser(socket: Socket, openChannel: number = -1): void {
     const socketId = socket.id;
-    
+
     this.attachedBrowsers.set(socketId, {socket, openChannel});
-    
+
     log.info(`User ${this.name}: browser attached (${socketId}), total: ${this.attachedBrowsers.size}`);
-    
-    // If networks exist (not first browser), send init NOW
+
+    // If networks exist, send init NOW (dla KAŻDEJ przeglądarki!)
     if (this.networks.length > 0) {
-        log.info(`User ${this.name}: sending init to new browser ${socketId}`);
+        log.info(`User ${this.name}: sending init to browser ${socketId}`);
         this.sendInitToSocket(socket);
     } else {
         log.info(`User ${this.name}: waiting for state_dump before sending init`);
     }
 }
 
-private sendInitToSocket(socket: Socket): void {
-    // Convert NetworkData[] to SharedNetwork[] (same as handleInit)
+private async sendInitToSocket(socket: Socket): Promise<void> {
+    // ŁADUJEMY MESSAGES Z STORAGE dla każdego kanału/query!
+    if (this.messageStorage) {
+        for (const network of this.networks) {
+            for (const channel of network.channels) {
+                try {
+                    // Pobierz 100 ostatnich messages z storage
+                    const messages = await this.messageStorage.getLastMessages(
+                        network.uuid,
+                        channel.name,
+                        100
+                    );
+
+                    // TYMCZASOWO dodaj do channel.messages (tylko dla tego init!)
+                    channel.messages = messages;
+                } catch (err) {
+                    log.error(`Failed to load messages for ${channel.name}: ${err}`);
+                    channel.messages = [];
+                }
+            }
+        }
+    }
+
+    // Convert NetworkData[] to SharedNetwork[]
     const sharedNetworks = this.networks.map(net => ({
         uuid: net.uuid,
         name: net.name,
         nick: net.nick,
         serverOptions: {...},
         status: {...},
-        channels: net.channels.map(ch => ch.getFilteredClone(true)),
+        channels: net.channels.map(ch => ch.getFilteredClone(true)), // Zawiera messages!
     }));
-    
+
+    // Wyczyść messages z cache (nie trzymamy w pamięci!)
+    for (const network of this.networks) {
+        for (const channel of network.channels) {
+            channel.messages = [];
+        }
+    }
+
     socket.emit("init", {
         active: this.lastActiveChannel,
         networks: sharedNetworks,
