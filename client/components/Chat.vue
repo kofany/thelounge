@@ -181,6 +181,11 @@ export default defineComponent({
 
 			socket.emit("open", props.channel.id);
 
+			// Mark channel as read (send to irssi backend)
+			socket.emit("mark_read", {
+				target: props.channel.id,
+			});
+
 			if (props.channel.usersOutdated) {
 				props.channel.usersOutdated = false;
 

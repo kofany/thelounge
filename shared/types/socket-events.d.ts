@@ -83,6 +83,9 @@ interface ServerToClientEvents {
 	"msg:special": EventHandler<{chan: number; data?: Record<string, any>}>;
 	msg: EventHandler<{msg: SharedMsg; chan: number; highlight?: number; unread?: number}>;
 
+	// Activity tracking (unread markers from irssi)
+	activity_update: EventHandler<{chan: number; unread: number; highlight: number}>;
+
 	init: EventHandler<{active: number; networks: SharedNetwork[]; token?: string}>;
 
 	"search:results": (response: SearchResponse) => void;
@@ -172,6 +175,9 @@ interface ClientToServerEvents {
 	"history:clear": EventHandler<{target: number}>;
 
 	search: EventHandler<SearchQuery>;
+
+	// Mark channel as read (send to irssi)
+	mark_read: EventHandler<{target: number}>;
 }
 
 interface InterServerEvents {}

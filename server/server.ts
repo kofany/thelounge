@@ -1143,6 +1143,22 @@ function initializeIrssiClient(
 		}
 	});
 
+	// Handle mark_read request (mark channel as read in irssi)
+	socket.on("mark_read", (data) => {
+		if (!_.isPlainObject(data) || typeof data.target !== "number") {
+			return;
+		}
+
+		// Find network and channel by channel ID
+		for (const network of client.networks) {
+			const channel = network.channels.find((c) => c.id === data.target);
+			if (channel) {
+				client.markAsRead(network.uuid, channel.name);
+				return;
+			}
+		}
+	});
+
 	// Handle settings
 	socket.on("setting:get", () => {
 		if (!Object.prototype.hasOwnProperty.call(client.config, "clientSettings")) {

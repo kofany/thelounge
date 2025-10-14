@@ -72,19 +72,19 @@ type BrowserSession = {
 
 // Unread marker (activity tracking)
 export enum DataLevel {
-	NONE = 0,        // No activity (read)
-	TEXT = 1,        // Normal text (gray)
-	MSG = 2,         // Message or highlight word (blue)
-	HILIGHT = 3      // Nick mention (red)
+	NONE = 0, // No activity (read)
+	TEXT = 1, // Normal text (gray)
+	MSG = 2, // Message or highlight word (blue)
+	HILIGHT = 3, // Nick mention (red)
 }
 
 export interface UnreadMarker {
-	network: string;       // Network UUID
-	channel: string;       // Channel name (lowercase)
-	unreadCount: number;   // Number of unread messages
-	lastReadTime: number;  // Unix timestamp of last read
+	network: string; // Network UUID
+	channel: string; // Channel name (lowercase)
+	unreadCount: number; // Number of unread messages
+	lastReadTime: number; // Unix timestamp of last read
 	lastMessageTime: number; // Unix timestamp of last message
-	dataLevel: DataLevel;  // Activity level (from irssi)
+	dataLevel: DataLevel; // Activity level (from irssi)
 }
 
 export class IrssiClient {
@@ -975,11 +975,10 @@ export class IrssiClient {
 		);
 
 		// Broadcast to all browsers
-		this.broadcastToAllBrowsers("activity:update" as any, {
-			network: network.uuid,
-			channel: channel.id,
-			dataLevel: dataLevel,
-			unreadCount: marker.unreadCount,
+		this.broadcastToAllBrowsers("activity_update" as any, {
+			chan: channel.id,
+			unread: marker.unreadCount,
+			highlight: dataLevel === DataLevel.HILIGHT ? marker.unreadCount : 0,
 		});
 	}
 
@@ -1006,11 +1005,10 @@ export class IrssiClient {
 			const chan = net.channels.find((c) => c.name.toLowerCase() === channel.toLowerCase());
 			if (chan) {
 				// Broadcast to all browsers
-				this.broadcastToAllBrowsers("activity:update" as any, {
-					network: net.uuid,
-					channel: chan.id,
-					dataLevel: DataLevel.NONE,
-					unreadCount: 0,
+				this.broadcastToAllBrowsers("activity_update" as any, {
+					chan: chan.id,
+					unread: 0,
+					highlight: 0,
 				});
 
 				// Send mark_read to irssi to clear activity there too
