@@ -716,6 +716,57 @@ Browser → "Show older messages" → socket.emit("more", {target, lastId})
 
 ---
 
-**Data utworzenia:** 2025-10-13  
-**Status:** Ready for implementation
+## ✅ ZAIMPLEMENTOWANE: Unread Markers Synchronization
+
+### Phase 3: Frontend unread markers (Vue.js) - ZAKOŃCZONE
+
+**Commit:** `0c21bd33` (2025-10-14)
+
+**Zaimplementowane funkcje:**
+
+1. **Socket.io event types** (`shared/types/socket-events.d.ts`)
+   - `activity_update: EventHandler<{chan: number; unread: number; highlight: number}>`
+   - `mark_read: EventHandler<{target: number}>`
+
+2. **Frontend handler** (`client/js/socket-events/activity_update.ts`)
+   - Odbiera `activity_update` z backendu
+   - Aktualizuje `channel.unread` i `channel.highlight`
+   - Ignoruje update dla aktywnego kanału (user już go widzi)
+
+3. **Frontend wysyłanie mark_read** (`client/components/Chat.vue`)
+   - Wysyła `mark_read` event przy otwarciu kanału
+   - Czyści unread markers w irssi
+
+4. **Backend handler** (`server/server.ts`)
+   - `socket.on("mark_read")` w `initializeIrssiClient()`
+   - Wywołuje `IrssiClient.markAsRead(network.uuid, channel.name)`
+
+5. **Backend poprawki** (`server/irssiClient.ts`)
+   - Zmieniono event z `activity:update` na `activity_update`
+   - Format danych: `{chan, unread, highlight}` (zgodny z frontendem)
+
+6. **Wizualne markery** (już istniały!)
+   - `Channel.vue` - badge z unread count
+   - `ChannelWrapper.vue` - CSS classes `.has-unread`, `.has-highlight`
+   - `style.css` - style dla `.badge` i `.badge.highlight`
+
+**Przepływ danych:**
+
+```
+irssi → The Lounge Backend → wszystkie przeglądarki:
+  WEB_MSG_ACTIVITY_UPDATE → handleActivityUpdate() → broadcast "activity_update"
+  → frontend aktualizuje channel.unread/highlight → Vue.js renderuje badge
+
+przeglądarka → The Lounge Backend → irssi → wszystkie przeglądarki:
+  User otwiera kanał → "mark_read" → markAsRead() → WEB_MSG_MARK_READ do irssi
+  → broadcast "activity_update" {unread:0, highlight:0} → wszystkie przeglądarki czyszczą badge
+```
+
+**Status:** ✅ Wszystkie 3 fazy zakończone (irssi C, Backend TypeScript, Frontend Vue.js)
+
+---
+
+**Data utworzenia:** 2025-10-13
+**Ostatnia aktualizacja:** 2025-10-14
+**Status:** Message storage ready for implementation, Unread markers DONE
 
