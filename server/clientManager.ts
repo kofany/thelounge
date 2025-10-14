@@ -149,6 +149,18 @@ class ClientManager {
 
 			log.info(`Loading user ${colors.bold(name)} in irssi proxy mode`);
 			const irssiClient = new IrssiClient(this, name, userConfig as IrssiUserConfig);
+
+			// AUTOCONNECT: If irssi password is configured, connect immediately!
+			// This allows backend to connect to irssi BEFORE user logs in
+			if ((userConfig as IrssiUserConfig).irssiConnection?.passwordEncrypted) {
+				log.info(
+					`User ${colors.bold(name)} has irssi config - auto-connecting to irssi...`
+				);
+				irssiClient.autoConnectToIrssi().catch((err) => {
+					log.error(`Autoconnect failed for user ${colors.bold(name)}: ${err}`);
+				});
+			}
+
 			// Note: IrssiClient.login() will be called after authentication
 			this.clients.push(irssiClient);
 			client = irssiClient as any; // Type cast for compatibility

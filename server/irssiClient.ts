@@ -205,6 +205,39 @@ export class IrssiClient {
 	}
 
 	/**
+	 * Auto-connect to irssi at startup (without user password)
+	 * Uses IP+PORT encryption to decrypt irssi password
+	 * Message storage will be enabled later when user logs in
+	 */
+	async autoConnectToIrssi(): Promise<void> {
+		log.info(`User ${colors.bold(this.name)} auto-connecting to irssi...`);
+
+		// Check if irssi password is configured
+		if (!this.config.irssiConnection.passwordEncrypted) {
+			log.warn(
+				`User ${colors.bold(
+					this.name
+				)} has no irssi password configured - skipping autoconnect`
+			);
+			return;
+		}
+
+		// Decrypt irssi password using IP+PORT salt
+		const {decryptIrssiPassword} = await import("./irssiConfigHelper");
+
+		this.irssiPassword = await decryptIrssiPassword(
+			this.config.irssiConnection.passwordEncrypted,
+			this.config.irssiConnection.host,
+			this.config.irssiConnection.port
+		);
+
+		log.info(`irssi password decrypted for user ${colors.bold(this.name)}`);
+
+		// Connect to irssi (without message storage - will be enabled on login)
+		await this.connectToIrssiInternal();
+	}
+
+	/**
 	 * Connect to irssi fe-web (persistent connection with dual-layer security)
 	 *
 	 * fe-web v1.5 uses:
@@ -219,6 +252,22 @@ export class IrssiClient {
 
 		if (!this.irssiPassword || !this.encryptionKey) {
 			throw new Error("Cannot connect to irssi: encryption key not derived");
+		}
+
+		await this.connectToIrssiInternal();
+	}
+
+	/**
+	 * Internal method to connect to irssi WebSocket
+	 */
+	private async connectToIrssiInternal(): Promise<void> {
+		if (this.irssiConnection) {
+			log.warn(`User ${colors.bold(this.name)} already connected to irssi`);
+			return;
+		}
+
+		if (!this.irssiPassword) {
+			throw new Error("Cannot connect to irssi: irssi password not decrypted");
 		}
 
 		const feWebConfig: FeWebConfig = {
