@@ -1031,9 +1031,56 @@ if (window->data_level == 0) {
 
 **Commit:** `ec5d09d0a` (irssi, 2025-10-14 16:19:31)
 
+### 🐛 Bugfix #9: Command translator - brak translacji kick/ban/invite
+
+**Problem:**
+User wpisuje w Vue na kanale `#polska`: `/kick gibi~ test`
+Backend wysyła do irssi: `/kick gibi~ test`
+irssi odpowiada: `Not joined to any channel` ❌
+
+**Przyczyna:**
+irssi wymaga pełnej składni: `/kick #polska gibi~ test` gdy komenda nie jest wykonywana w oknie kanału.
+
+Backend ma `translateCommand()` który tłumaczy `/close` → `/part #channel`, ale **NIE MA** translacji dla:
+- `/kick nick reason` → `/kick #channel nick reason`
+- `/ban nick` → `/ban #channel nick`
+- `/invite nick` → `/invite nick #channel`
+
+**Rozwiązanie:**
+Dodano translacje w `translateCommand()`:
+
+```typescript
+case "kick":
+case "kickban":
+    if (channel.type === ChanType.CHANNEL && args.length > 0) {
+        return `${command} ${channel.name} ${args.join(" ")}`;
+    }
+    break;
+
+case "ban":
+case "unban":
+    if (channel.type === ChanType.CHANNEL && args.length > 0) {
+        return `${command} ${channel.name} ${args.join(" ")}`;
+    }
+    break;
+
+case "invite":
+    if (channel.type === ChanType.CHANNEL && args.length === 1) {
+        return `invite ${args[0]} ${channel.name}`;
+    }
+    break;
+```
+
+**Teraz działa:**
+- User w Vue: `/kick gibi~ test` → Backend: `/kick #polska gibi~ test` → irssi: ✅
+- User w Vue: `/ban troll` → Backend: `/ban #polska troll` → irssi: ✅
+- User w Vue: `/invite friend` → Backend: `/invite friend #polska` → irssi: ✅
+
+**Commit:** `6e63e763` (2025-10-14 16:23:12)
+
 ---
 
 **Data utworzenia:** 2025-10-13
-**Ostatnia aktualizacja:** 2025-10-14 16:19
-**Status:** Message storage ready, Unread markers - FIXED (liczenie z bazy + broadcast level=0 + fe-web nie blokuje Act:)
+**Ostatnia aktualizacja:** 2025-10-14 16:23
+**Status:** Message storage ready, Unread markers FIXED, Command translator FIXED
 
