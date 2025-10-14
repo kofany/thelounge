@@ -1134,9 +1134,9 @@ function initializeIrssiClient(
 	});
 
 	// Handle message history request
-	socket.on("more", (data) => {
+	socket.on("more", async (data) => {
 		if (_.isPlainObject(data)) {
-			const history = client.more(data);
+			const history = await client.more(data);
 
 			if (history !== null) {
 				socket.emit("more", history);

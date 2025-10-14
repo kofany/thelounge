@@ -433,13 +433,14 @@ export class IrssiClient {
 	}
 
 	/**
-	 * Get message history for a channel
+	 * Get message history for a channel (lazy loading)
+	 * ALWAYS loads from storage (not from cache!)
 	 */
-	more(data: {target: number; lastId: number; condensed?: boolean}): {
+	async more(data: {target: number; lastId: number; condensed?: boolean}): Promise<{
 		chan: number;
 		messages: Msg[];
 		totalMessages: number;
-	} | null {
+	} | null> {
 		// Find channel by ID across all networks
 		let targetChannel: Chan | null = null;
 		let targetNetwork: NetworkData | null = null;
@@ -453,33 +454,90 @@ export class IrssiClient {
 			}
 		}
 
-		if (!targetChannel) {
+		if (!targetChannel || !targetNetwork) {
 			log.warn(`User ${colors.bold(this.name)}: channel ${data.target} not found for more`);
 			return null;
 		}
 
-		const chan = targetChannel;
+		// ALWAYS load from storage (not from cache!)
+		if (!this.messageStorage) {
+			log.warn(
+				`User ${colors.bold(this.name)}: message storage not enabled, returning empty`
+			);
+			return {
+				chan: data.target,
+				messages: [],
+				totalMessages: 0,
+			};
+		}
+
 		let messages: Msg[] = [];
-		let index = 0;
 
-		// If client requests -1, send last 100 messages
-		if (data.lastId < 0) {
-			index = chan.messages.length;
-		} else {
-			index = chan.messages.findIndex((val) => val.id === data.lastId);
+		try {
+			if (data.lastId < 0) {
+				// Initial load - last 100 messages
+				messages = await this.messageStorage.getLastMessages(
+					targetNetwork.uuid,
+					targetChannel.name,
+					100
+				);
+			} else {
+				// Lazy load - 100 messages before lastId
+				// Find the message with lastId to get its timestamp
+				const allMessages = await this.messageStorage.getLastMessages(
+					targetNetwork.uuid,
+					targetChannel.name,
+					1000 // Get more to find the lastId
+				);
+
+				const lastMsgIndex = allMessages.findIndex((m) => m.id === data.lastId);
+
+				if (lastMsgIndex > 0) {
+					// Get timestamp of the message before lastId
+					const beforeTime = allMessages[lastMsgIndex - 1].time.getTime();
+
+					// Load 100 messages before that timestamp
+					messages = await this.messageStorage.getMessagesBefore(
+						targetNetwork.uuid,
+						targetChannel.name,
+						beforeTime,
+						100
+					);
+				}
+			}
+
+			// Assign IDs to messages
+			for (const msg of messages) {
+				msg.id = this.nextMessageId();
+			}
+
+			// Get total count
+			const totalMessages = await this.messageStorage.getMessageCount(
+				targetNetwork.uuid,
+				targetChannel.name
+			);
+
+			log.debug(
+				`User ${colors.bold(this.name)}: loaded ${messages.length} messages for channel ${
+					data.target
+				} (total: ${totalMessages})`
+			);
+
+			return {
+				chan: data.target,
+				messages: messages,
+				totalMessages: totalMessages,
+			};
+		} catch (err) {
+			log.error(
+				`Failed to load messages for ${targetNetwork.name}/${targetChannel.name}: ${err}`
+			);
+			return {
+				chan: data.target,
+				messages: [],
+				totalMessages: 0,
+			};
 		}
-
-		// If requested id is not found, an empty array will be sent
-		if (index > 0) {
-			const startIndex = Math.max(0, index - 100); // Get up to 100 messages
-			messages = chan.messages.slice(startIndex, index);
-		}
-
-		return {
-			chan: data.target,
-			messages: messages,
-			totalMessages: chan.messages.length,
-		};
 	}
 
 	/**
