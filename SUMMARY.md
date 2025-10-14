@@ -1078,9 +1078,55 @@ case "invite":
 
 **Commit:** `6e63e763` (2025-10-14 16:23:12)
 
+### 🐛 Bugfix #10: CRITICAL - Act: statusbar nie odświeżał się (numery nie znikały)
+
+**Problem:**
+Po bugfix #8 (skipowanie `sig_window_hilight` gdy `window->data_level=0`):
+- User klika w Vue → irssi przełącza okno ✅
+- Backend otrzymuje `activity_update level=0` ✅
+- Badge w Vue znika ✅
+- **ALE Act: w irssi statusbar NIE ZNIKA** ❌
+- Numery okien zmieniają kolor na zielony ale **NIE ZNIKAJĄ** ❌
+
+**Przyczyna:**
+W `mark_read` handler (fe-web-client.c) kod **RĘCZNIE ZEROWAŁ** `window->data_level`:
+
+```c
+// ❌ ZŁE - ręczne zerowanie
+item->data_level = 0;
+window->data_level = 0;
+signal_emit("window dehilight", 1, window);
+```
+
+**Dlaczego to nie działa:**
+1. Ręczne zerowanie `window->data_level` **NIE AKTUALIZUJE** statusbar
+2. Core irssi ma funkcję `window_activity(window, 0, NULL)` która:
+   - Ustawia `window->data_level = 0` ✅
+   - Emituje `"window hilight"` signal ✅
+   - **AKTUALIZUJE STATUSBAR** ✅
+3. Bez wywołania `window_activity()` statusbar **NIE WIE** że activity zostało wyczyszczone
+
+**Rozwiązanie:**
+Użyć `window_activity(window, 0, NULL)` zamiast ręcznego zerowania:
+
+```c
+// ✅ DOBRE - używamy core irssi API
+window_set_active(window);
+window_activity(window, 0, NULL);  // Czyści activity + aktualizuje statusbar
+```
+
+**Teraz działa:**
+- User klika w Vue → irssi przełącza okno ✅
+- `window_activity(window, 0, NULL)` czyści activity ✅
+- Statusbar dostaje sygnał i **USUWA NUMER** z Act: ✅
+- Backend otrzymuje `activity_update level=0` ✅
+- Badge w Vue znika ✅
+
+**Commit:** `d79986590` (irssi, 2025-10-14 16:38:49)
+
 ---
 
 **Data utworzenia:** 2025-10-13
-**Ostatnia aktualizacja:** 2025-10-14 16:23
-**Status:** Message storage ready, Unread markers FIXED, Command translator FIXED
+**Ostatnia aktualizacja:** 2025-10-14 16:38
+**Status:** Message storage ready, Unread markers FIXED, Command translator FIXED, Act: statusbar FIXED
 
