@@ -39,11 +39,11 @@ export type NetworkData = {
 export type FeWebAdapterCallbacks = {
 	onNetworkUpdate: (network: NetworkData) => void;
 	onMessage: (networkUuid: string, channelId: number, msg: Msg) => void;
-	onChannelJoin: (networkUuid: string, channel: Chan) => void;
+	onChannelJoin: (networkUuid: string, channel: Chan) => Promise<void>;
 	onChannelPart: (networkUuid: string, channelId: number) => void;
 	onNicklistUpdate: (networkUuid: string, channelId: number, users: User[]) => void;
 	onTopicUpdate: (networkUuid: string, channelId: number, topic: string) => void;
-	onInit: (networks: NetworkData[]) => void;
+	onInit: (networks: NetworkData[]) => Promise<void>;
 };
 
 export class FeWebAdapter {
@@ -187,7 +187,7 @@ export class FeWebAdapter {
 	/**
 	 * 4. channel_join - User joined channel
 	 */
-	private handleChannelJoin(msg: FeWebMessage): void {
+	private async handleChannelJoin(msg: FeWebMessage): Promise<void> {
 		const network = this.getOrCreateNetwork(msg.server!);
 		if (!network) return;
 
@@ -207,7 +207,7 @@ export class FeWebAdapter {
 
 			channel = this.createChannel(network, channelName);
 			log.info(`[FeWebAdapter] Created channel ${channelName} on ${msg.server}`);
-			this.callbacks.onChannelJoin(network.uuid, channel);
+			await this.callbacks.onChannelJoin(network.uuid, channel);
 		} else {
 			// Someone else joined
 			if (nick && nick !== network.nick) {
@@ -724,7 +724,7 @@ export class FeWebAdapter {
 	 * 16. state_dump - Initial state dump
 	 * Marker message, followed by channel_join, topic, nicklist
 	 */
-	private handleStateDump(msg: FeWebMessage): void {
+	private async handleStateDump(msg: FeWebMessage): Promise<void> {
 		log.info(`[FeWebAdapter] State dump started for server: ${msg.server}`);
 
 		const network = this.getOrCreateNetwork(msg.server!);
@@ -752,19 +752,19 @@ export class FeWebAdapter {
 	/**
 	 * Emit init event with all networks
 	 */
-	private emitInit(): void {
+	private async emitInit(): Promise<void> {
 		if (this.initEmitted) return;
 		this.initEmitted = true;
 
 		const networks = Array.from(this.serverTagToNetworkMap.values());
 		log.info(`[FeWebAdapter] Emitting init event with ${networks.length} networks`);
-		this.callbacks.onInit(networks);
+		await this.callbacks.onInit(networks);
 	}
 
 	/**
 	 * 17. query_opened - Query window opened
 	 */
-	private handleQueryOpened(msg: FeWebMessage): void {
+	private async handleQueryOpened(msg: FeWebMessage): Promise<void> {
 		log.info(`[FeWebAdapter] Query opened: ${msg.nick} on ${msg.server}`);
 		const network = this.getOrCreateNetwork(msg.server!);
 		if (!network) return;
@@ -781,7 +781,7 @@ export class FeWebAdapter {
 		// Create query channel
 		channel = this.createQueryChannel(network, nick);
 		log.info(`[FeWebAdapter] Created query channel for ${nick} on ${msg.server}`);
-		this.callbacks.onChannelJoin(network.uuid, channel);
+		await this.callbacks.onChannelJoin(network.uuid, channel);
 	}
 
 	/**
