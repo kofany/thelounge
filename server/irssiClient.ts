@@ -72,6 +72,9 @@ export type IrssiUserConfig = {
 		hostname?: string;
 		isSecure?: boolean;
 	};
+	networkUuidMap?: {
+		[serverTag: string]: string; // server_tag -> persistent UUID
+	};
 };
 
 // Browser session info
@@ -382,7 +385,16 @@ export class IrssiClient {
 			onInit: (networks) => this.handleInit(networks),
 		};
 
-		this.feWebAdapter = new FeWebAdapter(this.irssiConnection, adapterCallbacks);
+		// Load existing network UUID map from config (for persistent UUIDs across reconnects)
+		const existingUuidMap = new Map<string, string>();
+		if (this.config.networkUuidMap) {
+			for (const [serverTag, uuid] of Object.entries(this.config.networkUuidMap)) {
+				existingUuidMap.set(serverTag, uuid);
+			}
+			log.info(`[IrssiClient] Loaded ${existingUuidMap.size} persistent network UUIDs from config`);
+		}
+
+		this.feWebAdapter = new FeWebAdapter(this.irssiConnection, adapterCallbacks, existingUuidMap);
 
 		// Set up event handlers
 		this.setupIrssiEventHandlers();
@@ -497,6 +509,8 @@ export class IrssiClient {
 	 * Includes command translation layer for Vue-specific commands
 	 */
 	async handleInput(socketId: string, data: {target: number; text: string}): Promise<void> {
+		log.info(`[DEBUG handleInput] socketId=${socketId}, target=${data.target}, text="${data.text}"`);
+		
 		if (!this.irssiConnection) {
 			log.error(`User ${colors.bold(this.name)}: cannot send input, not connected to irssi`);
 			return;
@@ -1811,6 +1825,14 @@ export class IrssiClient {
 					);
 				}
 			}
+		}
+
+		// Save network UUID map to config (persistent UUIDs across reconnects)
+		if (this.feWebAdapter) {
+			const uuidMap = this.feWebAdapter.getNetworkUuidMap();
+			this.config.networkUuidMap = Object.fromEntries(uuidMap);
+			this.manager.saveUser(this as any); // IrssiClient is compatible with Client interface
+			log.info(`[IrssiClient] Saved ${uuidMap.size} network UUIDs to config for persistence`);
 		}
 
 		log.info(`[IrssiClient] ⏰ TIMING: handleInit() COMPLETED`);

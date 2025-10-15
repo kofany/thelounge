@@ -263,8 +263,12 @@ class ClientManager {
 	}
 
 	getDataToSave(client: Client) {
+		// IrssiClient doesn't have Network[] with export() method
+		// Instead, it stores networks in irssi - we only save networkUuidMap
+		const isIrssiClient = (client as any).irssiConnection !== undefined;
+		
 		const json = Object.assign({}, client.config, {
-			networks: client.networks.map((n) => n.export()),
+			networks: isIrssiClient ? [] : client.networks.map((n) => n.export()),
 		});
 		const newUser = JSON.stringify(json, null, "\t");
 		const newHash = crypto.createHash("sha256").update(newUser).digest("hex");

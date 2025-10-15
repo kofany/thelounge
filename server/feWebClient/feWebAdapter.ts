@@ -53,11 +53,20 @@ export class FeWebAdapter {
 	private messageIdCounter = 1;
 	private channelIdCounter = 1;
 	private initEmitted = false;
+	private networkUuidMap: Map<string, string>; // server_tag -> UUID (persistent)
 
-	constructor(socket: FeWebSocket, callbacks: FeWebAdapterCallbacks) {
+	constructor(socket: FeWebSocket, callbacks: FeWebAdapterCallbacks, existingUuidMap?: Map<string, string>) {
 		this.socket = socket;
 		this.callbacks = callbacks;
+		this.networkUuidMap = existingUuidMap || new Map();
 		this.registerHandlers();
+	}
+
+	/**
+	 * Get current network UUID map (for persistence)
+	 */
+	getNetworkUuidMap(): Map<string, string> {
+		return this.networkUuidMap;
 	}
 
 	/**
@@ -846,7 +855,7 @@ export class FeWebAdapter {
 			lobbyChannel.state = ChanState.JOINED; // Lobby is always "joined"
 
 			network = {
-				uuid: this.generateUuid(),
+				uuid: this.getOrCreateNetworkUuid(serverTag),
 				name: serverTag,
 				nick: "", // Will be set from state_dump or nick_change
 				serverTag: serverTag,
@@ -917,6 +926,22 @@ export class FeWebAdapter {
 
 	private removeUserFromChannel(channel: Chan, nick: string): boolean {
 		return channel.users.delete(nick.toLowerCase());
+	}
+
+	/**
+	 * Get or create persistent UUID for network (based on server tag)
+	 * This ensures the same server always gets the same UUID, even after reconnect
+	 */
+	private getOrCreateNetworkUuid(serverTag: string): string {
+		let uuid = this.networkUuidMap.get(serverTag);
+		if (!uuid) {
+			uuid = `network-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+			this.networkUuidMap.set(serverTag, uuid);
+			log.info(`[FeWebAdapter] Created new persistent UUID for server ${serverTag}: ${uuid}`);
+		} else {
+			log.info(`[FeWebAdapter] Using existing UUID for server ${serverTag}: ${uuid}`);
+		}
+		return uuid;
 	}
 
 	private generateUuid(): string {

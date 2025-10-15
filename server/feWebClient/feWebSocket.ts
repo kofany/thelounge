@@ -415,11 +415,19 @@ export class FeWebSocket extends EventEmitter {
 	/**
 	 * Execute IRC command (CLIENT-SPEC.md: command)
 	 *
-	 * IMPORTANT: Commands sent via WebSocket API should NOT have "/" prefix!
-	 * The "/" prefix is only used when typing commands in IRC chat window.
-	 * WebSocket API expects raw command names: "msg", "part", "server", etc.
+	 * IMPORTANT: Commands sent via WebSocket API MUST have "/" prefix!
+	 * The irssi command system (src/core/commands.c) checks if the first character
+	 * is a cmdchar (default: "/"). If not, it treats the input as regular text
+	 * and sends it via "send text" signal instead of executing as a command.
+	 *
+	 * This method automatically adds "/" prefix if not present.
 	 */
 	executeCommand(command: string, server?: string): void {
+		// Ensure command starts with /
+		if (!command.startsWith("/")) {
+			command = "/" + command;
+		}
+
 		console.log(
 			`[FeWebSocket] Executing command: ${command}`,
 			server ? `on server: ${server}` : ""
