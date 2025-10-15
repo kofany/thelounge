@@ -29,6 +29,16 @@ import {ServerToClientEvents} from "../shared/types/socket-events";
 import {FeWebSocket, FeWebConfig, FeWebMessage} from "./feWebClient/feWebSocket";
 import {FeWebEncryption} from "./feWebClient/feWebEncryption";
 import {FeWebAdapter, FeWebAdapterCallbacks, NetworkData} from "./feWebClient/feWebAdapter";
+import {
+	IrssiNetwork,
+	IrssiServer,
+	CommandResult,
+	NetworkFormData,
+	ServerFormData,
+	networkFormToIrssi,
+	serverFormToIrssi,
+	snakeToCamel,
+} from "./types/irssi-network";
 import UAParser from "ua-parser-js";
 
 // irssi connection config (stored in user.json)
@@ -117,6 +127,25 @@ export class IrssiClient {
 	// When user switches windows in irssi, this gets updated
 	// This prevents activity_update being sent/processed for active window
 	private activeWindowInIrssi: string | null = null; // Format: "network_uuid:channel_name"
+
+	// Network/Server management - pending requests
+	private pendingRequests: Map<
+		string,
+		{
+			resolve: (result: CommandResult) => void;
+			reject: (error: Error) => void;
+			timeout: NodeJS.Timeout;
+		}
+	> = new Map();
+
+	private pendingListRequests: Map<
+		string,
+		{
+			resolve: (result: any) => void;
+			reject: (error: Error) => void;
+			timeout: NodeJS.Timeout;
+		}
+	> = new Map();
 
 	// State
 	awayMessage: string = "";
@@ -398,6 +427,15 @@ export class IrssiClient {
 		(this.irssiConnection as any).on("auth_fail", () => {
 			log.error(`User ${colors.bold(this.name)}: irssi authentication failed`);
 		});
+
+		// Network/Server management handlers
+		this.irssiConnection.onMessage("command_result", (msg) => this.handleCommandResult(msg));
+		this.irssiConnection.onMessage("network_list_response", (msg) =>
+			this.handleNetworkListResponse(msg)
+		);
+		this.irssiConnection.onMessage("server_list_response", (msg) =>
+			this.handleServerListResponse(msg)
+		);
 
 		// Activity tracking (unread markers)
 		(this.irssiConnection as any).on("activity_update", (msg: FeWebMessage) => {
@@ -1358,7 +1396,9 @@ export class IrssiClient {
 						server: net.serverTag,
 						target: chan.name,
 					});
-					log.debug(`[IrssiClient] Sent mark_read to irssi for ${net.serverTag}/${chan.name}`);
+					log.debug(
+						`[IrssiClient] Sent mark_read to irssi for ${net.serverTag}/${chan.name}`
+					);
 				}
 			}
 		}
@@ -1522,7 +1562,9 @@ export class IrssiClient {
 					// Add to channel.messages
 					channel.messages = messages;
 
-					log.info(`[IrssiClient] Loaded ${messages.length} messages for ${channel.name} from storage`);
+					log.info(
+						`[IrssiClient] Loaded ${messages.length} messages for ${channel.name} from storage`
+					);
 				}
 			} catch (err) {
 				log.error(`Failed to load messages for ${channel.name}: ${err}`);
@@ -1654,7 +1696,9 @@ export class IrssiClient {
 
 		// Load messages from storage for all channels (on node restart!)
 		if (this.messageStorage) {
-			log.info(`[IrssiClient] Loading messages from storage for ${networks.length} networks...`);
+			log.info(
+				`[IrssiClient] Loading messages from storage for ${networks.length} networks...`
+			);
 
 			for (const network of networks) {
 				for (const channel of network.channels) {
@@ -1681,9 +1725,13 @@ export class IrssiClient {
 						// Add to channel.messages
 						channel.messages = messages;
 
-						log.info(`[IrssiClient] Loaded ${messages.length} messages for ${network.name}/${channel.name} from storage`);
+						log.info(
+							`[IrssiClient] Loaded ${messages.length} messages for ${network.name}/${channel.name} from storage`
+						);
 					} catch (err) {
-						log.error(`Failed to load messages for ${network.name}/${channel.name}: ${err}`);
+						log.error(
+							`Failed to load messages for ${network.name}/${channel.name}: ${err}`
+						);
 						channel.messages = [];
 					}
 				}
@@ -1755,6 +1803,249 @@ export class IrssiClient {
 		}
 
 		log.info(`[IrssiClient] ⏰ TIMING: handleInit() COMPLETED`);
+	}
+
+	/**
+	 * ========================================================================
+	 * NETWORK/SERVER MANAGEMENT METHODS
+	 * ========================================================================
+	 */
+
+	/**
+	 * Handle command_result response from irssi
+	 */
+	private handleCommandResult(msg: FeWebMessage): void {
+		const requestId = msg.response_to;
+		if (!requestId) {
+			log.warn("[IrssiClient] Received command_result without response_to");
+			return;
+		}
+
+		const pending = this.pendingRequests.get(requestId);
+		if (!pending) {
+			log.warn(`[IrssiClient] Received command_result for unknown request ${requestId}`);
+			return;
+		}
+
+		clearTimeout(pending.timeout);
+		this.pendingRequests.delete(requestId);
+
+		pending.resolve({
+			success: msg.success || false,
+			message: msg.message || "",
+			error_code: msg.error_code,
+		});
+	}
+
+	/**
+	 * Handle network_list_response from irssi
+	 */
+	private handleNetworkListResponse(msg: FeWebMessage): void {
+		const requestId = msg.response_to;
+		if (!requestId) {
+			log.warn("[IrssiClient] Received network_list_response without response_to");
+			return;
+		}
+
+		const pending = this.pendingListRequests.get(requestId);
+		if (!pending) {
+			log.warn(
+				`[IrssiClient] Received network_list_response for unknown request ${requestId}`
+			);
+			return;
+		}
+
+		clearTimeout(pending.timeout);
+		this.pendingListRequests.delete(requestId);
+
+		const networks = msg.extra?.networks || [];
+		pending.resolve(networks);
+	}
+
+	/**
+	 * Handle server_list_response from irssi
+	 */
+	private handleServerListResponse(msg: FeWebMessage): void {
+		const requestId = msg.response_to;
+		if (!requestId) {
+			log.warn("[IrssiClient] Received server_list_response without response_to");
+			return;
+		}
+
+		const pending = this.pendingListRequests.get(requestId);
+		if (!pending) {
+			log.warn(
+				`[IrssiClient] Received server_list_response for unknown request ${requestId}`
+			);
+			return;
+		}
+
+		clearTimeout(pending.timeout);
+		this.pendingListRequests.delete(requestId);
+
+		const servers = msg.extra?.servers || [];
+		pending.resolve(servers);
+	}
+
+	/**
+	 * Send request to irssi and wait for command_result
+	 */
+	private async sendIrssiRequest(type: string, data: any): Promise<CommandResult> {
+		if (!this.irssiConnection || !this.irssiConnection.isConnected()) {
+			throw new Error("Not connected to irssi");
+		}
+
+		return new Promise((resolve, reject) => {
+			const requestId = `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+			const timeout = setTimeout(() => {
+				this.pendingRequests.delete(requestId);
+				reject(new Error(`Request timeout for ${type}`));
+			}, 10000);
+
+			this.pendingRequests.set(requestId, {resolve, reject, timeout});
+
+			this.irssiConnection!.send({
+				type,
+				id: requestId,
+				...data,
+			});
+		});
+	}
+
+	/**
+	 * Send list request to irssi and wait for response
+	 */
+	private async sendIrssiListRequest(type: string, data: any = {}): Promise<any> {
+		if (!this.irssiConnection || !this.irssiConnection.isConnected()) {
+			throw new Error("Not connected to irssi");
+		}
+
+		return new Promise((resolve, reject) => {
+			const requestId = `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+			const timeout = setTimeout(() => {
+				this.pendingListRequests.delete(requestId);
+				reject(new Error(`Request timeout for ${type}`));
+			}, 10000);
+
+			this.pendingListRequests.set(requestId, {resolve, reject, timeout});
+
+			this.irssiConnection!.send({
+				type,
+				id: requestId,
+				...data,
+			});
+		});
+	}
+
+	/**
+	 * List all IRC networks from irssi config
+	 */
+	async listIrssiNetworks(): Promise<IrssiNetwork[]> {
+		log.info(`[IrssiClient] Listing networks for user ${this.name}`);
+		const networks = await this.sendIrssiListRequest("network_list");
+		return networks.map((net: any) => snakeToCamel(net));
+	}
+
+	/**
+	 * List all servers (optionally filtered by network)
+	 */
+	async listIrssiServers(networkName?: string): Promise<IrssiServer[]> {
+		log.info(
+			`[IrssiClient] Listing servers for user ${this.name}${
+				networkName ? ` (network: ${networkName})` : ""
+			}`
+		);
+		const data = networkName ? {chatnet: networkName} : {};
+		const servers = await this.sendIrssiListRequest("server_list", data);
+		return servers.map((srv: any) => snakeToCamel(srv));
+	}
+
+	/**
+	 * Add IRC network to irssi config
+	 */
+	async addIrssiNetwork(networkData: NetworkFormData): Promise<CommandResult> {
+		log.info(`[IrssiClient] Adding network ${networkData.name} for user ${this.name}`);
+
+		const irssiNetwork = networkFormToIrssi(networkData);
+
+		const networkResult = await this.sendIrssiRequest("network_add", irssiNetwork);
+
+		if (!networkResult.success) {
+			return networkResult;
+		}
+
+		let successCount = 0;
+		let failCount = 0;
+
+		for (const server of networkData.servers) {
+			const irssiServer = serverFormToIrssi(server, networkData.name);
+
+			try {
+				const serverResult = await this.sendIrssiRequest("server_add", irssiServer);
+
+				if (serverResult.success) {
+					successCount++;
+				} else {
+					failCount++;
+					log.warn(
+						`Failed to add server ${server.address}:${server.port}: ${serverResult.message}`
+					);
+				}
+			} catch (error: any) {
+				failCount++;
+				log.error(`Error adding server ${server.address}:${server.port}: ${error.message}`);
+			}
+		}
+
+		return {
+			success: true,
+			message: `Network '${
+				networkData.name
+			}' added successfully with ${successCount} server(s)${
+				failCount > 0 ? ` (${failCount} failed)` : ""
+			}`,
+		};
+	}
+
+	/**
+	 * Remove IRC network from irssi config
+	 */
+	async removeIrssiNetwork(name: string): Promise<CommandResult> {
+		log.info(`[IrssiClient] Removing network ${name} for user ${this.name}`);
+		return await this.sendIrssiRequest("network_remove", {name});
+	}
+
+	/**
+	 * Add server to irssi config
+	 */
+	async addIrssiServer(serverData: ServerFormData, chatnet: string): Promise<CommandResult> {
+		log.info(
+			`[IrssiClient] Adding server ${serverData.address}:${serverData.port} to network ${chatnet} for user ${this.name}`
+		);
+		const irssiServer = serverFormToIrssi(serverData, chatnet);
+		return await this.sendIrssiRequest("server_add", irssiServer);
+	}
+
+	/**
+	 * Remove server from irssi config
+	 */
+	async removeIrssiServer(
+		address: string,
+		port: number,
+		chatnet?: string
+	): Promise<CommandResult> {
+		log.info(
+			`[IrssiClient] Removing server ${address}:${port}${
+				chatnet ? ` from network ${chatnet}` : ""
+			} for user ${this.name}`
+		);
+		const data: any = {address, port};
+		if (chatnet) {
+			data.chatnet = chatnet;
+		}
+		return await this.sendIrssiRequest("server_remove", data);
 	}
 }
 

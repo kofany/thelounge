@@ -28,6 +28,10 @@ export interface FeWebMessage {
 	extra?: Record<string, any>;
 	command?: string;
 	task?: string; // For nicklist_update: "add", "remove", "change", "+o", "-o", "+v", "-v", "+h", "-h"
+	// Network/Server management fields
+	success?: boolean; // For command_result
+	message?: string; // For command_result
+	error_code?: string; // For command_result
 }
 
 // Client → Server message types
