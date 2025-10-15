@@ -391,10 +391,16 @@ export class IrssiClient {
 			for (const [serverTag, uuid] of Object.entries(this.config.networkUuidMap)) {
 				existingUuidMap.set(serverTag, uuid);
 			}
-			log.info(`[IrssiClient] Loaded ${existingUuidMap.size} persistent network UUIDs from config`);
+			log.info(
+				`[IrssiClient] Loaded ${existingUuidMap.size} persistent network UUIDs from config`
+			);
 		}
 
-		this.feWebAdapter = new FeWebAdapter(this.irssiConnection, adapterCallbacks, existingUuidMap);
+		this.feWebAdapter = new FeWebAdapter(
+			this.irssiConnection,
+			adapterCallbacks,
+			existingUuidMap
+		);
 
 		// Set up event handlers
 		this.setupIrssiEventHandlers();
@@ -509,8 +515,10 @@ export class IrssiClient {
 	 * Includes command translation layer for Vue-specific commands
 	 */
 	async handleInput(socketId: string, data: {target: number; text: string}): Promise<void> {
-		log.info(`[DEBUG handleInput] socketId=${socketId}, target=${data.target}, text="${data.text}"`);
-		
+		log.info(
+			`[DEBUG handleInput] socketId=${socketId}, target=${data.target}, text="${data.text}"`
+		);
+
 		if (!this.irssiConnection) {
 			log.error(`User ${colors.bold(this.name)}: cannot send input, not connected to irssi`);
 			return;
@@ -919,7 +927,7 @@ export class IrssiClient {
 
 							// TEMPORARILY add to channel.messages (only for this init!)
 							channel.messages = messages;
-							
+
 							// Store total count for getFilteredClone to use
 							channel.totalMessagesInStorage = totalCount;
 
@@ -1485,16 +1493,43 @@ export class IrssiClient {
 	// FeWebAdapter callback handlers
 
 	private handleNetworkUpdate(network: NetworkData): void {
-		log.debug(`[IrssiClient] Network update: ${network.name}`);
+		log.debug(
+			`[IrssiClient] Network update: ${network.name} (connected: ${network.connected})`
+		);
+
 		// Update networks array
 		const index = this.networks.findIndex((n) => n.uuid === network.uuid);
+		const isNewNetwork = index === -1;
+
 		if (index !== -1) {
 			this.networks[index] = network;
 		} else {
 			this.networks.push(network);
 		}
 
-		// Broadcast to all browsers
+		// If this is a new network that just connected, send full network to frontend
+		// This happens when user connects to a server via /CONNECT or NetworkManager
+		if (isNewNetwork && network.connected) {
+			log.info(`[IrssiClient] New network connected: ${network.name} - sending to frontend`);
+
+			// Send network event to all browsers (so they add it to the network list)
+			// Use the same format as Client.connect() uses (server/client.ts:350)
+			this.broadcastToAllBrowsers("network", {
+				network: {
+					uuid: network.uuid,
+					name: network.name,
+					nick: network.nick || "",
+					serverOptions: network.serverOptions || {},
+					status: {
+						connected: network.connected,
+						secure: true,
+					},
+					channels: network.channels.map((chan) => chan.getFilteredClone(true)),
+				},
+			});
+		}
+
+		// Always broadcast status update
 		this.broadcastToAllBrowsers("network:status", {
 			network: network.uuid,
 			connected: network.connected,
