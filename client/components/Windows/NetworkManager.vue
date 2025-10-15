@@ -890,11 +890,34 @@ export default defineComponent({
 			isLoading.value = true;
 			errorMessage.value = "";
 
+			// First, load all networks
 			socket.emit("network:list_irssi", (result: any) => {
-				isLoading.value = false;
 				if (result.success) {
-					savedNetworks.value = result.networks || [];
+					const networks = result.networks || [];
+
+					// Then, load servers for each network
+					socket.emit("server:list_irssi", {}, (serverResult: any) => {
+						isLoading.value = false;
+
+						if (serverResult.success) {
+							const servers = serverResult.servers || [];
+
+							// Attach servers to their respective networks
+							networks.forEach((network: any) => {
+								network.servers = servers.filter(
+									(server: any) => server.chatnet === network.name
+								);
+							});
+
+							savedNetworks.value = networks;
+						} else {
+							// Even if server list fails, show networks without servers
+							savedNetworks.value = networks;
+							errorMessage.value = serverResult.error || "Failed to load servers";
+						}
+					});
 				} else {
+					isLoading.value = false;
 					errorMessage.value = result.error || "Failed to load networks";
 				}
 			});
