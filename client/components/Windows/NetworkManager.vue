@@ -30,42 +30,88 @@
 						:key="index"
 						class="network-item"
 					>
-						<div class="network-info">
-							<h3>{{ network.name }}</h3>
-							<p v-if="network.nick">Nick: {{ network.nick }}</p>
-							<p v-if="network.saslMechanism">
-								SASL: {{ network.saslMechanism }}
-								<span v-if="network.saslUsername"
-									>({{ network.saslUsername }})</span
+						<div class="network-header">
+							<div class="network-info">
+								<h3>{{ network.name }}</h3>
+								<p v-if="network.nick">Nick: {{ network.nick }}</p>
+								<p v-if="network.saslMechanism">
+									SASL: {{ network.saslMechanism }}
+									<span v-if="network.saslUsername"
+										>({{ network.saslUsername }})</span
+									>
+								</p>
+							</div>
+							<div class="network-actions">
+								<button
+									type="button"
+									class="btn btn-edit"
+									@click="editNetwork(network)"
+									:disabled="isLoading"
 								>
-							</p>
-							<p v-if="network.servers">Servers: {{ network.servers.length }}</p>
+									Edit
+								</button>
+								<button
+									type="button"
+									class="btn btn-remove"
+									@click="removeNetwork(network.name)"
+									:disabled="isLoading"
+								>
+									Remove
+								</button>
+							</div>
 						</div>
-						<div class="network-actions">
-							<button
-								type="button"
-								class="btn btn-connect"
-								@click="connectToNetwork(network)"
-								:disabled="isLoading"
-							>
-								Connect
-							</button>
-							<button
-								type="button"
-								class="btn btn-edit"
-								@click="editNetwork(network)"
-								:disabled="isLoading"
-							>
-								Edit
-							</button>
-							<button
-								type="button"
-								class="btn btn-remove"
-								@click="removeNetwork(network.name)"
-								:disabled="isLoading"
-							>
-								Remove
-							</button>
+
+						<!-- Servers Table -->
+						<div
+							v-if="network.servers && network.servers.length > 0"
+							class="servers-table"
+						>
+							<h4>Servers ({{ network.servers.length }})</h4>
+							<table>
+								<thead>
+									<tr>
+										<th>Address</th>
+										<th>Port</th>
+										<th>TLS</th>
+										<th>Auto-connect</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr
+										v-for="(server, serverIndex) in network.servers"
+										:key="serverIndex"
+									>
+										<td>{{ server.address }}</td>
+										<td>{{ server.port }}</td>
+										<td>{{ server.useTls || server.use_tls ? "✓" : "✗" }}</td>
+										<td>{{ server.autoconnect ? "✓" : "✗" }}</td>
+										<td class="server-actions">
+											<button
+												type="button"
+												class="btn btn-small btn-connect"
+												@click="connectToServer(network, server)"
+												:disabled="isLoading"
+												title="Connect to this server"
+											>
+												Connect
+											</button>
+											<button
+												type="button"
+												class="btn btn-small btn-remove"
+												@click="removeServer(server, network.name)"
+												:disabled="isLoading"
+												title="Remove this server"
+											>
+												Remove
+											</button>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div v-else class="no-servers">
+							<p>No servers configured for this network.</p>
 						</div>
 					</div>
 				</div>
@@ -444,7 +490,7 @@
 								v-if="newNetwork.servers.length > 1"
 								type="button"
 								class="btn btn-small btn-remove-server"
-								@click="removeServer(index)"
+								@click="removeServerFromForm(index)"
 								title="Remove this server"
 							>
 								×
@@ -993,13 +1039,7 @@ export default defineComponent({
 			});
 		};
 
-		const connectToNetwork = (network: IrssiNetwork) => {
-			if (!network.servers || network.servers.length === 0) {
-				alert("Network has no servers configured");
-				return;
-			}
-
-			const server = network.servers[0];
+		const connectToServer = (network: IrssiNetwork, server: any) => {
 			const connectCommand = `/CONNECT ${server.address} ${server.port} ${network.name}`;
 
 			socket.emit(
@@ -1011,10 +1051,45 @@ export default defineComponent({
 					if (response && response.error) {
 						errorMessage.value = `Failed to connect: ${response.error}`;
 					} else {
-						successMessage.value = `Connecting to ${network.name}...`;
+						successMessage.value = `Connecting to ${server.address}:${server.port} (${network.name})...`;
 						setTimeout(() => {
 							successMessage.value = "";
 						}, 3000);
+					}
+				}
+			);
+		};
+
+		const removeServer = (server: any, chatnet: string) => {
+			if (
+				!confirm(
+					`Are you sure you want to remove server ${server.address}:${server.port} from ${chatnet}?`
+				)
+			) {
+				return;
+			}
+
+			isLoading.value = true;
+			errorMessage.value = "";
+			successMessage.value = "";
+
+			socket.emit(
+				"server:remove_irssi",
+				{
+					address: server.address,
+					port: server.port,
+					chatnet: chatnet,
+				},
+				(result: any) => {
+					isLoading.value = false;
+					if (result.success) {
+						successMessage.value = result.message;
+						loadNetworks();
+						setTimeout(() => {
+							successMessage.value = "";
+						}, 5000);
+					} else {
+						errorMessage.value = result.message || "Failed to remove server";
 					}
 				}
 			);
@@ -1033,7 +1108,7 @@ export default defineComponent({
 			});
 		};
 
-		const removeServer = (index: number) => {
+		const removeServerFromForm = (index: number) => {
 			newNetwork.value.servers.splice(index, 1);
 		};
 
@@ -1084,11 +1159,108 @@ export default defineComponent({
 			addNewNetwork,
 			editNetwork,
 			removeNetwork,
-			connectToNetwork,
-			addServer,
+			connectToServer,
 			removeServer,
+			addServer,
+			removeServerFromForm,
 			resetForm,
 		};
 	},
 });
 </script>
+
+<style scoped>
+.network-item {
+	margin-bottom: 2rem;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	padding: 1rem;
+	background: #f9f9f9;
+}
+
+.network-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 1rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid #ddd;
+}
+
+.network-info h3 {
+	margin: 0 0 0.5rem 0;
+	font-size: 1.2rem;
+	color: #333;
+}
+
+.network-info p {
+	margin: 0.25rem 0;
+	font-size: 0.9rem;
+	color: #666;
+}
+
+.network-actions {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.servers-table {
+	margin-top: 1rem;
+}
+
+.servers-table h4 {
+	margin: 0 0 0.5rem 0;
+	font-size: 1rem;
+	color: #555;
+}
+
+.servers-table table {
+	width: 100%;
+	border-collapse: collapse;
+	background: white;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.servers-table thead {
+	background: #f0f0f0;
+}
+
+.servers-table th {
+	padding: 0.75rem;
+	text-align: left;
+	font-weight: 600;
+	font-size: 0.9rem;
+	color: #333;
+	border-bottom: 2px solid #ddd;
+}
+
+.servers-table td {
+	padding: 0.75rem;
+	border-bottom: 1px solid #eee;
+	font-size: 0.9rem;
+}
+
+.servers-table tbody tr:hover {
+	background: #f9f9f9;
+}
+
+.server-actions {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.btn-small {
+	padding: 0.25rem 0.75rem;
+	font-size: 0.85rem;
+}
+
+.no-servers {
+	padding: 1rem;
+	text-align: center;
+	color: #999;
+	font-style: italic;
+	background: white;
+	border-radius: 4px;
+}
+</style>
