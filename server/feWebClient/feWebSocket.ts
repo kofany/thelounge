@@ -31,7 +31,18 @@ export interface FeWebMessage {
 }
 
 // Client → Server message types
-export type ClientMessageType = "sync_server" | "command" | "ping" | "close_query" | "mark_read";
+export type ClientMessageType =
+	| "sync_server"
+	| "command"
+	| "ping"
+	| "close_query"
+	| "mark_read"
+	| "network_list"
+	| "server_list"
+	| "network_add"
+	| "network_remove"
+	| "server_add"
+	| "server_remove";
 
 // Server → Client message types
 export type ServerMessageType =
@@ -56,7 +67,10 @@ export type ServerMessageType =
 	| "query_closed"
 	| "activity_update" // Activity level changed (unread markers)
 	| "error"
-	| "pong";
+	| "pong"
+	| "network_list_response"
+	| "server_list_response"
+	| "command_result";
 
 export interface FeWebConfig {
 	host: string;
