@@ -1176,8 +1176,8 @@ export default defineComponent({
 	border-radius: 8px;
 	padding: 1rem;
 	background: #f9f9f9;
-	max-width: 100%;
-	overflow-x: auto;
+	display: inline-block;
+	min-width: 100%;
 }
 
 .network-header {
@@ -1216,7 +1216,6 @@ export default defineComponent({
 
 .servers-table {
 	margin-top: 1rem;
-	overflow-x: auto;
 }
 
 .servers-table h4 {
@@ -1226,13 +1225,12 @@ export default defineComponent({
 }
 
 .servers-table table {
-	width: 100%;
-	min-width: 600px;
+	width: auto;
 	border-collapse: collapse;
 	background: white;
 	border-radius: 4px;
 	overflow: hidden;
-	font-size: 0.85rem;
+	font-size: 0.9rem;
 }
 
 .servers-table thead {
@@ -1240,19 +1238,19 @@ export default defineComponent({
 }
 
 .servers-table th {
-	padding: 0.5rem;
+	padding: 0.75rem;
 	text-align: left;
 	font-weight: 600;
-	font-size: 0.8rem;
+	font-size: 0.9rem;
 	color: #333;
 	border-bottom: 2px solid #ddd;
 	white-space: nowrap;
 }
 
 .servers-table td {
-	padding: 0.5rem;
+	padding: 0.75rem;
 	border-bottom: 1px solid #eee;
-	font-size: 0.8rem;
+	font-size: 0.9rem;
 }
 
 .servers-table tbody tr:hover {
@@ -1261,13 +1259,13 @@ export default defineComponent({
 
 .server-actions {
 	display: flex;
-	gap: 0.25rem;
+	gap: 0.5rem;
 	white-space: nowrap;
 }
 
 .btn-small {
-	padding: 0.25rem 0.5rem;
-	font-size: 0.75rem;
+	padding: 0.25rem 0.75rem;
+	font-size: 0.85rem;
 	white-space: nowrap;
 }
 
@@ -1279,21 +1277,5 @@ export default defineComponent({
 	background: white;
 	border-radius: 4px;
 	font-size: 0.85rem;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-	.network-header {
-		flex-direction: column;
-	}
-
-	.servers-table table {
-		min-width: 500px;
-	}
-
-	.btn-small {
-		font-size: 0.7rem;
-		padding: 0.2rem 0.4rem;
-	}
 }
 </style>
