@@ -181,6 +181,36 @@ interface ClientToServerEvents {
 
 	// Client-driven channel/query close
 	part_channel: EventHandler<{networkUuid: string; channelId: number}>;
+
+	// Network/Server management (irssi fe-web)
+	"network:list_irssi": (
+		callback: (result: {success: boolean; networks?: any[]; error?: string}) => void
+	) => void;
+
+	"server:list_irssi": (
+		data: {networkName?: string},
+		callback: (result: {success: boolean; servers?: any[]; error?: string}) => void
+	) => void;
+
+	"network:add_irssi": (
+		data: any,
+		callback: (result: {success: boolean; message: string; error_code?: string}) => void
+	) => void;
+
+	"network:remove_irssi": (
+		data: {name: string},
+		callback: (result: {success: boolean; message: string; error_code?: string}) => void
+	) => void;
+
+	"server:add_irssi": (
+		data: {server: any; chatnet: string},
+		callback: (result: {success: boolean; message: string; error_code?: string}) => void
+	) => void;
+
+	"server:remove_irssi": (
+		data: {address: string; port: number; chatnet?: string},
+		callback: (result: {success: boolean; message: string; error_code?: string}) => void
+	) => void;
 }
 
 interface InterServerEvents {}

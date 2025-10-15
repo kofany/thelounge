@@ -1370,6 +1370,68 @@ function initializeIrssiClient(
 		}
 	});
 
+	// Network/Server management handlers
+	socket.on("network:list_irssi", async (callback) => {
+		try {
+			const networks = await client.listIrssiNetworks();
+			callback({success: true, networks});
+		} catch (error: any) {
+			log.error(`[network:list_irssi] Error: ${error.message}`);
+			callback({success: false, error: error.message});
+		}
+	});
+
+	socket.on("server:list_irssi", async (data, callback) => {
+		try {
+			const networkName = data?.networkName;
+			const servers = await client.listIrssiServers(networkName);
+			callback({success: true, servers});
+		} catch (error: any) {
+			log.error(`[server:list_irssi] Error: ${error.message}`);
+			callback({success: false, error: error.message});
+		}
+	});
+
+	socket.on("network:add_irssi", async (data, callback) => {
+		try {
+			const result = await client.addIrssiNetwork(data);
+			callback(result);
+		} catch (error: any) {
+			log.error(`[network:add_irssi] Error: ${error.message}`);
+			callback({success: false, message: error.message});
+		}
+	});
+
+	socket.on("network:remove_irssi", async (data, callback) => {
+		try {
+			const result = await client.removeIrssiNetwork(data.name);
+			callback(result);
+		} catch (error: any) {
+			log.error(`[network:remove_irssi] Error: ${error.message}`);
+			callback({success: false, message: error.message});
+		}
+	});
+
+	socket.on("server:add_irssi", async (data, callback) => {
+		try {
+			const result = await client.addIrssiServer(data.server, data.chatnet);
+			callback(result);
+		} catch (error: any) {
+			log.error(`[server:add_irssi] Error: ${error.message}`);
+			callback({success: false, message: error.message});
+		}
+	});
+
+	socket.on("server:remove_irssi", async (data, callback) => {
+		try {
+			const result = await client.removeIrssiServer(data.address, data.port, data.chatnet);
+			callback(result);
+		} catch (error: any) {
+			log.error(`[server:remove_irssi] Error: ${error.message}`);
+			callback({success: false, message: error.message});
+		}
+	});
+
 	log.info(
 		`Browser ${colors.bold(socket.id)} attached to irssi user ${colors.bold(client.name)}`
 	);
