@@ -41,13 +41,39 @@
 							</p>
 							<p v-if="network.servers">Servers: {{ network.servers.length }}</p>
 						</div>
+						<div class="network-actions">
+							<button
+								type="button"
+								class="btn btn-connect"
+								@click="connectToNetwork(network)"
+								:disabled="isLoading"
+							>
+								Connect
+							</button>
+							<button
+								type="button"
+								class="btn btn-edit"
+								@click="editNetwork(network)"
+								:disabled="isLoading"
+							>
+								Edit
+							</button>
+							<button
+								type="button"
+								class="btn btn-remove"
+								@click="removeNetwork(network.name)"
+								:disabled="isLoading"
+							>
+								Remove
+							</button>
+						</div>
 					</div>
 				</div>
 			</section>
 
-			<!-- Add New Network Section -->
+			<!-- Add/Edit Network Section -->
 			<section class="add-network">
-				<h2>Add New Network</h2>
+				<h2>{{ isEditing ? `Edit Network: ${editingNetworkName}` : "Add New Network" }}</h2>
 				<form @submit.prevent="addNewNetwork" class="network-form">
 					<!-- Basic Network Settings -->
 					<fieldset>
@@ -436,7 +462,7 @@
 
 					<div class="form-actions">
 						<button type="submit" class="btn" :disabled="actionInProgress">
-							Add Network
+							{{ isEditing ? "Update Network" : "Add Network" }}
 						</button>
 						<button
 							type="button"
@@ -444,7 +470,7 @@
 							@click="resetForm"
 							:disabled="actionInProgress"
 						>
-							Clear
+							{{ isEditing ? "Cancel" : "Clear" }}
 						</button>
 					</div>
 				</form>
@@ -532,6 +558,55 @@
 	margin: 5px 0;
 	font-size: 0.9em;
 	color: var(--body-color-muted);
+}
+
+.network-actions {
+	display: flex;
+	gap: 10px;
+	margin-top: 15px;
+	flex-wrap: wrap;
+}
+
+.network-actions .btn {
+	flex: 1;
+	min-width: 80px;
+	padding: 8px 12px;
+	font-size: 0.9em;
+}
+
+.btn-connect {
+	background: #28a745;
+	color: white;
+	border: none;
+}
+
+.btn-connect:hover:not(:disabled) {
+	background: #218838;
+}
+
+.btn-edit {
+	background: #007bff;
+	color: white;
+	border: none;
+}
+
+.btn-edit:hover:not(:disabled) {
+	background: #0056b3;
+}
+
+.btn-remove {
+	background: #dc3545;
+	color: white;
+	border: none;
+}
+
+.btn-remove:hover:not(:disabled) {
+	background: #c82333;
+}
+
+.btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
 }
 
 section {
@@ -782,6 +857,8 @@ export default defineComponent({
 		const isLoading = ref(false);
 		const errorMessage = ref("");
 		const successMessage = ref("");
+		const isEditing = ref(false);
+		const editingNetworkName = ref("");
 
 		const newNetwork = ref<IrssiNetwork>({
 			name: "",
@@ -834,6 +911,16 @@ export default defineComponent({
 				return;
 			}
 
+			if (!isEditing.value) {
+				const exists = savedNetworks.value.some(
+					(net) => net.name.toLowerCase() === newNetwork.value.name.toLowerCase()
+				);
+				if (exists) {
+					errorMessage.value = `Network '${newNetwork.value.name}' already exists. Use Edit to modify it.`;
+					return;
+				}
+			}
+
 			isLoading.value = true;
 			errorMessage.value = "";
 			successMessage.value = "";
@@ -851,6 +938,63 @@ export default defineComponent({
 					errorMessage.value = result.message || "Failed to add network";
 				}
 			});
+		};
+
+		const editNetwork = (network: IrssiNetwork) => {
+			isEditing.value = true;
+			editingNetworkName.value = network.name;
+			newNetwork.value = JSON.parse(JSON.stringify(network));
+			window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
+		};
+
+		const removeNetwork = (networkName: string) => {
+			if (!confirm(`Are you sure you want to remove network '${networkName}'?`)) {
+				return;
+			}
+
+			isLoading.value = true;
+			errorMessage.value = "";
+			successMessage.value = "";
+
+			socket.emit("network:remove_irssi", {name: networkName}, (result: any) => {
+				isLoading.value = false;
+				if (result.success) {
+					successMessage.value = result.message;
+					loadNetworks();
+					setTimeout(() => {
+						successMessage.value = "";
+					}, 5000);
+				} else {
+					errorMessage.value = result.message || "Failed to remove network";
+				}
+			});
+		};
+
+		const connectToNetwork = (network: IrssiNetwork) => {
+			if (!network.servers || network.servers.length === 0) {
+				alert("Network has no servers configured");
+				return;
+			}
+
+			const server = network.servers[0];
+			const connectCommand = `/CONNECT ${server.address} ${server.port} ${network.name}`;
+
+			socket.emit(
+				"input",
+				{
+					text: connectCommand,
+				},
+				(response: any) => {
+					if (response && response.error) {
+						errorMessage.value = `Failed to connect: ${response.error}`;
+					} else {
+						successMessage.value = `Connecting to ${network.name}...`;
+						setTimeout(() => {
+							successMessage.value = "";
+						}, 3000);
+					}
+				}
+			);
 		};
 
 		const addServer = () => {
@@ -871,6 +1015,8 @@ export default defineComponent({
 		};
 
 		const resetForm = () => {
+			isEditing.value = false;
+			editingNetworkName.value = "";
 			newNetwork.value = {
 				name: "",
 				nick: "",
@@ -908,9 +1054,14 @@ export default defineComponent({
 			isLoading,
 			errorMessage,
 			successMessage,
+			isEditing,
+			editingNetworkName,
 			newNetwork,
 			loadNetworks,
 			addNewNetwork,
+			editNetwork,
+			removeNetwork,
+			connectToNetwork,
 			addServer,
 			removeServer,
 			resetForm,
