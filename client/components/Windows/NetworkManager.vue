@@ -1040,16 +1040,16 @@ export default defineComponent({
 		};
 
 		const connectToServer = (network: IrssiNetwork, server: any) => {
-			const connectCommand = `/CONNECT ${server.address} ${server.port} ${network.name}`;
+			const connectCommand = `CONNECT ${server.address} ${server.port} ${network.name}`;
 
 			socket.emit(
-				"input",
+				"irssi:command",
 				{
-					text: connectCommand,
+					command: connectCommand,
 				},
 				(response: any) => {
-					if (response && response.error) {
-						errorMessage.value = `Failed to connect: ${response.error}`;
+					if (response && !response.success) {
+						errorMessage.value = `Failed to connect: ${response.message}`;
 					} else {
 						successMessage.value = `Connecting to ${server.address}:${server.port} (${network.name})...`;
 						setTimeout(() => {
@@ -1176,6 +1176,8 @@ export default defineComponent({
 	border-radius: 8px;
 	padding: 1rem;
 	background: #f9f9f9;
+	max-width: 100%;
+	overflow-x: auto;
 }
 
 .network-header {
@@ -1185,41 +1187,52 @@ export default defineComponent({
 	margin-bottom: 1rem;
 	padding-bottom: 1rem;
 	border-bottom: 1px solid #ddd;
+	flex-wrap: wrap;
+	gap: 1rem;
+}
+
+.network-info {
+	flex: 1;
+	min-width: 200px;
 }
 
 .network-info h3 {
 	margin: 0 0 0.5rem 0;
-	font-size: 1.2rem;
+	font-size: 1.1rem;
 	color: #333;
 }
 
 .network-info p {
 	margin: 0.25rem 0;
-	font-size: 0.9rem;
+	font-size: 0.85rem;
 	color: #666;
 }
 
 .network-actions {
 	display: flex;
 	gap: 0.5rem;
+	flex-wrap: wrap;
 }
 
 .servers-table {
 	margin-top: 1rem;
+	overflow-x: auto;
 }
 
 .servers-table h4 {
 	margin: 0 0 0.5rem 0;
-	font-size: 1rem;
+	font-size: 0.95rem;
 	color: #555;
 }
 
 .servers-table table {
 	width: 100%;
+	min-width: 600px;
 	border-collapse: collapse;
 	background: white;
 	border-radius: 4px;
 	overflow: hidden;
+	font-size: 0.85rem;
 }
 
 .servers-table thead {
@@ -1227,18 +1240,19 @@ export default defineComponent({
 }
 
 .servers-table th {
-	padding: 0.75rem;
+	padding: 0.5rem;
 	text-align: left;
 	font-weight: 600;
-	font-size: 0.9rem;
+	font-size: 0.8rem;
 	color: #333;
 	border-bottom: 2px solid #ddd;
+	white-space: nowrap;
 }
 
 .servers-table td {
-	padding: 0.75rem;
+	padding: 0.5rem;
 	border-bottom: 1px solid #eee;
-	font-size: 0.9rem;
+	font-size: 0.8rem;
 }
 
 .servers-table tbody tr:hover {
@@ -1247,12 +1261,14 @@ export default defineComponent({
 
 .server-actions {
 	display: flex;
-	gap: 0.5rem;
+	gap: 0.25rem;
+	white-space: nowrap;
 }
 
 .btn-small {
-	padding: 0.25rem 0.75rem;
-	font-size: 0.85rem;
+	padding: 0.25rem 0.5rem;
+	font-size: 0.75rem;
+	white-space: nowrap;
 }
 
 .no-servers {
@@ -1262,5 +1278,22 @@ export default defineComponent({
 	font-style: italic;
 	background: white;
 	border-radius: 4px;
+	font-size: 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.network-header {
+		flex-direction: column;
+	}
+
+	.servers-table table {
+		min-width: 500px;
+	}
+
+	.btn-small {
+		font-size: 0.7rem;
+		padding: 0.2rem 0.4rem;
+	}
 }
 </style>

@@ -2010,6 +2010,18 @@ export class IrssiClient {
 	}
 
 	/**
+	 * Execute raw irssi command (for global commands like /CONNECT)
+	 */
+	executeIrssiCommand(command: string, server?: string): void {
+		if (!this.irssiConnection) {
+			throw new Error("Not connected to irssi");
+		}
+
+		this.irssiConnection.executeCommand(command, server);
+		log.info(`[IrssiClient] Executed command: ${command}${server ? ` on ${server}` : ""}`);
+	}
+
+	/**
 	 * Remove IRC network from irssi config
 	 */
 	async removeIrssiNetwork(name: string): Promise<CommandResult> {

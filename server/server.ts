@@ -1432,6 +1432,23 @@ function initializeIrssiClient(
 		}
 	});
 
+	// Execute raw irssi command (for global commands like /CONNECT)
+	socket.on("irssi:command", (data, callback) => {
+		try {
+			const {command, server} = data;
+			if (!command) {
+				callback({success: false, message: "Command is required"});
+				return;
+			}
+
+			client.executeIrssiCommand(command, server);
+			callback({success: true, message: `Command sent: ${command}`});
+		} catch (error: any) {
+			log.error(`[irssi:command] Error: ${error.message}`);
+			callback({success: false, message: error.message});
+		}
+	});
+
 	log.info(
 		`Browser ${colors.bold(socket.id)} attached to irssi user ${colors.bold(client.name)}`
 	);

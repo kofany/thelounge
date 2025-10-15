@@ -211,6 +211,11 @@ interface ClientToServerEvents {
 		data: {address: string; port: number; chatnet?: string},
 		callback: (result: {success: boolean; message: string; error_code?: string}) => void
 	) => void;
+
+	"irssi:command": (
+		data: {command: string; server?: string},
+		callback: (result: {success: boolean; message: string}) => void
+	) => void;
 }
 
 interface InterServerEvents {}
