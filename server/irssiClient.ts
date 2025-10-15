@@ -1858,7 +1858,7 @@ export class IrssiClient {
 		clearTimeout(pending.timeout);
 		this.pendingListRequests.delete(requestId);
 
-		const networks = msg.extra?.networks || [];
+		const networks = (msg as any).networks || [];
 		pending.resolve(networks);
 	}
 
@@ -1883,7 +1883,7 @@ export class IrssiClient {
 		clearTimeout(pending.timeout);
 		this.pendingListRequests.delete(requestId);
 
-		const servers = msg.extra?.servers || [];
+		const servers = (msg as any).servers || [];
 		pending.resolve(servers);
 	}
 

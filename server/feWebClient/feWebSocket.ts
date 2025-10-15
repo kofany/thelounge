@@ -32,6 +32,8 @@ export interface FeWebMessage {
 	success?: boolean; // For command_result
 	message?: string; // For command_result
 	error_code?: string; // For command_result
+	networks?: any[]; // For network_list_response
+	servers?: any[]; // For server_list_response
 }
 
 // Client → Server message types
