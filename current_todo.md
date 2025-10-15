@@ -64,33 +64,33 @@ Implementacja graficznego zarządzania sieciami IRC i serwerami w irssilounge po
 - [x] 3.6. Zintegrować IrssiNetworkManager z IrssiClient
 - [x] 3.7. Sprawdzić kompilację TypeScript (`npx tsc --noEmit`)
 
-### Phase 4: Frontend - NetworkManager Component
-- [ ] 4.1. Utworzyć komponent `NetworkManager.vue` z podstawową strukturą
-- [ ] 4.2. Dodać sekcję "Saved Networks" z listą sieci
-- [ ] 4.3. Dodać formularz "Add New Network"
-- [ ] 4.4. Zaimplementować logikę dodawania serwerów do sieci (multi-server support)
-- [ ] 4.5. Dodać przyciski Connect/Edit/Remove dla każdej sieci
-- [ ] 4.6. Zaimplementować obsługę socket events w komponencie
+### Phase 4: Frontend - NetworkManager Component ✅ COMPLETED
+- [x] 4.1. Utworzyć komponent `NetworkManager.vue` z podstawową strukturą
+- [x] 4.2. Dodać sekcję "Saved Networks" z listą sieci
+- [x] 4.3. Dodać formularz "Add New Network"
+- [x] 4.4. Zaimplementować logikę dodawania serwerów do sieci (multi-server support)
+- [x] 4.5. Dodać przyciski Connect/Edit/Remove dla każdej sieci
+- [x] 4.6. Zaimplementować obsługę socket events w komponencie
 
-### Phase 5: Frontend - Socket Events & Integration
-- [ ] 5.1. Dodać socket event types w shared/types/socket-events.d.ts
-- [ ] 5.2. Utworzyć socket event handler dla `network:list`
-- [ ] 5.3. Utworzyć socket event handler dla `network:add`
-- [ ] 5.4. Utworzyć socket event handler dla `network:connect`
-- [ ] 5.5. Utworzyć socket event handler dla `network:remove`
+### Phase 5: Frontend - Socket Events & Integration ✅ COMPLETED
+- [x] 5.1. Socket events zintegrowane w NetworkManager.vue
+- [x] 5.2. Socket event handler dla `network:list` (onMounted + loadNetworks)
+- [x] 5.3. Socket event handler dla `network:add` (addNewNetwork)
+- [x] 5.4. Socket event handler dla `network:connect` (connectToNetwork)
+- [x] 5.5. Socket event handler dla `network:remove` (removeNetwork)
 
-### Phase 6: Router & UI Integration
-- [ ] 6.1. Dodać route `/connect` w Vue Router
-- [ ] 6.2. Zintegrować NetworkManager.vue z layoutem aplikacji
-- [ ] 6.3. Sprawdzić czy przycisk "Connect to network" w Sidebar.vue działa
-- [ ] 6.4. Dodać style CSS dla NetworkManager komponentu
+### Phase 6: Router & UI Integration ✅ COMPLETED
+- [x] 6.1. Dodać route `/network-manager` w Vue Router
+- [x] 6.2. Zintegrować NetworkManager.vue z layoutem aplikacji
+- [x] 6.3. Dodać przycisk "Network Manager" w Sidebar.vue
+- [x] 6.4. Dodać style CSS dla NetworkManager komponentu (scoped styles)
 
 ### Phase 7: Testing & Refinement
-- [ ] 7.1. Sprawdzić kompilację TypeScript (`npx tsc --noEmit`)
+- [x] 7.1. Sprawdzić kompilację TypeScript (`npx tsc --noEmit`)
 - [ ] 7.2. Sprawdzić build Vue (`npm run build`)
-- [ ] 7.3. Sprawdzić kompilację irssi C code (jeśli były zmiany)
-- [ ] 7.4. Przegląd kodu - usunięcie wszystkich TODO komentarzy
-- [ ] 7.5. Commit finalny z pełną implementacją
+- [ ] 7.3. Przegląd kodu - weryfikacja implementacji
+- [ ] 7.4. Commit finalny z pełną implementacją frontend
+- [ ] 7.5. Push do GitHub
 
 ---
 
@@ -125,6 +125,6 @@ chatnets = {
 ---
 
 ## Status: 🟢 IN PROGRESS
-**Current Phase**: Phase 4 - Frontend NetworkManager Component
-**Completed**: Phase 1 ✅, Phase 2 ✅, Phase 3 ✅
+**Current Phase**: Phase 7 - Testing & Refinement
+**Completed**: Phase 1 ✅, Phase 2 ✅, Phase 3 ✅, Phase 4 ✅, Phase 5 ✅, Phase 6 ✅
 **Last Updated**: 2025-10-15

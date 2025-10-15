@@ -7,6 +7,7 @@ import Settings from "../components/Windows/Settings.vue";
 import Help from "../components/Windows/Help.vue";
 import Changelog from "../components/Windows/Changelog.vue";
 import NetworkEdit from "../components/Windows/NetworkEdit.vue";
+import NetworkManager from "../components/Windows/NetworkManager.vue";
 import SearchResults from "../components/Windows/SearchResults.vue";
 import RoutedChat from "../components/RoutedChat.vue";
 import {store} from "./store";
@@ -44,6 +45,11 @@ const router = createRouter({
 			path: "/connect",
 			component: Connect,
 			props: (route) => ({queryParams: route.query}),
+		},
+		{
+			name: "NetworkManager",
+			path: "/network-manager",
+			component: NetworkManager,
 		},
 		{
 			path: "/settings",

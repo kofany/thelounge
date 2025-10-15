@@ -46,6 +46,22 @@
 						@keypress.enter="navigate"
 					/> </router-link
 			></span>
+			<span
+				class="tooltipped tooltipped-n tooltipped-no-touch"
+				aria-label="Network Manager"
+				><router-link
+					v-slot:default="{navigate, isActive}"
+					to="/network-manager"
+					role="tab"
+					aria-controls="network-manager"
+				>
+					<button
+						:class="['icon', 'connect', {active: isActive}]"
+						:aria-selected="isActive"
+						@click="navigate"
+						@keypress.enter="navigate"
+					></button> </router-link
+			></span>
 			<span class="tooltipped tooltipped-n tooltipped-no-touch" aria-label="Settings"
 				><router-link
 					v-slot:default="{navigate, isActive}"
