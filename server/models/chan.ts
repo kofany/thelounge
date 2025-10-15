@@ -38,6 +38,7 @@ class Chan {
 	data?: any;
 	closed?: boolean;
 	num_users?: number;
+	totalMessagesInStorage?: number; // Total count from storage (irssi mode)
 
 	constructor(attr?: Partial<Chan>) {
 		_.defaults(this, attr, {
@@ -206,7 +207,7 @@ class Chan {
 		return {
 			id: this.id,
 			messages: msgs,
-			totalMessages: this.messages.length,
+			totalMessages: this.totalMessagesInStorage ?? this.messages.length,
 			name: this.name,
 			key: this.key,
 			topic: this.topic,

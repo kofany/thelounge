@@ -885,6 +885,12 @@ export class IrssiClient {
 				for (const network of this.networks) {
 					for (const channel of network.channels) {
 						try {
+							// Get total message count from storage
+							const totalCount = await this.messageStorage.getMessageCount(
+								network.uuid,
+								channel.name
+							);
+
 							// Load last 100 messages from encrypted storage
 							const messages = await this.messageStorage.getLastMessages(
 								network.uuid,
@@ -899,15 +905,19 @@ export class IrssiClient {
 
 							// TEMPORARILY add to channel.messages (only for this init!)
 							channel.messages = messages;
+							
+							// Store total count for getFilteredClone to use
+							channel.totalMessagesInStorage = totalCount;
 
 							log.debug(
-								`[IrssiClient] Loaded ${messages.length} messages for ${network.name}/${channel.name}`
+								`[IrssiClient] Loaded ${messages.length}/${totalCount} messages for ${network.name}/${channel.name}`
 							);
 						} catch (err) {
 							log.error(
 								`Failed to load messages for ${network.name}/${channel.name}: ${err}`
 							);
 							channel.messages = [];
+							channel.totalMessagesInStorage = 0;
 						}
 					}
 				}
@@ -943,6 +953,7 @@ export class IrssiClient {
 			for (const network of this.networks) {
 				for (const channel of network.channels) {
 					channel.messages = [];
+					channel.totalMessagesInStorage = undefined; // Clear cached count
 				}
 			}
 

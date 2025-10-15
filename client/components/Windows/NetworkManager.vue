@@ -527,9 +527,10 @@
 
 <style scoped>
 #network-manager .container {
-	padding: 20px;
-	max-width: 900px;
+	padding: 15px;
+	max-width: 95%;
 	margin: 0 auto;
+	width: 100%;
 }
 
 #network-manager .title {
@@ -576,18 +577,19 @@
 }
 
 .networks-list {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-	gap: 15px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
 	margin-top: 15px;
 }
 
 .network-item {
 	background: var(--window-bg-color);
 	border: 1px solid var(--body-bg-color);
-	border-radius: 5px;
-	padding: 15px;
+	border-radius: 8px;
+	padding: 20px;
 	transition: box-shadow 0.2s;
+	width: 100%;
 }
 
 .network-item:hover {
@@ -667,15 +669,18 @@ section h2 {
 
 .network-form {
 	background: var(--window-bg-color);
-	padding: 20px;
+	padding: 25px;
 	border-radius: 5px;
+	width: 100%;
 }
 
 fieldset {
 	border: 1px solid var(--body-bg-color);
 	border-radius: 5px;
-	padding: 20px;
+	padding: 25px;
 	margin-bottom: 20px;
+	width: 100%;
+	box-sizing: border-box;
 }
 
 fieldset legend {
@@ -702,7 +707,7 @@ fieldset legend {
 }
 
 .form-row label {
-	flex: 0 0 180px;
+	flex: 0 0 200px;
 	padding-top: 8px;
 	font-weight: bold;
 }
@@ -712,11 +717,15 @@ fieldset legend {
 .form-row select,
 .form-row textarea {
 	flex: 1;
+	min-width: 300px;
+	font-size: 14px;
+	padding: 8px 12px;
 }
 
 .form-row textarea {
 	resize: vertical;
-	min-height: 60px;
+	min-height: 80px;
+	padding: 10px 12px;
 }
 
 .help-inline {
@@ -724,7 +733,7 @@ fieldset legend {
 	font-size: 0.85em;
 	color: var(--body-color-muted);
 	margin-top: 5px;
-	margin-left: 180px;
+	margin-left: 200px;
 }
 
 .input-wrap {
@@ -835,6 +844,120 @@ fieldset legend {
 
 .btn-secondary:hover:not(:disabled) {
 	background: var(--highlight-bg-color);
+}
+
+/* Servers table styles (override for better layout) */
+.servers-table {
+	margin-top: 1rem;
+	width: 100%;
+	overflow-x: auto;
+}
+
+.servers-table h4 {
+	margin: 0 0 0.75rem 0;
+	font-size: 1rem;
+	color: var(--body-color);
+	font-weight: 600;
+}
+
+.servers-table table {
+	width: 100%;
+	min-width: 600px;
+	border-collapse: collapse;
+	background: var(--body-bg-color);
+	border-radius: 4px;
+	overflow: hidden;
+	font-size: 0.9rem;
+	table-layout: auto;
+}
+
+.servers-table thead {
+	background: var(--highlight-bg-color);
+}
+
+.servers-table th {
+	padding: 0.75rem 1rem;
+	text-align: left;
+	font-weight: 600;
+	font-size: 0.9rem;
+	color: var(--body-color);
+	border-bottom: 2px solid var(--body-bg-color);
+	white-space: nowrap;
+}
+
+.servers-table td {
+	padding: 0.75rem 1rem;
+	border-bottom: 1px solid var(--window-bg-color);
+	font-size: 0.9rem;
+}
+
+.servers-table tbody tr:hover {
+	background: var(--window-bg-color);
+}
+
+.server-actions {
+	display: flex;
+	gap: 0.5rem;
+	white-space: nowrap;
+}
+
+.btn-small {
+	padding: 0.4rem 0.9rem;
+	font-size: 0.85rem;
+	white-space: nowrap;
+	min-width: 70px;
+}
+
+.no-servers {
+	padding: 1.5rem;
+	text-align: center;
+	color: var(--body-color-muted);
+	font-style: italic;
+	background: var(--body-bg-color);
+	border-radius: 4px;
+	font-size: 0.9rem;
+}
+
+.network-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 1.5rem;
+	padding-bottom: 1rem;
+	border-bottom: 2px solid var(--body-bg-color);
+	flex-wrap: wrap;
+	gap: 1rem;
+}
+
+.network-info {
+	flex: 1;
+	min-width: 250px;
+}
+
+.network-info h3 {
+	margin: 0 0 0.75rem 0;
+	font-size: 1.3rem;
+	color: var(--link-color);
+	font-weight: bold;
+}
+
+.network-info p {
+	margin: 0.5rem 0;
+	font-size: 0.95rem;
+	color: var(--body-color-muted);
+}
+
+.network-actions {
+	display: flex;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+	align-items: flex-start;
+}
+
+.network-actions .btn {
+	min-width: 90px;
+	padding: 0.6rem 1.2rem;
+	font-size: 0.95rem;
 }
 </style>
 
@@ -1040,7 +1163,9 @@ export default defineComponent({
 		};
 
 		const connectToServer = (network: IrssiNetwork, server: any) => {
-			const connectCommand = `CONNECT ${server.address} ${server.port} ${network.name}`;
+			// Build CONNECT command with network name
+			// Syntax: CONNECT [-4] [-network <network>] <address> [<port>]
+			const connectCommand = `CONNECT -4 -network ${network.name} ${server.address} ${server.port}`;
 
 			socket.emit(
 				"irssi:command",
@@ -1168,114 +1293,3 @@ export default defineComponent({
 	},
 });
 </script>
-
-<style scoped>
-.network-item {
-	margin-bottom: 2rem;
-	border: 1px solid #ddd;
-	border-radius: 8px;
-	padding: 1rem;
-	background: #f9f9f9;
-	display: inline-block;
-	min-width: 100%;
-}
-
-.network-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	margin-bottom: 1rem;
-	padding-bottom: 1rem;
-	border-bottom: 1px solid #ddd;
-	flex-wrap: wrap;
-	gap: 1rem;
-}
-
-.network-info {
-	flex: 1;
-	min-width: 200px;
-}
-
-.network-info h3 {
-	margin: 0 0 0.5rem 0;
-	font-size: 1.1rem;
-	color: #333;
-}
-
-.network-info p {
-	margin: 0.25rem 0;
-	font-size: 0.85rem;
-	color: #666;
-}
-
-.network-actions {
-	display: flex;
-	gap: 0.5rem;
-	flex-wrap: wrap;
-}
-
-.servers-table {
-	margin-top: 1rem;
-}
-
-.servers-table h4 {
-	margin: 0 0 0.5rem 0;
-	font-size: 0.95rem;
-	color: #555;
-}
-
-.servers-table table {
-	width: auto;
-	border-collapse: collapse;
-	background: white;
-	border-radius: 4px;
-	overflow: hidden;
-	font-size: 0.9rem;
-}
-
-.servers-table thead {
-	background: #f0f0f0;
-}
-
-.servers-table th {
-	padding: 0.75rem;
-	text-align: left;
-	font-weight: 600;
-	font-size: 0.9rem;
-	color: #333;
-	border-bottom: 2px solid #ddd;
-	white-space: nowrap;
-}
-
-.servers-table td {
-	padding: 0.75rem;
-	border-bottom: 1px solid #eee;
-	font-size: 0.9rem;
-}
-
-.servers-table tbody tr:hover {
-	background: #f9f9f9;
-}
-
-.server-actions {
-	display: flex;
-	gap: 0.5rem;
-	white-space: nowrap;
-}
-
-.btn-small {
-	padding: 0.25rem 0.75rem;
-	font-size: 0.85rem;
-	white-space: nowrap;
-}
-
-.no-servers {
-	padding: 1rem;
-	text-align: center;
-	color: #999;
-	font-style: italic;
-	background: white;
-	border-radius: 4px;
-	font-size: 0.85rem;
-}
-</style>
