@@ -5,9 +5,45 @@
 		</div>
 		<div class="container">
 			<h1 class="title">IRC Network Manager</h1>
-			<p class="info-text">
-				<strong>Note:</strong> This feature is under development. Network/server management will be available once the backend implementation is complete.
-			</p>
+
+			<!-- Loading indicator -->
+			<div v-if="isLoading" class="loading-message">
+				<p>Loading...</p>
+			</div>
+
+			<!-- Success message -->
+			<div v-if="successMessage" class="success-message">
+				<p>{{ successMessage }}</p>
+			</div>
+
+			<!-- Error message -->
+			<div v-if="errorMessage" class="error-message">
+				<p>{{ errorMessage }}</p>
+			</div>
+
+			<!-- Saved Networks Section -->
+			<section v-if="savedNetworks.length > 0" class="saved-networks">
+				<h2>Saved Networks ({{ savedNetworks.length }})</h2>
+				<div class="networks-list">
+					<div
+						v-for="(network, index) in savedNetworks"
+						:key="index"
+						class="network-item"
+					>
+						<div class="network-info">
+							<h3>{{ network.name }}</h3>
+							<p v-if="network.nick">Nick: {{ network.nick }}</p>
+							<p v-if="network.saslMechanism">
+								SASL: {{ network.saslMechanism }}
+								<span v-if="network.saslUsername"
+									>({{ network.saslUsername }})</span
+								>
+							</p>
+							<p v-if="network.servers">Servers: {{ network.servers.length }}</p>
+						</div>
+					</div>
+				</div>
+			</section>
 
 			<!-- Add New Network Section -->
 			<section class="add-network">
@@ -81,7 +117,9 @@
 
 					<!-- SASL Authentication -->
 					<fieldset>
-						<legend>SASL Authentication <span class="optional">(optional)</span></legend>
+						<legend>
+							SASL Authentication <span class="optional">(optional)</span>
+						</legend>
 
 						<div class="form-row">
 							<label for="sasl-mechanism">SASL Mechanism</label>
@@ -97,7 +135,12 @@
 							</select>
 						</div>
 
-						<div v-if="newNetwork.saslMechanism && newNetwork.saslMechanism !== 'EXTERNAL'" class="form-row">
+						<div
+							v-if="
+								newNetwork.saslMechanism && newNetwork.saslMechanism !== 'EXTERNAL'
+							"
+							class="form-row"
+						>
 							<label for="sasl-username">SASL Username</label>
 							<input
 								id="sasl-username"
@@ -109,7 +152,12 @@
 							/>
 						</div>
 
-						<div v-if="newNetwork.saslMechanism && newNetwork.saslMechanism !== 'EXTERNAL'" class="form-row">
+						<div
+							v-if="
+								newNetwork.saslMechanism && newNetwork.saslMechanism !== 'EXTERNAL'
+							"
+							class="form-row"
+						>
 							<label for="sasl-password">SASL Password</label>
 							<input
 								id="sasl-password"
@@ -124,7 +172,9 @@
 
 					<!-- Advanced Network Settings -->
 					<fieldset>
-						<legend>Advanced Network Settings <span class="optional">(optional)</span></legend>
+						<legend>
+							Advanced Network Settings <span class="optional">(optional)</span>
+						</legend>
 
 						<div class="form-row">
 							<label for="network-usermode">User Mode</label>
@@ -149,7 +199,10 @@
 								placeholder="/msg NickServ identify password"
 								maxlength="500"
 							/>
-							<span class="help-inline">Commands to run after connecting (one per line or separated by ;)</span>
+							<span class="help-inline"
+								>Commands to run after connecting (one per line or separated by
+								;)</span
+							>
 						</div>
 
 						<div class="form-row">
@@ -168,7 +221,9 @@
 
 					<!-- Servers -->
 					<fieldset>
-						<legend>Servers <span class="required">(at least one required)</span></legend>
+						<legend>
+							Servers <span class="required">(at least one required)</span>
+						</legend>
 
 						<div
 							v-for="(server, index) in newNetwork.servers"
@@ -207,10 +262,7 @@
 									<label></label>
 									<div class="input-wrap">
 										<label class="checkbox-label">
-											<input
-												v-model="server.useTLS"
-												type="checkbox"
-											/>
+											<input v-model="server.useTLS" type="checkbox" />
 											Use TLS
 										</label>
 										<label class="checkbox-label">
@@ -222,10 +274,7 @@
 											Verify TLS Certificate
 										</label>
 										<label class="checkbox-label">
-											<input
-												v-model="server.autoConnect"
-												type="checkbox"
-											/>
+											<input v-model="server.autoConnect" type="checkbox" />
 											Auto-connect
 										</label>
 									</div>
@@ -249,7 +298,9 @@
 									<summary>TLS Client Certificates (for SASL EXTERNAL)</summary>
 
 									<div class="form-row">
-										<label :for="`server-tls-cert-${index}`">Client Certificate Path</label>
+										<label :for="`server-tls-cert-${index}`"
+											>Client Certificate Path</label
+										>
 										<input
 											:id="`server-tls-cert-${index}`"
 											v-model.trim="server.tlsCert"
@@ -261,7 +312,9 @@
 									</div>
 
 									<div class="form-row">
-										<label :for="`server-tls-pkey-${index}`">Client Private Key Path</label>
+										<label :for="`server-tls-pkey-${index}`"
+											>Client Private Key Path</label
+										>
 										<input
 											:id="`server-tls-pkey-${index}`"
 											v-model.trim="server.tlsPkey"
@@ -273,7 +326,9 @@
 									</div>
 
 									<div class="form-row">
-										<label :for="`server-tls-pass-${index}`">Private Key Password</label>
+										<label :for="`server-tls-pass-${index}`"
+											>Private Key Password</label
+										>
 										<input
 											:id="`server-tls-pass-${index}`"
 											v-model="server.tlsPass"
@@ -285,7 +340,9 @@
 									</div>
 
 									<div class="form-row">
-										<label :for="`server-tls-cafile-${index}`">CA Certificate File</label>
+										<label :for="`server-tls-cafile-${index}`"
+											>CA Certificate File</label
+										>
 										<input
 											:id="`server-tls-cafile-${index}`"
 											v-model.trim="server.tlsCafile"
@@ -297,7 +354,9 @@
 									</div>
 
 									<div class="form-row">
-										<label :for="`server-tls-capath-${index}`">CA Certificate Directory</label>
+										<label :for="`server-tls-capath-${index}`"
+											>CA Certificate Directory</label
+										>
 										<input
 											:id="`server-tls-capath-${index}`"
 											v-model.trim="server.tlsCapath"
@@ -314,7 +373,9 @@
 									<summary>Advanced Server Settings</summary>
 
 									<div class="form-row">
-										<label :for="`server-ownhost-${index}`">Bind to Address</label>
+										<label :for="`server-ownhost-${index}`"
+											>Bind to Address</label
+										>
 										<input
 											:id="`server-ownhost-${index}`"
 											v-model.trim="server.ownHost"
@@ -342,17 +403,11 @@
 										<label></label>
 										<div class="input-wrap">
 											<label class="checkbox-label">
-												<input
-													v-model="server.noCap"
-													type="checkbox"
-												/>
+												<input v-model="server.noCap" type="checkbox" />
 												Disable CAP negotiation
 											</label>
 											<label class="checkbox-label">
-												<input
-													v-model="server.noProxy"
-													type="checkbox"
-												/>
+												<input v-model="server.noProxy" type="checkbox" />
 												Don't use proxy
 											</label>
 										</div>
@@ -380,11 +435,7 @@
 					</fieldset>
 
 					<div class="form-actions">
-						<button
-							type="submit"
-							class="btn"
-							:disabled="actionInProgress"
-						>
+						<button type="submit" class="btn" :disabled="actionInProgress">
 							Add Network
 						</button>
 						<button
@@ -421,6 +472,68 @@
 	border-radius: 3px;
 }
 
+.loading-message {
+	padding: 15px;
+	background: var(--highlight-bg-color);
+	border-left: 4px solid var(--link-color);
+	margin-bottom: 20px;
+	border-radius: 3px;
+	text-align: center;
+}
+
+.success-message {
+	padding: 15px;
+	background: #d4edda;
+	color: #155724;
+	border-left: 4px solid #28a745;
+	margin-bottom: 20px;
+	border-radius: 3px;
+}
+
+.error-message {
+	padding: 15px;
+	background: #f8d7da;
+	color: #721c24;
+	border-left: 4px solid #dc3545;
+	margin-bottom: 20px;
+	border-radius: 3px;
+}
+
+.saved-networks {
+	margin-bottom: 40px;
+}
+
+.networks-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+	gap: 15px;
+	margin-top: 15px;
+}
+
+.network-item {
+	background: var(--window-bg-color);
+	border: 1px solid var(--body-bg-color);
+	border-radius: 5px;
+	padding: 15px;
+	transition: box-shadow 0.2s;
+}
+
+.network-item:hover {
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.network-info h3 {
+	margin: 0 0 10px 0;
+	color: var(--link-color);
+	font-size: 1.2em;
+}
+
+.network-info p {
+	margin: 5px 0;
+	font-size: 0.9em;
+	color: var(--body-color-muted);
+}
+
 section {
 	margin-bottom: 40px;
 }
@@ -450,7 +563,8 @@ fieldset legend {
 	font-size: 1.1em;
 }
 
-.optional, .required {
+.optional,
+.required {
 	font-weight: normal;
 	font-size: 0.9em;
 	color: var(--body-color-muted);
@@ -664,6 +778,10 @@ export default defineComponent({
 	},
 	setup() {
 		const actionInProgress = ref(false);
+		const savedNetworks = ref<IrssiNetwork[]>([]);
+		const isLoading = ref(false);
+		const errorMessage = ref("");
+		const successMessage = ref("");
 
 		const newNetwork = ref<IrssiNetwork>({
 			name: "",
@@ -691,30 +809,48 @@ export default defineComponent({
 			],
 		});
 
+		const loadNetworks = () => {
+			isLoading.value = true;
+			errorMessage.value = "";
+
+			socket.emit("network:list_irssi", (result: any) => {
+				isLoading.value = false;
+				if (result.success) {
+					savedNetworks.value = result.networks || [];
+				} else {
+					errorMessage.value = result.error || "Failed to load networks";
+				}
+			});
+		};
+
 		const addNewNetwork = () => {
 			if (!newNetwork.value.name || newNetwork.value.servers.length === 0) {
 				alert("Network name and at least one server are required");
 				return;
 			}
 
-			// TODO: Implement when backend is ready
-			alert("Network management is not yet implemented in the backend. This feature will be available soon.");
+			if (!newNetwork.value.servers[0].address) {
+				alert("Server address is required");
+				return;
+			}
 
-			// Future implementation:
-			// const networkData: IrssiNetwork = {
-			//   ...newNetwork.value,
-			//   servers: newNetwork.value.servers.map((s) => ({
-			//     ...s,
-			//     chatnet: newNetwork.value.name,
-			//   })),
-			// };
-			// socket.emit("network:add", {network: networkData}, (response: any) => {
-			//   if (response.success) {
-			//     resetForm();
-			//   } else {
-			//     alert(`Failed to add network: ${response.error}`);
-			//   }
-			// });
+			isLoading.value = true;
+			errorMessage.value = "";
+			successMessage.value = "";
+
+			socket.emit("network:add_irssi", newNetwork.value, (result: any) => {
+				isLoading.value = false;
+				if (result.success) {
+					successMessage.value = result.message;
+					resetForm();
+					loadNetworks();
+					setTimeout(() => {
+						successMessage.value = "";
+					}, 5000);
+				} else {
+					errorMessage.value = result.message || "Failed to add network";
+				}
+			});
 		};
 
 		const addServer = () => {
@@ -763,12 +899,17 @@ export default defineComponent({
 		};
 
 		onMounted(() => {
-			// Network management will be implemented in Phase 7
+			loadNetworks();
 		});
 
 		return {
 			actionInProgress,
+			savedNetworks,
+			isLoading,
+			errorMessage,
+			successMessage,
 			newNetwork,
+			loadNetworks,
 			addNewNetwork,
 			addServer,
 			removeServer,
