@@ -24,13 +24,13 @@
 	--nick-system-color: #909090;
 	--nick-bot-color: #888888;
 
-	/* Event symbol colors - minimal variation */
-	--join-color: #a0a0a0;
-	--part-color: #909090;
-	--quit-color: #808080;
-	--kick-color: #707070;
-	--mode-color: #888888;
-	--topic-color: #a0a0a0;
+	/* Event symbol colors - muted pastels */
+	--join-color: #b0c5a0;    /* stonowany zielony - join */
+	--part-color: #a0b4c5;    /* stonowany niebieski - part */
+	--quit-color: #c5a0b4;    /* stonowany różowy - quit */
+	--kick-color: #d4a090;    /* stonowany czerwony - kick */
+	--mode-color: #d4c5a0;    /* stonowany złoty - mode */
+	--topic-color: #a0c5b4;   /* stonowany turkusowy - topic */
 
 	/* Other colors - monochrome */
 	--hostmask-color: #707070;
@@ -55,8 +55,8 @@
 	--list-item-hover-bg: #323232;
 	--list-item-selected-bg: #2b2b2b;
 
-	/* Input colors */
-	--input-bg-color: #444444;
+	/* Input colors - dark like sidebar */
+	--input-bg-color: #383838;
 	--input-border-color: #404040;
 }
 
@@ -322,30 +322,61 @@ textarea.input {
 }
 
 /* Override default user colors - stonowane pastelowe */
-.user.color-1 { color: #b0c5a0; } /* stonowany zielony */
-.user.color-2 { color: #a0b4c5; } /* stonowany niebieski */
-.user.color-3 { color: #d4c5a0; } /* stonowany złoty */
-.user.color-4 { color: #c5a0b4; } /* stonowany różowy */
-.user.color-5 { color: #a0c5b4; } /* stonowany turkusowy */
-.user.color-6 { color: #c5b4a0; } /* stonowany brązowy */
-.user.color-7 { color: #b4a0c5; } /* stonowany fioletowy */
-.user.color-8 { color: #c5c5a0; } /* stonowany żółty */
+.user.color-1,
+#chat .from .user.color-1,
+#chat .userlist .user.color-1 { color: #b0c5a0 !important; } /* stonowany zielony */
+
+.user.color-2,
+#chat .from .user.color-2,
+#chat .userlist .user.color-2 { color: #a0b4c5 !important; } /* stonowany niebieski */
+
+.user.color-3,
+#chat .from .user.color-3,
+#chat .userlist .user.color-3 { color: #d4c5a0 !important; } /* stonowany złoty */
+
+.user.color-4,
+#chat .from .user.color-4,
+#chat .userlist .user.color-4 { color: #c5a0b4 !important; } /* stonowany różowy */
+
+.user.color-5,
+#chat .from .user.color-5,
+#chat .userlist .user.color-5 { color: #a0c5b4 !important; } /* stonowany turkusowy */
+
+.user.color-6,
+#chat .from .user.color-6,
+#chat .userlist .user.color-6 { color: #c5b4a0 !important; } /* stonowany brązowy */
+
+.user.color-7,
+#chat .from .user.color-7,
+#chat .userlist .user.color-7 { color: #b4a0c5 !important; } /* stonowany fioletowy */
+
+.user.color-8,
+#chat .from .user.color-8,
+#chat .userlist .user.color-8 { color: #c5c5a0 !important; } /* stonowany żółty */
+
+/* Ensure all users in chat and userlist have pastel colors */
+#chat .from .user,
+#chat .msg .from .user,
+#chat .userlist .user {
+	font-weight: normal;
+}
 
 /* Userlist active state */
 #chat .userlist .user.active {
 	background-color: #323232;
 }
 
-/* Input text field - fix white background */
+/* Input text field - dark background like sidebar */
 #form .input,
 .input {
-	background-color: #444444 !important;
+	background-color: #383838 !important;
 	border-color: #404040 !important;
 	color: #cccccc !important;
 }
 
-#form .input::placeholder {
-	color: #777777;
+#form .input::placeholder,
+.input::placeholder {
+	color: #777777 !important;
 }
 
 /* Stonowane kolory dla nicków w czacie - monochrome palette */
