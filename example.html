@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRC Log - #polska</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            color: #d0d0d0;
+            font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            padding: 20px;
+        }
+
+        .log-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: #252525;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .log-line {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-bottom: 2px;
+        }
+
+        /* Timestamp */
+        .timestamp {
+            color: #5f8787;
+            font-weight: normal;
+        }
+
+        /* Symbole akcji */
+        .symbol {
+            color: #87af87;
+            font-weight: bold;
+        }
+
+        .symbol.join { color: #5faf5f; }
+        .symbol.part { color: #af8700; }
+        .symbol.quit { color: #af5f00; }
+        .symbol.kick { color: #d75f5f; }
+        .symbol.mode { color: #af87d7; }
+        .symbol.topic { color: #5fafaf; }
+
+        /* Nicki */
+        .nick {
+            font-weight: bold;
+        }
+
+        .nick.op {
+            color: #ffaf00;
+        }
+
+        .nick.voice {
+            color: #87d7ff;
+        }
+
+        .nick.normal {
+            color: #afd787;
+        }
+
+        .nick.system {
+            color: #d7875f;
+        }
+
+        .nick.bot {
+            color: #af87ff;
+        }
+
+        /* Tekst wiadomości */
+        .message {
+            color: #d0d0d0;
+        }
+
+        /* Hostmask */
+        .hostmask {
+            color: #5f8787;
+            font-size: 0.95em;
+        }
+
+        /* Channel */
+        .channel {
+            color: #5fafaf;
+            font-weight: bold;
+        }
+
+        /* Separator */
+        .separator {
+            color: #5f5f87;
+        }
+
+        /* Info messages */
+        .info {
+            color: #87afaf;
+            font-style: italic;
+        }
+
+        /* Reason (kick, quit) */
+        .reason {
+            color: #af8787;
+            font-style: italic;
+        }
+
+        /* Mode */
+        .mode-change {
+            color: #d787d7;
+            font-weight: bold;
+        }
+
+        /* Day separator */
+        .day-change {
+            color: #ffaf5f;
+            font-weight: bold;
+            background-color: #2a2a2a;
+            padding: 5px;
+            margin: 10px 0;
+            text-align: center;
+            border-left: 3px solid #ffaf5f;
+        }
+
+        /* Emoji i symbole */
+        .emoji {
+            font-size: 1.1em;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4a4a4a;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5a5a5a;
+        }
+
+        /* Userlist on the right */
+        .userlist {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 90vh;
+            overflow-y: auto;
+            min-width: 150px;
+            border: 1px solid #3a3a3a;
+        }
+
+        .userlist-title {
+            color: #87afaf;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #3a3a3a;
+            padding-bottom: 5px;
+        }
+
+        .userlist-user {
+            color: #afd787;
+            font-size: 12px;
+            padding: 2px 0;
+        }
+
+        @media (max-width: 1200px) {
+            .userlist {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="log-container" id="logContainer"></div>
+    
+    <div class="userlist">
+        <div class="userlist-title">Users (350)</div>
+        <div id="userListContent"></div>
+    </div>
+
+    <script>
+        const logData = `23:32:35❱ ⥤ atufka ❮❮atufka@to.emerytka.z.podworko.net❯❯ has breached #polska
+23:32:49❱ @kofany\`❯ no claude pro w chuj
+23:33:08❱ ⏻ Crater ❮❮a@de.juen.im❯❯ has been deprecated (Ping timeout)
+23:33:09❱ @kofany\`❯ jeden dzien kilka msg rano kilka teraz i aproching weekly limit
+23:33:15❱ @kofany\`❯ popierdoliło ich w chuj
+23:33:27❱ ⏻ Sorlag ❮❮a@juen.im❯❯ has been deprecated (Ping timeout)
+23:33:43❱ ⏻ Gwiazda ❮❮a@juen.me❯❯ has been deprecated (Ping timeout)
+23:33:54❱ ⏻ juen ❮❮juen@cycate.baby❯❯ has been deprecated (Ping timeout)
+23:34:25❱ ⏻ Slumlord ❮❮~Slumlord@129.222.46.23❯❯ has been deprecated ("Leaving")
+23:38:37❱ ⥤ Crater ❮❮a@de.juen.im❯❯ has breached #polska
+23:38:50❱ ⥤ Gwiazda ❮❮a@juen.me❯❯ has breached #polska
+23:38:50❱ ⥤ juen ❮❮juen@cycate.baby❯❯ has breached #polska
+23:39:04❱ ⛈ Premier- has executed protocol +v juen on ➜#polska
+23:40:21❱ ⥤ Sorlag ❮❮a@juen.im❯❯ has breached #polska
+23:42:34❱ ⥤ Klips ❮❮kolia@iowa.hu❯❯ has breached #polska
+23:43:19❱ ⥤ Klipsik ❮❮kolia@bezdomny.hu❯❯ has breached #polska
+23:45:48❱ ⥢ kofany\` ❮❮kofany@0pn.pl❯❯ has withdrawn from #polska ()
+23:45:48❱ ⥤ kofany\` ❮❮kofany@0pn.pl❯❯ has breached #polska
+23:45:48❱ ⚡ Topic for #polska: https://dev.raszei.eu/
+23:45:48❱ ⚙ Topic set by Prezydent ❮Wed Oct 15 10:00:43 2025❯
+23:45:48❱ Irssi: #polska: Total❮350❯ targets ❮Operators ❮7❯, Voice ❮27❯, Standard ❮316❯❯
+23:45:53❱  kofany\`❯ .opme
+23:45:56❱  kofany\`❯ .op
+23:45:59❱ ⛈ Premier- has executed protocol +o kofany\` on ➜#polska
+23:46:00❱ Irssi: ✓ Join to #polska was synced in 12 secs
+23:46:05❱ @kofany\`❯ wszyscy śpią?
+23:46:21❱ ☠ gibi~ dropped by kofany\` #polska (Wstawaj!)
+23:46:39❱ @kofany\`❯ hm
+23:47:05❱ ⛈ kofany\` has executed protocol +b *!*@*gunwo* on ➜#polska
+23:47:16❱ ⛈ kofany\` has executed protocol +l 6969 on ➜#polska
+23:47:34❱ ⇶ You has evolved into ^kofany - synchronized
+23:47:51❱    pasqd❯ kurwa
+23:47:57❱    pasqd❯ nie mozesz cicho siedziec?
+23:49:05❱   atufka❯ jeszcze nie wszyscy spia
+23:53:11❱    pasqd❯ zaraz przyjdzie tamu
+23:53:40❱    pasqd❯ kofany: zmien topic bo wstyd z tym gunwem patologicznym
+23:56:52❱  +golisz❯ :P
+23:57:26❱    pasqd❯ no golisz bedziesz pilnowal
+23:57:31❱    pasqd❯ skoro juz po pracy jestes
+23:58:13❱  +golisz❯ nie am spania :)
+23:58:24❱    pasqd❯ bedzie zaraz
+23:58:27❱  +golisz❯ tak po pracy
+23:58:36❱  +golisz❯ wlasnie wrocilem
+23:58:40❱    pasqd❯ ja bede wstawal jak bedziesz sie kladl
+23:58:40❱    pasqd❯ ;>
+23:58:51❱  +golisz❯ hha no racej tak
+23:58:54❱  +golisz❯ raczej :)
+23:59:59❱    +Tamu❯ .1st
+Day changed to 16 Oct 2025
+00:00:00❱     info❯ 🎉 Gratulacje Tamu!iros@tamu.users.ircnet.com! Jesteś pierwszy dzisiaj! 🥇 (00:00:00)
+00:00:00❱     info❯ 📊 To twoja 19. wygrana w ogóle i 11. wygrana w październiku! 🌟
+00:00:00❱    pasqd❯ .1st
+00:00:01❱    pasqd❯ .1st
+00:00:01❱     info❯ 🏆 Dzisiaj pierwszy był już Tamu!iros@tamu.users.ircnet.com o godzinie 00:00:00! 📅
+00:00:01❱     info❯ 🏆 Dzisiaj pierwszy był już Tamu!iros@tamu.users.ircnet.com o godzinie 00:00:00! 📅
+00:00:09❱    pasqd❯ .dobranoc
+00:00:09❱  +golisz❯ hahah
+00:00:10❱    pasqd❯ .dzisiaj
+00:00:12❱      bot❯ Dobranoc! Hałas powyżej 30 dB może zakłócać sen!
+00:00:13❱     info❯ 📅 Dziś jest: Czwartek, 16 października 2025
+00:00:13❱     info❯ 🎉 Nietypowe święto: Światowy Dzień Godności, Światowy Dzień Żywności, Dzień Papieża Jana Pawła II, Światowy Dzień Chleba, Europejski Dzień Przywracania Czynności Serca, Światowy Dzień Anestezjologa, Dzień Szefa
+00:00:14❱     info❯ 👤 Imieniny obchodzą: Ambroży, Anastazy, Aurelia, Dionizy, Elifia, Elifiusz, Emil, Florentyn, Gaweł, Gerard, Gerarda, Grzegorz, Honorat, Iga, Jadwiga, Józefina, Lubgost, Maksyma, Martynian, Małgorzata, Momelin, Nazary, Nereusz, Radzisław, Saturnin, Walenty
+00:00:14❱     info❯ 📊 Dzień 289/365 | Do końca roku: 75 dni
+00:00:15❱     info❯ 📅 Tydzień 42 roku
+00:00:26❱  +golisz❯ :P
+00:01:43❱    +Tamu❯ bot tego 30 dB to nie wiedziałem przyda się przy doborze sprzętu w domu :)
+00:02:21❱  +golisz❯ to jakis nowy bot :)
+00:02:52❱  +golisz❯ bot: .dobranoc
+00:03:04❱  +golisz❯ .dobranoc
+00:03:07❱      bot❯ Śpij słodko! Sen to naturalny sposób na obniżenie poziomu stresu!
+00:03:20❱  +golisz❯ hahah
+00:03:29❱  +golisz❯ z tym sie zgodze :)
+00:03:46❱  +golisz❯ ale budzisz sie z now stress wraca ahhahah
+00:04:09❱  +golisz❯ Tamu: dzisiaj znow byles 1wszy?
+00:04:32❱  +golisz❯ co do jednej sek :)
+00:23:37❱ ⥤ Jenny__ ❮❮~can@88.242.132.194❯❯ has breached #polska
+01:16:56❱ ⥤ kfn ❮❮~kfn@217.97.37.254.ipv4.supernova.orange.pl❯❯ has breached #polska
+01:17:10❱      kfn❯ dsf
+01:24:22❱ ⏻ kfn ❮❮~kfn@217.97.37.254.ipv4.supernova.orange.pl❯❯ has been deprecated ("leaving")
+01:48:01❱ ⛈ Prezydent has executed protocol -b *!*@*gunwo* on ➜#polska
+01:48:03❱ ⛈ Premier- has executed protocol -b *!*@*gunwo* on ➜#polska
+02:03:13❱ ⥤ kfn ❮❮~kfn@217.97.37.254.ipv4.supernova.orange.pl❯❯ has breached #polska
+02:03:29❱      kfn❯ dizen dobry zgredki
+02:04:09❱      kfn❯ 1st
+02:04:14❱      kfn❯ .1st
+02:04:14❱     info❯ 🏆 Dzisiaj pierwszy był już Tamu!iros@tamu.users.ircnet.com o godzinie 00:00:00! 📅
+02:04:20❱      kfn❯ jak zwykle
+02:11:52❱ ⚙ modified by ^kofany in #polska: gunwo
+02:24:06❱    lamer❯ mosz na zembach
+02:24:14❱    lamer❯ kek.gif`;
+
+        function parseAndRenderLog(logText) {
+            const container = document.getElementById('logContainer');
+            const lines = logText.split('\n');
+            
+            lines.forEach(line => {
+                if (!line.trim()) return;
+                
+                const div = document.createElement('div');
+                div.className = 'log-line';
+                
+                // Day change
+                if (line.includes('Day changed')) {
+                    div.className = 'log-line day-change';
+                    div.innerHTML = line;
+                    container.appendChild(div);
+                    return;
+                }
+                
+                // Parse timestamp
+                const timestampMatch = line.match(/^(\d{2}:\d{2}:\d{2})❱\s*/);
+                if (timestampMatch) {
+                    const timestamp = timestampMatch[1];
+                    const rest = line.substring(timestampMatch[0].length);
+                    
+                    let html = `<span class="timestamp">${timestamp}❱</span> `;
+                    
+                    // Join message
+                    if (rest.includes('⥤') && rest.includes('has breached')) {
+                        const match = rest.match(/⥤\s+(\S+)\s+❮❮([^❯]+)❯❯\s+has breached\s+(#\S+)/);
+                        if (match) {
+                            html += `<span class="symbol join">⥤</span> `;
+                            html += `<span class="nick normal">${match[1]}</span> `;
+                            html += `<span class="hostmask">❮❮${match[2]}❯❯</span> `;
+                            html += `<span class="info">has breached</span> `;
+                            html += `<span class="channel">${match[3]}</span>`;
+                        }
+                    }
+                    // Quit message
+                    else if (rest.includes('⏻') && rest.includes('has been deprecated')) {
+                        const match = rest.match(/⏻\s+(\S+)\s+❮❮([^❯]+)❯❯\s+has been deprecated\s*(.+)?/);
+                        if (match) {
+                            html += `<span class="symbol quit">⏻</span> `;
+                            html += `<span class="nick normal">${match[1]}</span> `;
+                            html += `<span class="hostmask">❮❮${match[2]}❯❯</span> `;
+                            html += `<span class="info">has been deprecated</span>`;
+                            if (match[3]) {
+                                html += ` <span class="reason">${match[3]}</span>`;
+                            }
+                        }
+                    }
+                    // Part message
+                    else if (rest.includes('⥢') && rest.includes('has withdrawn')) {
+                        const match = rest.match(/⥢\s+(\S+)\s+❮❮([^❯]+)❯❯\s+has withdrawn from\s+(#\S+)/);
+                        if (match) {
+                            html += `<span class="symbol part">⥢</span> `;
+                            html += `<span class="nick normal">${match[1]}</span> `;
+                            html += `<span class="hostmask">❮❮${match[2]}❯❯</span> `;
+                            html += `<span class="info">has withdrawn from</span> `;
+                            html += `<span class="channel">${match[3]}</span>`;
+                        }
+                    }
+                    // Kick message
+                    else if (rest.includes('☠') && rest.includes('dropped by')) {
+                        const match = rest.match(/☠\s+(\S+)\s+dropped by\s+(\S+)\s+(#\S+)\s*(.+)?/);
+                        if (match) {
+                            html += `<span class="symbol kick">☠</span> `;
+                            html += `<span class="nick normal">${match[1]}</span> `;
+                            html += `<span class="info">dropped by</span> `;
+                            html += `<span class="nick op">${match[2]}</span> `;
+                            html += `<span class="channel">${match[3]}</span>`;
+                            if (match[4]) {
+                                html += ` <span class="reason">${match[4]}</span>`;
+                            }
+                        }
+                    }
+                    // Mode change
+                    else if (rest.includes('⛈') && rest.includes('has executed protocol')) {
+                        const match = rest.match(/⛈\s+(\S+)\s+has executed protocol\s+([\+\-]\S+)\s+(.+?)\s+on\s+➜(#\S+)/);
+                        if (match) {
+                            html += `<span class="symbol mode">⛈</span> `;
+                            html += `<span class="nick system">${match[1]}</span> `;
+                            html += `<span class="info">has executed protocol</span> `;
+                            html += `<span class="mode-change">${match[2]} ${match[3]}</span> `;
+                            html += `<span class="info">on</span> `;
+                            html += `<span class="channel">➜${match[4]}</span>`;
+                        }
+                    }
+                    // Topic
+                    else if (rest.includes('⚡ Topic') || rest.includes('⚙ Topic') || rest.includes('⚙ modified')) {
+                        html += `<span class="symbol topic">${rest[0]}</span> `;
+                        html += `<span class="info">${rest.substring(2)}</span>`;
+                    }
+                    // Status change (You has evolved)
+                    else if (rest.includes('⇶')) {
+                        html += `<span class="symbol">${rest}</span>`;
+                    }
+                    // Irssi system message
+                    else if (rest.includes('Irssi:')) {
+                        html += `<span class="info">${rest}</span>`;
+                    }
+                    // Regular message with nick
+                    else {
+                        const nickMatch = rest.match(/^(\s*)(@|\+)?(\S+?)❯\s*(.+)/);
+                        if (nickMatch) {
+                            html += nickMatch[1]; // spacing
+                            const prefix = nickMatch[2] || '';
+                            const nick = nickMatch[3];
+                            const message = nickMatch[4];
+                            
+                            let nickClass = 'normal';
+                            if (prefix === '@') nickClass = 'op';
+                            else if (prefix === '+') nickClass = 'voice';
+                            else if (nick === 'bot') nickClass = 'bot';
+                            else if (nick === 'info') nickClass = 'system';
+                            
+                            html += `<span class="nick ${nickClass}">${prefix}${nick}❯</span> `;
+                            html += `<span class="message">${message}</span>`;
+                        } else {
+                            html += `<span class="info">${rest}</span>`;
+                        }
+                    }
+                    
+                    div.innerHTML = html;
+                    container.appendChild(div);
+                }
+            });
+        }
+
+        // Render userlist
+        const users = ['@^kofany', '@kofany`', '@m', '@Piotr', '@Premier-', '@Prezydent', '@ruciu', '@yooz', '@zibi', 
+                       '+brudny', '+feel', '+gabii', '+golisz', '+gosub', '+Ibanez', '+juen', '+LySy', '+makumba', 
+                       '+mxl', '+nosfar', '+nsfr_', '+rty', '+rud0lf', '+snowek', '+spok', '+Tamu', '+tomala', 
+                       '+toyek', '+Uni-E', '+wArNeD', '+Yelon', '+Ymarg', '+zeol', '+zuy', '+||'];
+        
+        const userListContent = document.getElementById('userListContent');
+        users.forEach(user => {
+            const div = document.createElement('div');
+            div.className = 'userlist-user';
+            if (user.startsWith('@')) {
+                div.style.color = '#ffaf00';
+            } else if (user.startsWith('+')) {
+                div.style.color = '#87d7ff';
+            }
+            div.textContent = user;
+            userListContent.appendChild(div);
+        });
+
+        // Parse and render log
+        parseAndRenderLog(logData);
+    </script>
+</body>
+</html>
