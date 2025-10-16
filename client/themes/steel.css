@@ -185,9 +185,9 @@ body {
 	background: #444444;
 }
 
-/* Input styling */
+/* Input styling - dark background like sidebar */
 #form .input {
-	background-color: #444444;
+	background-color: #383838;
 	border-color: #404040;
 	color: #cccccc;
 }
@@ -199,12 +199,12 @@ body {
 /* Input field focus */
 #form .input:focus {
 	border-color: #505050;
-	background-color: #444444;
+	background-color: #383838;
 }
 
 /* Textarea input */
 textarea.input {
-	background-color: #444444;
+	background-color: #383838;
 	color: #cccccc;
 }
 
@@ -287,49 +287,49 @@ textarea.input {
 	border-left-color: var(--highlight-border-color);
 }
 
-/* User colors - stonowane odcienie szarości */
+/* User colors - stonowane pastelowe odcienie */
 .user {
 	font-weight: normal;
 }
 
-/* Operator - jaśniejszy szary */
+/* Operator - stonowany złoty */
 .user.color-op,
 #chat .userlist .user[data-mode="~"],
 #chat .userlist .user[data-mode="&"],
 #chat .userlist .user[data-mode="@"] {
-	color: #d0d0d0 !important;
+	color: #d4c5a0 !important;
 }
 
-/* Voice - średni szary */
+/* Voice - stonowany niebieski */
 .user.color-voice,
 #chat .userlist .user[data-mode="+"] {
-	color: #b8b8b8 !important;
+	color: #a0b4c5 !important;
 }
 
-/* Normal users - standardowy szary */
+/* Normal users - stonowany zielony */
 .user.color-normal,
 #chat .userlist .user[data-mode=""] {
-	color: #a0a0a0 !important;
+	color: #b0c5a0 !important;
 }
 
-/* System/bot nicks - ciemniejszy szary */
+/* System/bot nicks - stonowany fioletowy */
 .user.color-system {
-	color: #909090 !important;
+	color: #c5a0b4 !important;
 }
 
 .user.color-bot {
-	color: #888888 !important;
+	color: #b4a0c5 !important;
 }
 
-/* Override default user colors - wszystkie w odcieniach szarości */
-.user.color-1 { color: #c0c0c0; }
-.user.color-2 { color: #b0b0b0; }
-.user.color-3 { color: #a8a8a8; }
-.user.color-4 { color: #a0a0a0; }
-.user.color-5 { color: #989898; }
-.user.color-6 { color: #909090; }
-.user.color-7 { color: #888888; }
-.user.color-8 { color: #808080; }
+/* Override default user colors - stonowane pastelowe */
+.user.color-1 { color: #b0c5a0; } /* stonowany zielony */
+.user.color-2 { color: #a0b4c5; } /* stonowany niebieski */
+.user.color-3 { color: #d4c5a0; } /* stonowany złoty */
+.user.color-4 { color: #c5a0b4; } /* stonowany różowy */
+.user.color-5 { color: #a0c5b4; } /* stonowany turkusowy */
+.user.color-6 { color: #c5b4a0; } /* stonowany brązowy */
+.user.color-7 { color: #b4a0c5; } /* stonowany fioletowy */
+.user.color-8 { color: #c5c5a0; } /* stonowany żółty */
 
 /* Userlist active state */
 #chat .userlist .user.active {
