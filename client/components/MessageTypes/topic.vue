@@ -1,9 +1,9 @@
 <template>
 	<span class="content">
 		<template v-if="message.from && message.from.nick"
-			><Username :user="message.from" /> has changed the topic to:
+			>Topic modified by <Username :user="message.from" />:
 		</template>
-		<template v-else>The topic is: </template>
+		<template v-else>Topic: </template>
 		<span v-if="message.text" class="new-topic"
 			><ParsedMessage :network="network" :message="message"
 		/></span>

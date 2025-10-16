@@ -1,7 +1,7 @@
 <template>
 	<span class="content">
 		<Username :user="message.from" />
-		sets mode <b>{{ message.text }}</b>
+		has executed protocol <b>{{ message.text }}</b>
 	</span>
 </template>
 
