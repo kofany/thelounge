@@ -1,0 +1,436 @@
+/* Nexus Light Theme - Pastel version of Nexus theme */
+/* Dark IRC theme with muted pastel colors and custom symbols */
+
+@import "default.css";
+
+:root {
+	/* Main colors based on provided CSS */
+	--body-color: #e0e0e0;
+	--body-color-muted: #9a9a9a;
+	--body-bg-color: #2d2d2d;
+	--link-color: #a0b4c5;  /* pastel blue */
+
+	/* Window colors */
+	--window-bg-color: #2d2d2d;
+	--window-heading-color: #e0e0e0;
+
+	/* Timestamp color */
+	--timestamp-color: #6d6d6d;
+
+	/* Nick colors - pastel versions */
+	--nick-op-color: #d4c5a0;      /* pastel gold */
+	--nick-voice-color: #a0b4c5;   /* pastel blue */
+	--nick-normal-color: #b0c5a0;  /* pastel green */
+	--nick-system-color: #c5b4a0;  /* pastel brown */
+	--nick-bot-color: #b4a0c5;     /* pastel purple */
+
+	/* Event symbol colors - pastel versions */
+	--join-color: #b0c5a0;         /* pastel green */
+	--part-color: #d4c5a0;         /* pastel gold */
+	--quit-color: #c5a0b4;         /* pastel pink */
+	--kick-color: #d4a090;         /* pastel red */
+	--mode-color: #b4a0c5;         /* pastel purple */
+	--topic-color: #a0c5b4;        /* pastel teal */
+
+	/* Other colors - pastel versions */
+	--hostmask-color: #a0b4b4;     /* pastel cyan-gray */
+	--channel-color: #a0c5b4;      /* pastel teal */
+	--separator-color: #a0a0b4;    /* pastel blue-gray */
+	--info-color: #a0b4c5;         /* pastel blue */
+	--reason-color: #c5a0a0;       /* pastel red-gray */
+	--mode-change-color: #c5a0c5;  /* pastel magenta */
+
+	/* Markers - pastel versions */
+	--date-marker-color: #d4c5a0;  /* pastel orange */
+	--unread-marker-color: #c5a0a0; /* pastel red */
+	--highlight-bg-color: #4a5060; /* slightly muted */
+	--highlight-border-color: #4a5060;
+
+	/* Button colors - pastel */
+	--button-color: #a0b4c5;  /* pastel blue */
+	--button-text-color-hover: #e0e0e0;
+
+	/* Sidebar/List colors */
+	--sidebar-bg-color: #383838;
+	--list-item-hover-bg: #323232;
+	--list-item-selected-bg: #2b2b2b;
+
+	/* Input colors */
+	--input-bg-color: #444444;
+	--input-border-color: #404040;
+}
+
+body {
+	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
+	scrollbar-color: #888888ee transparent;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #888888ee;
+	border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #555555;
+}
+
+/* Window styling */
+.window {
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Chat area */
+#chat {
+	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
+	font-size: 13px;
+	line-height: 1.2;
+}
+
+/* Reduce spacing between messages for more compact view like Irssi */
+#chat .msg {
+	line-height: 1.1;
+	margin: 0;
+	padding: 0;
+}
+
+/* Remove vertical padding from time, from, content - reduce from 3px to 0px */
+#chat .time,
+#chat .from,
+#chat .content {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+/* Keep horizontal padding minimal */
+#chat .time {
+	padding-left: 10px;
+}
+
+#chat .from {
+	padding-right: 10px;
+}
+
+#chat .content {
+	padding-left: 10px;
+	padding-right: 6px;
+}
+
+/* Reduce container padding */
+#chat .messages {
+	padding: 5px 0;
+}
+
+/* Set consistent width for nick/event column - 90px for all message types */
+#chat .from {
+	width: 90px;
+}
+
+/* Sidebar (networks/channels) - compact spacing and monospace font */
+.channel-list-item,
+#sidebar .empty {
+	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
+	font-size: 13px;
+}
+
+.channel-list-item {
+	padding: 2px 14px;
+	line-height: 1.1;
+}
+
+#sidebar .network {
+	margin-bottom: 10px;
+}
+
+/* Userlist (nicklist) - compact spacing and monospace font */
+.userlist {
+	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
+	font-size: 13px;
+	line-height: 1.1;
+}
+
+#chat .names .user {
+	line-height: 1.1;
+	padding: 0 16px;
+}
+
+/* Sidebar background */
+#sidebar {
+	background-color: #383838;
+}
+
+/* Channel list item hover and active states */
+.channel-list-item:hover {
+	background-color: #323232 !important;
+}
+
+.channel-list-item.active {
+	background-color: #2b2b2b !important;
+}
+
+/* Userlist background */
+#chat .userlist {
+	background-color: #383838;
+}
+
+#chat .userlist .count {
+	background: #444444;
+}
+
+/* Input styling */
+#form .input {
+	background-color: #444444;
+	border-color: #404040;
+	color: #e0e0e0;
+}
+
+/* Timestamp styling with ❱ symbol */
+#chat .time {
+	color: var(--timestamp-color);
+	font-weight: normal;
+}
+
+#chat .time::after {
+	content: "❱";
+	color: var(--timestamp-color);
+	margin-left: 2px;
+}
+
+/* From/Nick area */
+#chat .from {
+	color: var(--body-color-muted);
+}
+
+/* Content area */
+#chat .content {
+	color: var(--body-color);
+}
+
+/* Hostmask styling */
+#chat .hostmask {
+	color: var(--hostmask-color);
+	font-size: 0.95em;
+}
+
+#chat .hostmask::before {
+	content: "❮";
+	color: var(--hostmask-color);
+}
+
+#chat .hostmask::after {
+	content: "❯";
+	color: var(--hostmask-color);
+}
+
+/* Channel names */
+#chat .channel {
+	color: var(--channel-color);
+	font-weight: bold;
+}
+
+/* Reasons (part, quit, kick) */
+#chat .part-reason,
+#chat .quit-reason {
+	color: var(--reason-color);
+	font-style: italic;
+}
+
+/* Info messages */
+#chat .msg[data-type="condensed"] .content,
+#chat .msg[data-type="away"] .content,
+#chat .msg[data-type="back"] .content,
+#chat .msg[data-type="join"] .content,
+#chat .msg[data-type="kick"] .content,
+#chat .msg[data-type="mode"] .content,
+#chat .msg[data-type="nick"] .content,
+#chat .msg[data-type="chghost"] .content,
+#chat .msg[data-type="part"] .content,
+#chat .msg[data-type="quit"] .content,
+#chat .msg[data-type="topic"] .content,
+#chat .msg[data-type="topic_set_by"] .content {
+	color: var(--info-color);
+	font-style: italic;
+}
+
+/* JOIN - green arrow ⥤ */
+#chat .msg[data-type="join"] .from::before {
+	content: "⥤";
+	color: var(--join-color);
+	font-weight: bold;
+	font-style: normal;
+}
+
+/* PART - yellow/orange arrow ⥢ */
+#chat .msg[data-type="part"] .from::before {
+	content: "⥢";
+	color: var(--part-color);
+	font-weight: bold;
+	font-style: normal;
+	transform: none;
+	display: inline;
+}
+
+/* QUIT - orange power symbol ⏻ */
+#chat .msg[data-type="quit"] .from::before {
+	content: "⏻";
+	color: var(--quit-color);
+	font-weight: bold;
+	font-style: normal;
+	transform: none;
+	display: inline;
+}
+
+/* KICK - red skull ☠ */
+#chat .msg[data-type="kick"] .from::before {
+	content: "☠";
+	color: var(--kick-color);
+	font-weight: bold;
+	font-style: normal;
+}
+
+/* MODE - purple lightning ⛈ */
+#chat .msg[data-type="mode_channel"] .from::before,
+#chat .msg[data-type="mode_user"] .from::before,
+#chat .msg[data-type="mode"] .from::before {
+	content: "⛈";
+	color: var(--mode-color);
+	font-weight: bold;
+	font-style: normal;
+}
+
+/* TOPIC - cyan gear ⚙ */
+#chat .msg[data-type="topic"] .from::before {
+	content: "⚙";
+	color: var(--topic-color);
+	font-weight: bold;
+	font-style: normal;
+}
+
+/* NICK change - green diamond ⬢ */
+#chat .msg[data-type="nick"] .from::before,
+#chat .msg[data-type="chghost"] .from::before {
+	content: "⬢";
+	color: var(--join-color);
+	font-weight: bold;
+	font-style: normal;
+}
+
+/* User colors based on mode */
+.user {
+	font-weight: bold;
+}
+
+/* Operator - gold */
+.user.color-op,
+#chat .userlist .user[data-mode="~"],
+#chat .userlist .user[data-mode="&"],
+#chat .userlist .user[data-mode="@"] {
+	color: var(--nick-op-color) !important;
+}
+
+/* Voice - cyan */
+.user.color-voice,
+#chat .userlist .user[data-mode="+"] {
+	color: var(--nick-voice-color) !important;
+}
+
+/* Normal users - green */
+.user.color-normal,
+#chat .userlist .user[data-mode=""] {
+	color: var(--nick-normal-color) !important;
+}
+
+/* System/bot nicks */
+.user.color-system {
+	color: var(--nick-system-color) !important;
+}
+
+.user.color-bot {
+	color: var(--nick-bot-color) !important;
+}
+
+/* Override default user colors with pastel palette */
+.user.color-1 { color: #b0c5a0; } /* pastel green */
+.user.color-2 { color: #a0b4c5; } /* pastel blue */
+.user.color-3 { color: #d4c5a0; } /* pastel gold */
+.user.color-4 { color: #b4a0c5; } /* pastel purple */
+.user.color-5 { color: #c5b4a0; } /* pastel brown */
+.user.color-6 { color: #a0c5b4; } /* pastel teal */
+.user.color-7 { color: #c5a0c5; } /* pastel magenta */
+.user.color-8 { color: #b0c5a0; } /* pastel green */
+
+/* Day change marker */
+.date-marker {
+	color: var(--date-marker-color);
+	font-weight: bold;
+	background-color: #2a2a2a;
+	border-left: 3px solid var(--date-marker-color);
+}
+
+/* Unread marker */
+.unread-marker {
+	border-color: var(--unread-marker-color);
+}
+
+/* Highlights */
+#chat .msg.highlight {
+	background-color: var(--highlight-bg-color);
+	border-left-color: var(--highlight-border-color);
+}
+
+#chat .chat-view[data-type="channel"] .msg.highlight .time {
+	color: var(--timestamp-color);
+}
+
+/* Code blocks */
+#chat .msg[data-type="monospace_block"] .text,
+code,
+.irc-monospace {
+	background: #2a2a2a;
+	color: #d0d0d0;
+	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
+}
+
+/* Userlist */
+#chat .userlist {
+	background-color: #2a2a2a;
+	border-color: #3a3a3a;
+}
+
+#chat .userlist .count {
+	background-color: #1a1a1a;
+	color: var(--info-color);
+}
+
+#chat .userlist .user.active {
+	background-color: #1a1a1a;
+}
+
+/* Input form */
+#form {
+	background-color: #1a1a1a;
+	border-color: #3a3a3a;
+	color: var(--body-color);
+}
+
+#form #nick {
+	background: #2a2a2a;
+	color: #d0d0d0;
+}
+
+/* Borders */
+#chat .content,
+#chat .header,
+#chat .user-mode::before,
+#chat .userlist {
+	border-color: #3a3a3a;
+}
+
