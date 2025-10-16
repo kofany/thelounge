@@ -120,6 +120,11 @@ body {
 	padding: 5px 0;
 }
 
+/* Set consistent width for nick/event column - 90px for all message types */
+#chat .from {
+	width: 90px;
+}
+
 /* Timestamp styling with ❱ symbol */
 #chat .time {
 	color: var(--timestamp-color);
