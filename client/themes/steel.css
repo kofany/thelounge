@@ -1,0 +1,273 @@
+/* Steel Theme - Minimalist monochrome IRC theme */
+/* Stonowany motyw z ograniczoną paletą kolorów */
+
+@import "default.css";
+
+:root {
+	/* Main colors - monochrome palette */
+	--body-color: #c0c0c0;
+	--body-color-muted: #808080;
+	--body-bg-color: #2d2d2d;
+	--link-color: #a0a0a0;
+
+	/* Window colors */
+	--window-bg-color: #2d2d2d;
+	--window-heading-color: #b0b0b0;
+
+	/* Timestamp color */
+	--timestamp-color: #707070;
+
+	/* Nick colors - subtle grays */
+	--nick-op-color: #d0d0d0;
+	--nick-voice-color: #b8b8b8;
+	--nick-normal-color: #a0a0a0;
+	--nick-system-color: #909090;
+	--nick-bot-color: #888888;
+
+	/* Event symbol colors - minimal variation */
+	--join-color: #a0a0a0;
+	--part-color: #909090;
+	--quit-color: #808080;
+	--kick-color: #707070;
+	--mode-color: #888888;
+	--topic-color: #a0a0a0;
+
+	/* Other colors - monochrome */
+	--hostmask-color: #707070;
+	--channel-color: #a0a0a0;
+	--separator-color: #606060;
+	--info-color: #808080;
+	--reason-color: #707070;
+	--mode-change-color: #888888;
+
+	/* Markers */
+	--date-marker-color: #909090;
+	--unread-marker-color: #a0a0a0;
+	--highlight-bg-color: #3a3a3a;
+	--highlight-border-color: #505050;
+
+	/* Button colors */
+	--button-color: #808080;
+	--button-text-color-hover: #fff;
+
+	/* Sidebar/List colors */
+	--sidebar-bg-color: #383838;
+	--list-item-hover-bg: #323232;
+	--list-item-selected-bg: #2b2b2b;
+
+	/* Input colors */
+	--input-bg-color: #444444;
+	--input-border-color: #404040;
+}
+
+body {
+	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
+	scrollbar-color: #888888ee transparent;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #888888ee;
+	border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #555555;
+}
+
+/* Window styling */
+.window {
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Chat area */
+#chat {
+	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
+	font-size: 13px;
+	line-height: 1.2;
+}
+
+/* Reduce spacing between messages for more compact view like Irssi */
+#chat .msg {
+	line-height: 1.1;
+	margin: 0;
+	padding: 0;
+}
+
+/* Remove vertical padding from time, from, content - reduce from 3px to 0px */
+#chat .time,
+#chat .from,
+#chat .content {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+/* Keep horizontal padding minimal */
+#chat .time {
+	padding-left: 10px;
+}
+
+#chat .from {
+	padding-right: 10px;
+}
+
+#chat .content {
+	padding-left: 10px;
+	padding-right: 6px;
+}
+
+/* Reduce container padding */
+#chat .messages {
+	padding: 5px 0;
+}
+
+/* Set consistent width for nick/event column - 90px for all message types */
+#chat .from {
+	width: 90px;
+}
+
+/* Sidebar (networks/channels) - compact spacing and monospace font */
+.channel-list-item,
+#sidebar .empty {
+	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
+	font-size: 13px;
+}
+
+.channel-list-item {
+	padding: 2px 14px;
+	line-height: 1.1;
+}
+
+#sidebar .network {
+	margin-bottom: 10px;
+}
+
+/* Userlist (nicklist) - compact spacing and monospace font */
+.userlist {
+	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
+	font-size: 13px;
+	line-height: 1.1;
+}
+
+#chat .names .user {
+	line-height: 1.1;
+	padding: 0 16px;
+}
+
+/* Sidebar background */
+#sidebar {
+	background-color: #383838;
+}
+
+/* Channel list item hover and active states */
+.channel-list-item:hover {
+	background-color: #323232 !important;
+}
+
+.channel-list-item.active {
+	background-color: #2b2b2b !important;
+}
+
+/* Userlist background */
+#chat .userlist {
+	background-color: #383838;
+}
+
+#chat .userlist .count {
+	background: #444444;
+}
+
+/* Input styling */
+#form .input {
+	background-color: #444444;
+	border-color: #404040;
+	color: #c0c0c0;
+}
+
+/* Timestamp styling - simple prefix */
+#chat .time::after {
+	content: " │";
+	color: #505050;
+}
+
+/* Nick styling - minimal brackets */
+#chat .from .user::before {
+	content: "<";
+	color: #606060;
+}
+
+#chat .from .user::after {
+	content: ">";
+	color: #606060;
+}
+
+/* Join messages - simple arrow */
+#chat .msg[data-type="join"] .from::before {
+	content: "→ ";
+	color: var(--join-color);
+}
+
+/* Part messages - simple arrow */
+#chat .msg[data-type="part"] .from::before {
+	content: "← ";
+	color: var(--part-color);
+}
+
+/* Quit messages - simple x */
+#chat .msg[data-type="quit"] .from::before {
+	content: "× ";
+	color: var(--quit-color);
+}
+
+/* Kick messages - simple ! */
+#chat .msg[data-type="kick"] .from::before {
+	content: "! ";
+	color: var(--kick-color);
+}
+
+/* Mode messages - simple # */
+#chat .msg[data-type="mode_channel"] .from::before,
+#chat .msg[data-type="mode"] .from::before {
+	content: "# ";
+	color: var(--mode-color);
+}
+
+/* Topic messages - simple * */
+#chat .msg[data-type="topic"] .from::before,
+#chat .msg[data-type="topic_set_by"] .from::before {
+	content: "* ";
+	color: var(--topic-color);
+}
+
+/* Nick change - simple ~ */
+#chat .msg[data-type="nick"] .from::before {
+	content: "~ ";
+	color: #808080;
+}
+
+/* Hostmask styling - subtle */
+.hostmask {
+	color: var(--hostmask-color);
+	font-style: normal;
+}
+
+/* Channel names */
+.channel {
+	color: var(--channel-color);
+	font-weight: normal;
+}
+
+/* Remove colorful highlights - keep it minimal */
+#chat .msg.highlight {
+	background-color: var(--highlight-bg-color);
+	border-left-color: var(--highlight-border-color);
+}
+
