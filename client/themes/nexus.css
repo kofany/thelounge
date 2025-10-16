@@ -88,9 +88,36 @@ body {
 
 /* Reduce spacing between messages for more compact view like Irssi */
 #chat .msg {
-	line-height: 1.2;
+	line-height: 1.1;
 	margin: 0;
-	padding: 1px 10px;
+	padding: 0;
+}
+
+/* Remove vertical padding from time, from, content - reduce from 3px to 0px */
+#chat .time,
+#chat .from,
+#chat .content {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+/* Keep horizontal padding minimal */
+#chat .time {
+	padding-left: 10px;
+}
+
+#chat .from {
+	padding-right: 10px;
+}
+
+#chat .content {
+	padding-left: 10px;
+	padding-right: 6px;
+}
+
+/* Reduce container padding */
+#chat .messages {
+	padding: 5px 0;
 }
 
 /* Timestamp styling with ❱ symbol */
