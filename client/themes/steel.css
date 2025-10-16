@@ -65,22 +65,59 @@ body {
 	scrollbar-color: #888888ee transparent;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-	width: 10px;
+/* Scrollbar styling - specific for chat, sidebar, userlist */
+/* Sidebar (chanlist) scrollbar */
+#sidebar .scrollable-area::-webkit-scrollbar {
+	width: 8px;
 }
 
-::-webkit-scrollbar-track {
+#sidebar .scrollable-area::-webkit-scrollbar-track {
 	background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
-	background: #888888ee;
+#sidebar .scrollable-area::-webkit-scrollbar-thumb {
+	background: #505050;
 	border-radius: 5px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-	background: #555555;
+#sidebar .scrollable-area::-webkit-scrollbar-thumb:hover {
+	background: #606060;
+}
+
+/* Chat window scrollbar */
+#chat .chat::-webkit-scrollbar {
+	width: 8px;
+}
+
+#chat .chat::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+#chat .chat::-webkit-scrollbar-thumb {
+	background: #505050;
+	border-radius: 5px;
+}
+
+#chat .chat::-webkit-scrollbar-thumb:hover {
+	background: #606060;
+}
+
+/* Userlist (nicklist) scrollbar */
+#chat .userlist .names::-webkit-scrollbar {
+	width: 8px;
+}
+
+#chat .userlist .names::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+#chat .userlist .names::-webkit-scrollbar-thumb {
+	background: #505050;
+	border-radius: 5px;
+}
+
+#chat .userlist .names::-webkit-scrollbar-thumb:hover {
+	background: #606060;
 }
 
 /* Window styling */
@@ -202,10 +239,17 @@ body {
 	background-color: #383838;
 }
 
-/* Textarea input */
+/* Textarea input - NO scrollbar */
 textarea.input {
 	background-color: #383838;
+	border: 1px solid #404040;
 	color: #cccccc;
+	overflow: hidden;
+	resize: none;
+}
+
+textarea.input::-webkit-scrollbar {
+	display: none;
 }
 
 /* Timestamp styling - simple prefix */
