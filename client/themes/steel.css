@@ -189,7 +189,23 @@ body {
 #form .input {
 	background-color: #444444;
 	border-color: #404040;
-	color: #c0c0c0;
+	color: #cccccc;
+}
+
+#form .input::placeholder {
+	color: #777777;
+}
+
+/* Input field focus */
+#form .input:focus {
+	border-color: #505050;
+	background-color: #444444;
+}
+
+/* Textarea input */
+textarea.input {
+	background-color: #444444;
+	color: #cccccc;
 }
 
 /* Timestamp styling - simple prefix */
@@ -271,3 +287,130 @@ body {
 	border-left-color: var(--highlight-border-color);
 }
 
+/* User colors - stonowane odcienie szarości */
+.user {
+	font-weight: normal;
+}
+
+/* Operator - jaśniejszy szary */
+.user.color-op,
+#chat .userlist .user[data-mode="~"],
+#chat .userlist .user[data-mode="&"],
+#chat .userlist .user[data-mode="@"] {
+	color: #d0d0d0 !important;
+}
+
+/* Voice - średni szary */
+.user.color-voice,
+#chat .userlist .user[data-mode="+"] {
+	color: #b8b8b8 !important;
+}
+
+/* Normal users - standardowy szary */
+.user.color-normal,
+#chat .userlist .user[data-mode=""] {
+	color: #a0a0a0 !important;
+}
+
+/* System/bot nicks - ciemniejszy szary */
+.user.color-system {
+	color: #909090 !important;
+}
+
+.user.color-bot {
+	color: #888888 !important;
+}
+
+/* Override default user colors - wszystkie w odcieniach szarości */
+.user.color-1 { color: #c0c0c0; }
+.user.color-2 { color: #b0b0b0; }
+.user.color-3 { color: #a8a8a8; }
+.user.color-4 { color: #a0a0a0; }
+.user.color-5 { color: #989898; }
+.user.color-6 { color: #909090; }
+.user.color-7 { color: #888888; }
+.user.color-8 { color: #808080; }
+
+/* Userlist active state */
+#chat .userlist .user.active {
+	background-color: #323232;
+}
+
+/* Input text field - fix white background */
+#form .input,
+.input {
+	background-color: #444444 !important;
+	border-color: #404040 !important;
+	color: #cccccc !important;
+}
+
+#form .input::placeholder {
+	color: #777777;
+}
+
+/* Stonowane kolory dla nicków w czacie - monochrome palette */
+#chat .msg .from .user {
+	color: #a0a0a0 !important;
+}
+
+/* Różne odcienie szarości dla różnych nicków (zamiast kolorów) */
+#chat .msg .from .user[data-name*="0"],
+#chat .msg .from .user[data-name*="5"] {
+	color: #b0b0b0 !important;
+}
+
+#chat .msg .from .user[data-name*="1"],
+#chat .msg .from .user[data-name*="6"] {
+	color: #a8a8a8 !important;
+}
+
+#chat .msg .from .user[data-name*="2"],
+#chat .msg .from .user[data-name*="7"] {
+	color: #a0a0a0 !important;
+}
+
+#chat .msg .from .user[data-name*="3"],
+#chat .msg .from .user[data-name*="8"] {
+	color: #989898 !important;
+}
+
+#chat .msg .from .user[data-name*="4"],
+#chat .msg .from .user[data-name*="9"] {
+	color: #909090 !important;
+}
+
+/* Nicklist - stonowane kolory dla nicków */
+#chat .userlist .user {
+	color: #a0a0a0 !important;
+}
+
+/* Różne odcienie dla nicków w userlist */
+#chat .userlist .user[data-name*="0"],
+#chat .userlist .user[data-name*="5"] {
+	color: #b0b0b0 !important;
+}
+
+#chat .userlist .user[data-name*="1"],
+#chat .userlist .user[data-name*="6"] {
+	color: #a8a8a8 !important;
+}
+
+#chat .userlist .user[data-name*="2"],
+#chat .userlist .user[data-name*="7"] {
+	color: #a0a0a0 !important;
+}
+
+#chat .userlist .user[data-name*="3"],
+#chat .userlist .user[data-name*="8"] {
+	color: #989898 !important;
+}
+
+#chat .userlist .user[data-name*="4"],
+#chat .userlist .user[data-name*="9"] {
+	color: #909090 !important;
+}
+
+/* User modes w userlist - stonowane */
+#chat .userlist .user-mode {
+	color: #808080;
+}
