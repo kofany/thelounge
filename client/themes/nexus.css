@@ -9,21 +9,21 @@
 	--body-color-muted: #87afaf;
 	--body-bg-color: #1a1a1a;
 	--link-color: #5fafaf;
-	
+
 	/* Window colors */
 	--window-bg-color: #252525;
 	--window-heading-color: #87afaf;
-	
+
 	/* Timestamp color */
 	--timestamp-color: #5f8787;
-	
+
 	/* Nick colors */
 	--nick-op-color: #ffaf00;
 	--nick-voice-color: #87d7ff;
 	--nick-normal-color: #afd787;
 	--nick-system-color: #d7875f;
 	--nick-bot-color: #af87ff;
-	
+
 	/* Event symbol colors */
 	--join-color: #5faf5f;
 	--part-color: #af8700;
@@ -31,7 +31,7 @@
 	--kick-color: #d75f5f;
 	--mode-color: #af87d7;
 	--topic-color: #5fafaf;
-	
+
 	/* Other colors */
 	--hostmask-color: #5f8787;
 	--channel-color: #5fafaf;
@@ -39,13 +39,13 @@
 	--info-color: #87afaf;
 	--reason-color: #af8787;
 	--mode-change-color: #d787d7;
-	
+
 	/* Markers */
 	--date-marker-color: #ffaf5f;
 	--unread-marker-color: #d75f5f;
 	--highlight-bg-color: #2a2a2a;
 	--highlight-border-color: #ffaf5f;
-	
+
 	/* Button colors */
 	--button-color: #5faf5f;
 	--button-text-color-hover: #fff;
@@ -83,7 +83,14 @@ body {
 #chat {
 	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
 	font-size: 13px;
-	line-height: 1.4;
+	line-height: 1.2;
+}
+
+/* Reduce spacing between messages for more compact view like Irssi */
+#chat .msg {
+	line-height: 1.2;
+	margin: 0;
+	padding: 1px 10px;
 }
 
 /* Timestamp styling with ❱ symbol */
