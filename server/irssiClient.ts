@@ -192,12 +192,9 @@ export class IrssiClient {
 	/**
 	 * Login user - derive encryption key and connect to irssi
 	 *
-	 * Encryption architecture (fe-web v1.5):
-	 * 1. WebSocket auth + encryption: JEDNO hasło (irssiPassword)
-	 *    - Auth: /?password=<irssiPassword>
-	 *    - Encryption: PBKDF2(irssiPassword, salt="irssi-fe-web-v1")
-	 * 2. Message storage encryption: PBKDF2(userPassword, salt=irssiPassword)
-	 *    - Osobny klucz dla lokalnego storage (nie związany z WebSocket)
+	 * Encryption architecture:
+	 * - WebSocket auth + encryption uses irssi password
+	 * - Message storage encryption uses derived key
 	 */
 	async login(userPassword: string): Promise<void> {
 		log.info(`User ${colors.bold(this.name)} logging in...`);
@@ -229,13 +226,10 @@ export class IrssiClient {
 		log.info(`irssi password decrypted for user ${colors.bold(this.name)}`);
 
 		// Step 2: Derive message storage encryption key
-		// NOTE: If autoconnect already initialized storage with irssiPassword,
-		// we continue using that key. Only derive new key if not already set.
 		if (!this.encryptionKey) {
-			// Use irssiPassword for encryption (same as autoconnect)
 			this.encryptionKey = crypto.pbkdf2Sync(
 				this.irssiPassword,
-				"irssi-message-storage-v1", // Fixed salt (same as autoconnect)
+				"irssi-message-storage-v1",
 				10000,
 				32,
 				"sha256"
@@ -255,9 +249,6 @@ export class IrssiClient {
 		}
 
 		// Step 4: Connect to irssi fe-web (ASYNCHRONOUSLY - don't block login!)
-		// WebSocket będzie używał:
-		// - Auth: /?password=<irssiPassword>
-		// - Encryption: PBKDF2(irssiPassword, salt="irssi-fe-web-v1")
 		// Don't await - let it connect in background
 		// If it fails, user can still use The Lounge UI and fix config in Settings
 		this.connectToIrssi().catch((error) => {
@@ -321,11 +312,7 @@ export class IrssiClient {
 	}
 
 	/**
-	 * Connect to irssi fe-web (persistent connection with dual-layer security)
-	 *
-	 * fe-web v1.5 uses:
-	 * - Layer 1: wss:// (SSL/TLS with self-signed cert)
-	 * - Layer 2: AES-256-GCM with PBKDF2(irssiPassword, salt="irssi-fe-web-v1")
+	 * Connect to irssi fe-web (persistent connection with encryption)
 	 */
 	async connectToIrssi(): Promise<void> {
 		if (this.irssiConnection) {
@@ -356,7 +343,7 @@ export class IrssiClient {
 		const feWebConfig: FeWebConfig = {
 			host: this.config.irssiConnection.host,
 			port: this.config.irssiConnection.port,
-			password: this.irssiPassword, // irssi WebSocket password (for PBKDF2 with FIXED salt)
+			password: this.irssiPassword,
 			encryption: true, // ALWAYS true for fe-web v1.5
 
 			// SSL/TLS options (fe-web v1.5 REQUIRES wss://)
