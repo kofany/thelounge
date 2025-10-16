@@ -4,18 +4,18 @@
 @import "default.css";
 
 :root {
-	/* Main colors from example.html */
-	--body-color: #d0d0d0;
-	--body-color-muted: #87afaf;
-	--body-bg-color: #1a1a1a;
-	--link-color: #5fafaf;
+	/* Main colors based on provided CSS */
+	--body-color: #e0e0e0;
+	--body-color-muted: #9a9a9a;
+	--body-bg-color: #2d2d2d;
+	--link-color: #409aed;
 
 	/* Window colors */
-	--window-bg-color: #252525;
-	--window-heading-color: #87afaf;
+	--window-bg-color: #2d2d2d;
+	--window-heading-color: #e0e0e0;
 
 	/* Timestamp color */
-	--timestamp-color: #5f8787;
+	--timestamp-color: #6d6d6d;
 
 	/* Nick colors */
 	--nick-op-color: #ffaf00;
@@ -42,18 +42,27 @@
 
 	/* Markers */
 	--date-marker-color: #ffaf5f;
-	--unread-marker-color: #d75f5f;
-	--highlight-bg-color: #2a2a2a;
-	--highlight-border-color: #ffaf5f;
+	--unread-marker-color: #db4437;
+	--highlight-bg-color: #46546e;
+	--highlight-border-color: #46546e;
 
 	/* Button colors */
-	--button-color: #5faf5f;
+	--button-color: #409aed;
 	--button-text-color-hover: #fff;
+
+	/* Sidebar/List colors */
+	--sidebar-bg-color: #383838;
+	--list-item-hover-bg: #323232;
+	--list-item-selected-bg: #2b2b2b;
+
+	/* Input colors */
+	--input-bg-color: #444444;
+	--input-border-color: #404040;
 }
 
 body {
 	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
-	scrollbar-color: #4a4a4a #1a1a1a;
+	scrollbar-color: #888888ee transparent;
 }
 
 /* Scrollbar styling */
@@ -62,16 +71,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-	background: #1a1a1a;
+	background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-	background: #4a4a4a;
+	background: #888888ee;
 	border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-	background: #5a5a5a;
+	background: #555555;
 }
 
 /* Window styling */
@@ -151,6 +160,36 @@ body {
 #chat .names .user {
 	line-height: 1.1;
 	padding: 0 16px;
+}
+
+/* Sidebar background */
+#sidebar {
+	background-color: #383838;
+}
+
+/* Channel list item hover and active states */
+.channel-list-item:hover {
+	background-color: #323232 !important;
+}
+
+.channel-list-item.active {
+	background-color: #2b2b2b !important;
+}
+
+/* Userlist background */
+#chat .userlist {
+	background-color: #383838;
+}
+
+#chat .userlist .count {
+	background: #444444;
+}
+
+/* Input styling */
+#form .input {
+	background-color: #444444;
+	border-color: #404040;
+	color: #e0e0e0;
 }
 
 /* Timestamp styling with ❱ symbol */
