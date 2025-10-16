@@ -125,6 +125,34 @@ body {
 	width: 90px;
 }
 
+/* Sidebar (networks/channels) - compact spacing and monospace font */
+.channel-list-item,
+#sidebar .empty {
+	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
+	font-size: 13px;
+}
+
+.channel-list-item {
+	padding: 2px 14px;
+	line-height: 1.1;
+}
+
+#sidebar .network {
+	margin-bottom: 10px;
+}
+
+/* Userlist (nicklist) - compact spacing and monospace font */
+.userlist {
+	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
+	font-size: 13px;
+	line-height: 1.1;
+}
+
+#chat .names .user {
+	line-height: 1.1;
+	padding: 0 16px;
+}
+
 /* Timestamp styling with ❱ symbol */
 #chat .time {
 	color: var(--timestamp-color);
