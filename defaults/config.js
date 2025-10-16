@@ -99,8 +99,8 @@ module.exports = {
 	// example, the value for Morning would be `morning`, and the value for
 	// Solarized would be `thelounge-theme-solarized`.
 	//
-	// This value is set to `"default"` by default.
-	theme: "default",
+	// This value is set to `"nexus"` by default.
+	theme: "nexus",
 
 	// ### `prefetch`
 	//
