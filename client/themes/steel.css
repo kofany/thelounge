@@ -366,6 +366,18 @@ textarea.input {
 	background-color: #323232;
 }
 
+/* Input form - dark background */
+#form {
+	background-color: #2d2d2d !important;
+	border-color: #404040 !important;
+	color: #cccccc !important;
+}
+
+#form #nick {
+	background: #383838 !important;
+	color: #cccccc !important;
+}
+
 /* Input text field - dark background like sidebar */
 #form .input,
 .input {
