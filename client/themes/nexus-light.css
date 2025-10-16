@@ -463,71 +463,17 @@ code,
 	color: #d0d0d0 !important;
 }
 
-/* Input styling - dark background */
+/* Input text field - dark background like sidebar */
 #form .input,
-.input,
-input[type="text"],
-input[type="password"],
-input[type="search"] {
+.input {
 	background-color: #2a2a2a !important;
-	border: 1px solid #3a3a3a !important;
+	border-color: #3a3a3a !important;
 	color: #d0d0d0 !important;
 }
 
 #form .input::placeholder,
-.input::placeholder,
-input::placeholder {
+.input::placeholder {
 	color: #666666 !important;
-}
-
-/* Input field focus */
-#form .input:focus,
-.input:focus,
-input:focus {
-	border-color: #4a4a4a !important;
-	background-color: #2a2a2a !important;
-	outline: none !important;
-}
-
-/* Textarea input - NO scrollbar */
-textarea,
-textarea.input {
-	background-color: #2a2a2a !important;
-	border: 1px solid #3a3a3a !important;
-	color: #d0d0d0 !important;
-	overflow: hidden;
-	resize: none;
-}
-
-textarea::-webkit-scrollbar,
-textarea.input::-webkit-scrollbar {
-	display: none;
-}
-
-/* Select dropdowns */
-select {
-	background-color: #2a2a2a !important;
-	border: 1px solid #3a3a3a !important;
-	color: #d0d0d0 !important;
-}
-
-select option {
-	background-color: #2a2a2a !important;
-	color: #d0d0d0 !important;
-}
-
-/* Buttons */
-button,
-.btn {
-	background-color: #3a3a3a !important;
-	border: 1px solid #4a4a4a !important;
-	color: #d0d0d0 !important;
-}
-
-button:hover,
-.btn:hover {
-	background-color: #4a4a4a !important;
-	border-color: #5a5a5a !important;
 }
 
 /* Borders */
