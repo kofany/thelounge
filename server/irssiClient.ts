@@ -885,6 +885,33 @@ export class IrssiClient {
 		try {
 			log.info(`[IrssiClient] ⏰ TIMING: sendInitialState() START for socket ${socket.id}`);
 
+			// STEP 0: Defensive check - ensure unread markers are loaded from storage
+			// This handles the edge case where sendInitialState() is called before handleInit()
+			if (this.messageStorage && this.unreadMarkers.size === 0) {
+				log.info(
+					`[IrssiClient] Unread markers not loaded yet, loading from storage (defensive check)...`
+				);
+				try {
+					const markers = await this.messageStorage.loadUnreadMarkers();
+					for (const [key, lastReadTime] of markers) {
+						const [networkUuid, channelName] = key.split(":");
+						this.unreadMarkers.set(key, {
+							network: networkUuid,
+							channel: channelName,
+							unreadCount: 0,
+							lastReadTime: lastReadTime,
+							lastMessageTime: 0,
+							dataLevel: DataLevel.NONE,
+						});
+					}
+					log.info(
+						`[IrssiClient] Loaded ${markers.size} unread markers (defensive check)`
+					);
+				} catch (err) {
+					log.error(`Failed to load unread markers in sendInitialState: ${err}`);
+				}
+			}
+
 			// STEP 1: Load messages from storage for each channel/query
 			if (this.messageStorage) {
 				log.info(
@@ -1386,6 +1413,17 @@ export class IrssiClient {
 			marker.unreadCount = 0;
 			marker.lastReadTime = Date.now();
 			this.unreadMarkers.set(key, marker);
+
+			// Persist to storage (async - don't block!)
+			if (this.messageStorage) {
+				this.messageStorage
+					.saveUnreadMarker(network, channel, marker.lastReadTime)
+					.catch((err) => {
+						log.error(
+							`Failed to save unread marker for ${network}/${channel}: ${err}`
+						);
+					});
+			}
 		}
 
 		log.debug(`[IrssiClient] Marked as read: ${network}/${channel} (fromIrssi=${fromIrssi})`);
@@ -1782,6 +1820,32 @@ export class IrssiClient {
 						channel.messages = [];
 					}
 				}
+			}
+
+			// Load unread markers from storage (persistent read status across restarts!)
+			log.info(`[IrssiClient] Loading unread markers from storage...`);
+			try {
+				const markers = await this.messageStorage.loadUnreadMarkers();
+
+				// Populate unreadMarkers Map with loaded data
+				for (const [key, lastReadTime] of markers) {
+					// Parse key (format: "network_uuid:channel_name")
+					const [networkUuid, channelName] = key.split(":");
+
+					// Create marker with loaded lastReadTime
+					this.unreadMarkers.set(key, {
+						network: networkUuid,
+						channel: channelName,
+						unreadCount: 0, // Will be recalculated if needed
+						lastReadTime: lastReadTime,
+						lastMessageTime: 0, // Will be updated by activity_update
+						dataLevel: DataLevel.NONE, // Default to read
+					});
+				}
+
+				log.info(`[IrssiClient] Loaded ${markers.size} unread markers from storage`);
+			} catch (err) {
+				log.error(`Failed to load unread markers from storage: ${err}`);
 			}
 		}
 
