@@ -68,7 +68,7 @@ try {
 	);
 }
 
-export const currentSchemaVersion = 1729080000000; // 2024-10-17 (added unread_markers table)
+export const currentSchemaVersion = 1760689200000; // 2025-10-17 (added unread_markers table)
 
 // Schema for encrypted message storage
 const schema = [
