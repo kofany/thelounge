@@ -4,7 +4,7 @@
   "version": "4.4.3",
   "preferGlobal": true,
   "bin": {
-    "thelounge": "index.js"
+    "nexuslounge": "index.js"
   },
   "repository": {
     "type": "git",
@@ -46,7 +46,7 @@
     "node": ">=18.0.0"
   },
   "files": [
-    "./.thelounge_home",
+    "./.nexuslounge_home",
     "./index.js",
     "./yarn.lock",
     "./client/index.html.tpl",

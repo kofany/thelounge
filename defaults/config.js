@@ -32,8 +32,8 @@ module.exports = {
 	//
 	// Set the port to listen to.
 	//
-	// This value is set to `9000` by default.
-	port: 9000,
+	// This value is set to `19000` by default.
+	port: 19000,
 
 	// ### `bind`
 	//
@@ -133,7 +133,7 @@ module.exports = {
 	// or audio as The Lounge will only load these from https hosts.
 	//
 	// If storage is enabled, The Lounge will fetch and store images and thumbnails
-	// in the `${THELOUNGE_HOME}/storage` folder.
+	// in the `${NEXUSLOUNGE_HOME}/storage` folder.
 	//
 	// Images are deleted when they are no longer referenced by any message
 	// (controlled by `maxHistory`), and the folder is cleaned up when The Lounge
@@ -214,9 +214,9 @@ module.exports = {
 	// Set users' default `quit` and `part` messages if they are not providing
 	// one.
 	//
-	// This value is set to `"The Lounge - https://thelounge.chat"` by
+	// This value is set to `"NexusLounge"` by
 	// default.
-	leaveMessage: "The Lounge - https://thelounge.chat",
+	leaveMessage: "NexusLounge",
 
 	// ## Default network
 

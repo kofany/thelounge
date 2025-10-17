@@ -49,7 +49,7 @@ class ClientManager {
 		if (users.length === 0) {
 			log.info(
 				`There are currently no users. Create one with ${colors.bold(
-					"thelounge add <name>"
+					"nexuslounge add <name>"
 				)}.`
 			);
 
@@ -256,7 +256,7 @@ class ClientManager {
 			}
 		} catch (e: any) {
 			// We're simply verifying file owner as a safe guard for users
-			// that run `thelounge add` as root, so we don't care if it fails
+			// that run `nexuslounge add` as root, so we don't care if it fails
 		}
 
 		return true;

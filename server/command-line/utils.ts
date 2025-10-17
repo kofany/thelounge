@@ -13,7 +13,7 @@ class Utils {
 		[
 			"",
 			"Environment variable:",
-			`  THELOUNGE_HOME            Path for all configuration files and folders. Defaults to ${colors.green(
+			`  NEXUSLOUNGE_HOME          Path for all configuration files and folders. Defaults to ${colors.green(
 				Helper.expandHome(Utils.defaultHome())
 			)}`,
 			"",
@@ -25,7 +25,7 @@ class Utils {
 			return home;
 		}
 
-		const distConfig = Utils.getFileFromRelativeToRoot(".thelounge_home");
+		const distConfig = Utils.getFileFromRelativeToRoot(".nexuslounge_home");
 
 		home = fs.readFileSync(distConfig, "utf-8").trim();
 

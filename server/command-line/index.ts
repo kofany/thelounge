@@ -8,7 +8,7 @@ import Helper from "../helper";
 import Config from "../config";
 import Utils from "./utils";
 
-const program = new Command("thelounge");
+const program = new Command("nexuslounge");
 program
 	.version(Helper.getVersion(), "-v, --version")
 	.option(
@@ -21,7 +21,7 @@ program
 // Parse options from `argv` returning `argv` void of these options.
 const argvWithoutOptions = program.parseOptions(process.argv);
 
-Config.setHome(process.env.THELOUNGE_HOME || Utils.defaultHome());
+Config.setHome(process.env.NEXUSLOUNGE_HOME || Utils.defaultHome());
 
 // Check config file owner and warn if we're running under a different user
 try {

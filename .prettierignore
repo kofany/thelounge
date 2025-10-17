@@ -19,7 +19,7 @@ yarn.lock
 .npmrc
 .npmignore
 .prettierignore
-.thelounge_home
+.nexuslounge_home
 .editorconfig
 .eslintignore
 .gitattributes
