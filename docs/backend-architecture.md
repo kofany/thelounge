@@ -1,4 +1,4 @@
-# The Lounge Backend Architecture - irssi Proxy Mode
+# Nexus Lounge Backend Architecture - irssi Proxy Mode
 
 **Wersja:** 2.1 (Backend Proxy + fe-web v1.5 Dual-Layer Security)
 **Data:** 2025-10-13
@@ -6,7 +6,8 @@
 
 ## 🎯 Cel
 
-Przekształcenie The Lounge w **multi-user proxy** do irssi z:
+Przekształcenie Nexus Lounge w **multi-user proxy** do irssi z:
+
 - Persistent WebSocket connections (zawsze aktywne)
 - **Dual-layer security** (SSL/TLS + AES-256-GCM) - fe-web v1.5
 - Encrypted message storage (AES-256-GCM)
@@ -29,7 +30,7 @@ Przekształcenie The Lounge w **multi-user proxy** do irssi z:
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │  ClientManager                                         │ │
 │  │  - Zarządza wszystkimi użytkownikami                   │ │
-│  │  - Ładuje users z ~/.thelounge/users/*.json            │ │
+│  │  - Ładuje users z ~/.nexuslounge/users/*.json            │ │
 │  └────────────────────────────────────────────────────────┘ │
 │                           │                                  │
 │  ┌────────────────────────▼────────────────────────────────┐ │
@@ -55,7 +56,7 @@ Przekształcenie The Lounge w **multi-user proxy** do irssi z:
 │  │  └──────────────────────────────────────────────────┘ │ │
 │  │  ┌──────────────────────────────────────────────────┐ │ │
 │  │  │ messageStorage: EncryptedMessageStorage          │ │ │
-│  │  │ - SQLite database (~/.thelounge/logs/alice.db)   │ │ │
+│  │  │ - SQLite database (~/.nexuslounge/logs/alice.db)   │ │ │
 │  │  │ - Messages encrypted: [IV 12B][Cipher][Tag 16B]  │ │ │
 │  │  │ - LRU cache dla performance                      │ │ │
 │  │  └──────────────────────────────────────────────────┘ │ │
@@ -84,42 +85,46 @@ fe-web v1.5 **WYMUSZA** dual-layer security - OBA warstwy są OBOWIĄZKOWE:
 ### Triple-Key System
 
 **1. Authentication Key** (bcrypt hash):
+
 ```json
-// ~/.thelounge/users/alice.json
+// ~/.nexuslounge/users/alice.json
 {
-  "password": "$2a$11$xyz..." // bcrypt hash - weryfikacja logowania do The Lounge
+  "password": "$2a$11$xyz..." // bcrypt hash - weryfikacja logowania do Nexus Lounge
 }
 ```
 
 **2. WebSocket Encryption Key** (PBKDF2-derived, używany przez FeWebSocket):
+
 ```typescript
 // fe-web v1.5 używa FIXED salt!
 const webSocketKey = crypto.pbkdf2Sync(
-  irssiPassword,           // "irssi_pass_456" (hasło do irssi WebSocket)
-  "irssi-fe-web-v1",       // FIXED salt (15 bytes UTF-8) - MUSI być dokładnie ten!
-  10000,                   // iterations (MUSI być 10,000)
-  32,                      // key length (256 bits)
-  'sha256'
+  irssiPassword, // "irssi_pass_456" (hasło do irssi WebSocket)
+  "irssi-fe-web-v1", // FIXED salt (15 bytes UTF-8) - MUSI być dokładnie ten!
+  10000, // iterations (MUSI być 10,000)
+  32, // key length (256 bits)
+  "sha256"
 );
 // Ten klucz jest używany TYLKO przez FeWebSocket do szyfrowania komunikacji z irssi
 ```
 
 **3. Message Storage Encryption Key** (PBKDF2-derived, in-memory):
+
 ```typescript
 // Osobny klucz dla lokalnego storage (RÓŻNY od WebSocket!)
 const storageKey = crypto.pbkdf2Sync(
-  userPassword,      // "secret123" (hasło użytkownika do The Lounge)
-  irssiPassword,     // "irssi_pass_456" (hasło do irssi WebSocket - SALT)
-  10000,             // iterations
-  32,                // key length (256 bits)
-  'sha256'
+  userPassword, // "secret123" (hasło użytkownika do Nexus Lounge)
+  irssiPassword, // "irssi_pass_456" (hasło do irssi WebSocket - SALT)
+  10000, // iterations
+  32, // key length (256 bits)
+  "sha256"
 );
 // Ten klucz jest używany TYLKO do szyfrowania wiadomości w SQLite
 ```
 
 **4. irssi Password** (encrypted, on-disk):
+
 ```json
-// ~/.thelounge/users/alice.json
+// ~/.nexuslounge/users/alice.json
 {
   "irssiConnection": {
     "host": "127.0.0.1",
@@ -132,6 +137,7 @@ const storageKey = crypto.pbkdf2Sync(
 ### Encryption Flow (fe-web v1.5)
 
 **Logowanie użytkownika**:
+
 ```
 1. User → Browser: username="alice", password="secret123"
 
@@ -164,6 +170,7 @@ const storageKey = crypto.pbkdf2Sync(
 ```
 
 **Zapisywanie wiadomości**:
+
 ```
 1. irssi → Backend: {"type": "message", "text": "Secret message", ...}
 2. Backend: Encrypt message:
@@ -193,11 +200,13 @@ CREATE INDEX idx_messages_user_channel ON messages(user, network, channel, time)
 ```
 
 **Encrypted Data Format**:
+
 ```
 [IV 12 bytes][Ciphertext (variable)][Auth Tag 16 bytes]
 ```
 
 **Decrypted JSON**:
+
 ```json
 {
   "type": "message",
@@ -305,22 +314,26 @@ CREATE INDEX idx_messages_user_channel ON messages(user, network, channel, time)
 ## 🔧 Kluczowe Komponenty
 
 ### 1. FeWebSocket (server/feWebClient/feWebSocket.ts)
+
 - WebSocket client do irssi fe-web (Node.js `ws` library)
 - AES-256-GCM encryption/decryption
 - Auto-reconnect z exponential backoff
 - Event handlers dla 20 server message types
 
 ### 2. FeWebEncryption (server/feWebClient/feWebEncryption.ts)
+
 - PBKDF2 key derivation (userPassword + irssiPassword salt)
 - AES-256-GCM encrypt/decrypt
 - Node.js crypto API
 
 ### 3. EncryptedMessageStorage (server/plugins/messageStorage/encrypted.ts)
+
 - SQLite database z encrypted messages
 - LRU cache dla performance
 - Re-encryption support (password change)
 
 ### 4. Modified Client (server/client.ts)
+
 - Usunięte: `networks: Network[]` (IRC zarządzane przez irssi)
 - Dodane: `irssiConnection: FeWebSocket`
 - Dodane: `encryptionKey: Buffer`
@@ -330,18 +343,21 @@ CREATE INDEX idx_messages_user_channel ON messages(user, network, channel, time)
 ## ⚠️ Bezpieczeństwo
 
 ### ✅ Zalety:
+
 - Logi szyfrowane AES-256-GCM (nie plaintext na dysku)
 - Encryption key derived z hasła użytkownika
 - irssi password szyfrowane (nie plaintext w config)
 - Każdy user ma osobny encryption key
 
 ### ⚠️ Ograniczenia:
+
 - Encryption key przechowywany w RAM (persistent)
 - Admin z root access może dump memory → extract key
 - Wymaga zaufania do administratora serwera
 
 ### 🛡️ Mitigacje:
-- Uruchom The Lounge w izolowanym środowisku (Docker, VM)
+
+- Uruchom Nexus Lounge w izolowanym środowisku (Docker, VM)
 - Użyj encrypted swap (Linux: dm-crypt)
 - Regularnie restartuj serwer (clear memory)
 - Użyj strong passwords (min 16 znaków)
@@ -355,4 +371,3 @@ CREATE INDEX idx_messages_user_channel ON messages(user, network, channel, time)
 - [ ] Modified Client class
 - [ ] Server integration
 - [ ] Testing
-

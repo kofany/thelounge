@@ -1,5 +1,5 @@
 /*
-This (very The Lounge-custom) script is a helper to generate changelog entries.
+This (very Nexus Lounge-custom) script is a helper to generate changelog entries.
 
 Note that it is not meant to produce fully-automated changelogs like other tools
 do, but merely prepare a changelog entry without risks of mistyping a URL or
@@ -155,7 +155,7 @@ Please refer to the commit list given above for a complete list of changes, or w
 As with all pre-releases, this version requires explicit use of the \`next\` tag to be installed:
 
 \`\`\`sh
-yarn global add thelounge@next
+yarn global add nexuslounge@next
 \`\`\`
 `;
 }
@@ -215,7 +215,7 @@ ${printList(items.documentation)}`
 ${
 	items.websiteDocumentation.length === 0
 		? ""
-		: `On the [website repository](https://github.com/thelounge/thelounge.github.io):
+		: `On the [website repository](https://github.com/nexuslounge/nexuslounge.github.io):
 
 ${printList(items.websiteDocumentation)}`
 }
@@ -253,9 +253,9 @@ function stableVersion(prereleaseVersion) {
 	return prereleaseVersion.substr(0, prereleaseVersion.indexOf("-"));
 }
 
-// Generates a compare-view URL between 2 versions of The Lounge
+// Generates a compare-view URL between 2 versions of Nexus Lounge
 function fullChangelogUrl(v1, v2) {
-	return `https://github.com/thelounge/thelounge/compare/v${v1}...v${v2}`;
+	return `https://github.com/nexuslounge/nexuslounge/compare/v${v1}...v${v2}`;
 }
 
 // This class is a facade to fetching details about commits / PRs / tags / etc.
@@ -291,7 +291,7 @@ class RepositoryFetcher {
 	// Returns the git commit that is attached to a given tag
 	async fetchTaggedCommit(tag) {
 		const tagQuery = `query fetchTaggedCommit($repositoryName: String!, $tag: String!) {
-			repository(owner: "thelounge", name: $repositoryName) {
+			repository(owner: "nexuslounge", name: $repositoryName) {
 				ref(qualifiedName: $tag) {
 					tag: target {
 						oid
@@ -313,7 +313,7 @@ class RepositoryFetcher {
 	// have a `pullRequestId` if this is a merge-PR commit.
 	async fetchCommitsSince(stopCommit) {
 		const commitsQuery = `query fetchCommits($repositoryName: String!, $afterCursor: String) {
-			repository(owner: "thelounge", name: $repositoryName) {
+			repository(owner: "nexuslounge", name: $repositoryName) {
 				ref(qualifiedName: "master") {
 					target {
 						... on Commit {
@@ -381,7 +381,7 @@ class RepositoryFetcher {
 	// skipped).
 	async fetchPreviousVersion(newVersion) {
 		const lastTagsQuery = `query fetchPreviousVersion($repositoryName: String!) {
-			repository(owner: "thelounge", name: $repositoryName) {
+			repository(owner: "nexuslounge", name: $repositoryName) {
 				refs(refPrefix: "refs/tags/", first: 20, direction: DESC) {
 					tags: nodes {
 						name
@@ -406,7 +406,7 @@ class RepositoryFetcher {
 	// tag!) of the repository
 	async fetchMilestone(targetVersion) {
 		const milestonesQuery = `query fetchMilestone($repositoryName: String!) {
-			repository(owner: "thelounge", name: $repositoryName) {
+			repository(owner: "nexuslounge", name: $repositoryName) {
 				milestones(last: 20) {
 					nodes {
 						title
@@ -441,7 +441,7 @@ class RepositoryFetcher {
 		}
 
 		const prQuery = `query fetchPullRequests($repositoryName: String!) {
-			repository(owner: "thelounge", name: $repositoryName) {
+			repository(owner: "nexuslounge", name: $repositoryName) {
 				${numbers
 					.map(
 						(number) => `
@@ -849,7 +849,7 @@ async function generateChangelogEntry(changelog, targetVersion) {
 	let template;
 	let contributors = [];
 
-	const codeRepo = new RepositoryFetcher(token, "thelounge");
+	const codeRepo = new RepositoryFetcher(token, "nexuslounge");
 	const previousVersion = await codeRepo.fetchPreviousVersion(targetVersion);
 
 	if (isPrerelease(targetVersion)) {
@@ -863,7 +863,7 @@ async function generateChangelogEntry(changelog, targetVersion) {
 		items = parse(codeCommitsAndPullRequests);
 		items.milestone = await codeRepo.fetchMilestone(targetVersion);
 
-		const websiteRepo = new RepositoryFetcher(token, "thelounge.github.io");
+		const websiteRepo = new RepositoryFetcher(token, "nexuslounge.github.io");
 		const previousWebsiteVersion = await websiteRepo.fetchPreviousVersion(targetVersion);
 		const websiteCommitsAndPullRequests = await websiteRepo.fetchCommitsAndPullRequestsSince(
 			"v" + previousWebsiteVersion

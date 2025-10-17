@@ -49,7 +49,7 @@ class ClientManager {
 		if (users.length === 0) {
 			log.info(
 				`There are currently no users. Create one with ${colors.bold(
-					"thelounge add <name>"
+					"nexuslounge add <name>"
 				)}.`
 			);
 
@@ -127,7 +127,7 @@ class ClientManager {
 				 * have their latest password. We're not replacing the entire config
 				 * object, because that could have undesired consequences.
 				 *
-				 * @see https://github.com/thelounge/thelounge/issues/598
+				 * @see https://github.com/nexuslounge/nexuslounge/issues/598
 				 */
 				client.config.password = userConfig.password;
 				log.info(`Password for user ${colors.bold(name)} was reset.`);
@@ -246,17 +246,17 @@ class ClientManager {
 				);
 				log.warn(
 					"The file owner has been changed to the expected user. " +
-						"To prevent any issues, please run thelounge commands " +
+						"To prevent any issues, please run nexuslounge commands " +
 						"as the correct user that owns the config folder."
 				);
 				log.warn(
-					"See https://thelounge.chat/docs/usage#using-the-correct-system-user for more information."
+					"See https://nexuslounge.chat/docs/usage#using-the-correct-system-user for more information."
 				);
 				fs.chownSync(userPath, userFolderStat.uid, userFolderStat.gid);
 			}
 		} catch (e: any) {
 			// We're simply verifying file owner as a safe guard for users
-			// that run `thelounge add` as root, so we don't care if it fails
+			// that run `nexuslounge add` as root, so we don't care if it fails
 		}
 
 		return true;
@@ -266,7 +266,7 @@ class ClientManager {
 		// IrssiClient doesn't have Network[] with export() method
 		// Instead, it stores networks in irssi - we only save networkUuidMap
 		const isIrssiClient = (client as any).irssiConnection !== undefined;
-		
+
 		const json = Object.assign({}, client.config, {
 			networks: isIrssiClient ? [] : client.networks.map((n) => n.export()),
 		});

@@ -5,18 +5,18 @@
 				<img
 					:src="`img/logo-${isPublic() ? 'horizontal-' : ''}transparent-bg.svg`"
 					class="logo"
-					alt="The Lounge"
+					alt="Nexus Lounge"
 					role="presentation"
 				/>
 				<img
 					:src="`img/logo-${isPublic() ? 'horizontal-' : ''}transparent-bg-inverted.svg`"
 					class="logo-inverted"
-					alt="The Lounge"
+					alt="Nexus Lounge"
 					role="presentation"
 				/>
 				<span
 					v-if="isDevelopment"
-					title="The Lounge has been built in development mode"
+					title="Nexus Lounge has been built in development mode"
 					:style="{
 						backgroundColor: '#ff9e18',
 						color: '#000',
@@ -30,9 +30,7 @@
 			<NetworkList />
 		</div>
 		<footer id="footer">
-			<span
-				class="tooltipped tooltipped-n tooltipped-no-touch"
-				aria-label="Network Manager"
+			<span class="tooltipped tooltipped-n tooltipped-no-touch" aria-label="Network Manager"
 				><router-link
 					v-slot:default="{navigate, isActive}"
 					to="/network-manager"

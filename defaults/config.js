@@ -5,7 +5,7 @@ module.exports = {
 
 	// ### `public`
 	//
-	// When set to `true`, The Lounge starts in public mode. When set to `false`,
+	// When set to `true`, Nexus Lounge starts in public mode. When set to `false`,
 	// it starts in private mode.
 	//
 	// - A **public server** does not require authentication. Anyone can connect
@@ -45,7 +45,7 @@ module.exports = {
 
 	// ### `reverseProxy`
 	//
-	// When set to `true`, The Lounge is marked as served behind a reverse proxy
+	// When set to `true`, Nexus Lounge is marked as served behind a reverse proxy
 	// and will honor the `X-Forwarded-For` header.
 	//
 	// This value is set to `false` by default.
@@ -62,10 +62,10 @@ module.exports = {
 
 	// ### `https`
 	//
-	// These settings are used to run The Lounge's web server using encrypted TLS.
+	// These settings are used to run Nexus Lounge's web server using encrypted TLS.
 	//
 	// If you want more control over the webserver,
-	// [use a reverse proxy instead](https://thelounge.chat/docs/guides/reverse-proxies).
+	// [use a reverse proxy instead](https://nexuslounge.chat/docs/guides/reverse-proxies).
 	//
 	// The available keys for the `https` object are:
 	//
@@ -91,20 +91,20 @@ module.exports = {
 	// Set the default theme to serve to new users. They will be able to select a
 	// different one in their client settings among those available.
 	//
-	// The Lounge ships with two themes (`default` and `morning`) and can be
+	// Nexus Lounge ships with two themes (`default` and `morning`) and can be
 	// extended by installing more themes. Read more about how to manage them
-	// [here](https://thelounge.chat/docs/guides/theme-creation).
+	// [here](https://nexuslounge.chat/docs/guides/theme-creation).
 	//
 	// This value needs to be the package name and not the display name. For
 	// example, the value for Morning would be `morning`, and the value for
-	// Solarized would be `thelounge-theme-solarized`.
+	// Solarized would be `nexuslounge-theme-solarized`.
 	//
 	// This value is set to `"nexus"` by default.
 	theme: "nexus",
 
 	// ### `prefetch`
 	//
-	// When set to `true`, The Lounge will load thumbnails and site descriptions
+	// When set to `true`, Nexus Lounge will load thumbnails and site descriptions
 	// from URLs posted in channels and private messages.
 	//
 	// This value is set to `false` by default.
@@ -112,10 +112,10 @@ module.exports = {
 
 	// ### `disableMediaPreview`
 	//
-	// When set to `true`, The Lounge will not preview media (images, video and
+	// When set to `true`, Nexus Lounge will not preview media (images, video and
 	// audio) hosted on third-party sites. This ensures the client does not
 	// make any requests to external sites. If `prefetchStorage` is enabled,
-	// images proxied via the The Lounge will be previewed.
+	// images proxied via the Nexus Lounge will be previewed.
 	//
 	// This has no effect if `prefetch` is set to `false`.
 	//
@@ -124,19 +124,19 @@ module.exports = {
 
 	// ### `prefetchStorage`
 
-	// When set to `true`, The Lounge will store and proxy prefetched images and
+	// When set to `true`, Nexus Lounge will store and proxy prefetched images and
 	// thumbnails on the filesystem rather than directly display the content at
 	// the original URLs.
 	//
 	// This option primarily exists to resolve mixed content warnings by not
 	// loading images from http hosts. This option does not work for video
-	// or audio as The Lounge will only load these from https hosts.
+	// or audio as Nexus Lounge will only load these from https hosts.
 	//
-	// If storage is enabled, The Lounge will fetch and store images and thumbnails
+	// If storage is enabled, Nexus Lounge will fetch and store images and thumbnails
 	// in the `${THELOUNGE_HOME}/storage` folder.
 	//
 	// Images are deleted when they are no longer referenced by any message
-	// (controlled by `maxHistory`), and the folder is cleaned up when The Lounge
+	// (controlled by `maxHistory`), and the folder is cleaned up when Nexus Lounge
 	// restarts.
 	//
 	// This value is set to `false` by default.
@@ -163,11 +163,11 @@ module.exports = {
 	// ### `prefetchTimeout`
 	//
 	// When `prefetch` is enabled, this value sets the number of milliseconds
-	// before The Lounge gives up attempting to fetch a link. This can be useful
+	// before Nexus Lounge gives up attempting to fetch a link. This can be useful
 	// if you've increased the `prefetchMaxImageSize`.
 	//
 	// Take caution, however, that an inordinately large value may lead to
-	// performance issues or even a denial of service, since The Lounge will not
+	// performance issues or even a denial of service, since Nexus Lounge will not
 	// be able to clean up outgoing connections as quickly. Usually the default
 	// value is appropriate, so only change it if necessary.
 	//
@@ -176,10 +176,10 @@ module.exports = {
 
 	// ### `fileUpload`
 	//
-	// Allow uploading files to the server hosting The Lounge.
+	// Allow uploading files to the server hosting Nexus Lounge.
 	//
 	// Files are stored in the `${THELOUNGE_HOME}/uploads` folder, do not expire,
-	// and are not removed by The Lounge. This may cause issues depending on your
+	// and are not removed by Nexus Lounge. This may cause issues depending on your
 	// hardware, for example in terms of disk usage.
 	//
 	// The available keys for the `fileUpload` object are:
@@ -194,7 +194,7 @@ module.exports = {
 	//   you can set this option to `"https://example.com/folder/"` and the final URL
 	//   would look like `"https://example.com/folder/aabbccddeeff1234/name.png"`.
 	//   If you use this option, you must have a reverse proxy configured,
-	//   to correctly proxy the uploads URLs back to The Lounge.
+	//   to correctly proxy the uploads URLs back to Nexus Lounge.
 	//   This value is set to `null` by default.
 	fileUpload: {
 		enable: false,
@@ -214,9 +214,9 @@ module.exports = {
 	// Set users' default `quit` and `part` messages if they are not providing
 	// one.
 	//
-	// This value is set to `"The Lounge - https://thelounge.chat"` by
+	// This value is set to `"Nexus Lounge - https://nexuslounge.chat"` by
 	// default.
-	leaveMessage: "The Lounge - https://thelounge.chat",
+	leaveMessage: "Nexus Lounge - https://nexuslounge.chat",
 
 	// ## Default network
 
@@ -227,7 +227,7 @@ module.exports = {
 	//
 	// The available keys for the `defaults` object are:
 	//
-	// - `name`: Name to display in the channel list of The Lounge. This value is
+	// - `name`: Name to display in the channel list of Nexus Lounge. This value is
 	//   not forwarded to the IRC network.
 	// - `host`: IP address or hostname of the IRC server.
 	// - `port`: Usually 6667 for unencrypted connections and 6697 for
@@ -245,7 +245,7 @@ module.exports = {
 	// - `leaveMessage`: Network specific leave message (overrides global leaveMessage)
 	// - `join`: Comma-separated list of channels to auto-join once connected.
 	//
-	// This value is set to connect to the official channel of The Lounge on
+	// This value is set to connect to the official channel of Nexus Lounge on
 	// Libera.Chat by default:
 	//
 	// ```js
@@ -256,10 +256,10 @@ module.exports = {
 	//   password: "",
 	//   tls: true,
 	//   rejectUnauthorized: true,
-	//   nick: "thelounge%%",
-	//   username: "thelounge",
-	//   realname: "The Lounge User",
-	//   join: "#thelounge"
+	//   nick: "nexuslounge%%",
+	//   username: "nexuslounge",
+	//   realname: "Nexus Lounge User",
+	//   join: "#nexuslounge"
 	// }
 	// ```
 	defaults: {
@@ -269,10 +269,10 @@ module.exports = {
 		password: "",
 		tls: true,
 		rejectUnauthorized: true,
-		nick: "thelounge%%",
-		username: "thelounge",
+		nick: "nexuslounge%%",
+		username: "nexuslounge",
 		realname: "",
-		join: "#thelounge",
+		join: "#nexuslounge",
 		leaveMessage: "",
 	},
 
@@ -289,7 +289,7 @@ module.exports = {
 
 	// ### `messageStorage`
 
-	// The Lounge can log user messages, for example to access them later or to
+	// Nexus Lounge can log user messages, for example to access them later or to
 	// reload messages on server restart.
 
 	// Set this array with one or multiple values to enable logging:
@@ -337,9 +337,9 @@ module.exports = {
 
 	// ## WEBIRC support
 	//
-	// When enabled, The Lounge will pass the connecting user's host and IP to the
+	// When enabled, Nexus Lounge will pass the connecting user's host and IP to the
 	// IRC server. Note that this requires to obtain a password from the IRC
-	// network that The Lounge will be connecting to and generally involves a lot
+	// network that Nexus Lounge will be connecting to and generally involves a lot
 	// of trust from the network you are connecting to.
 	//
 	// There are 2 ways to configure the `webirc` setting:
@@ -376,7 +376,7 @@ module.exports = {
 
 	// ### `identd`
 	//
-	// Run The Lounge with `identd` support.
+	// Run Nexus Lounge with `identd` support.
 	//
 	// The available keys for the `identd` object are:
 	//
@@ -409,10 +409,10 @@ module.exports = {
 	//
 	// The authentication process works as follows:
 	//
-	// 1. The Lounge connects to the LDAP server with its system credentials.
+	// 1. Nexus Lounge connects to the LDAP server with its system credentials.
 	// 2. It performs an LDAP search query to find the full DN associated to the
 	//    user requesting to log in.
-	// 3. The Lounge tries to connect a second time, but this time using the
+	// 3. Nexus Lounge tries to connect a second time, but this time using the
 	//    user's DN and password. Authentication is validated if and only if this
 	//    connection is successful.
 	//
@@ -463,18 +463,18 @@ module.exports = {
 		//   When unset, the LDAP auth logic with use `searchDN` instead to locate users.
 
 		// - `searchDN`: LDAP search DN settings. This defines the procedure by
-		//   which The Lounge first looks for the user DN before authenticating them.
+		//   which Nexus Lounge first looks for the user DN before authenticating them.
 		//   It is ignored if `baseDN` is specified. It is an object with the
 		//   following keys:
 		searchDN: {
 			//   - `rootDN`: This bind DN is used to query the server for the DN of
 			//     the user. This is supposed to be a system user that has access in
 			//     read-only to the DNs of the people that are allowed to log in.
-			//     It is set to `"cn=thelounge,ou=system-users,dc=example,dc=com"` by
+			//     It is set to `"cn=nexuslounge,ou=system-users,dc=example,dc=com"` by
 			//     default.
-			rootDN: "cn=thelounge,ou=system-users,dc=example,dc=com",
+			rootDN: "cn=nexuslounge,ou=system-users,dc=example,dc=com",
 
-			//   - `rootPassword`: Password of The Lounge LDAP system user.
+			//   - `rootPassword`: Password of Nexus Lounge LDAP system user.
 			rootPassword: "1234",
 
 			//   - `filter`: it is set to `"(&(objectClass=person)(memberOf=ou=accounts,dc=example,dc=com))"`
@@ -503,7 +503,7 @@ module.exports = {
 		//
 		// When set to true, this enables extra debugging output provided by
 		// [`irc-framework`](https://github.com/kiwiirc/irc-framework), the
-		// underlying IRC library for Node.js used by The Lounge.
+		// underlying IRC library for Node.js used by Nexus Lounge.
 		ircFramework: false,
 
 		// ### `debug.raw`

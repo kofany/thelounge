@@ -112,7 +112,7 @@ export class IrssiClient {
 	feWebAdapter: FeWebAdapter | null = null;
 	encryptionKey: Buffer | null = null;
 	irssiPassword: string | null = null; // Decrypted irssi password (in memory)
-	userPassword: string | null = null; // User's The Lounge password (in memory, for encryption)
+	userPassword: string | null = null; // User's Nexus Lounge password (in memory, for encryption)
 
 	// Networks from irssi (managed by FeWebAdapter)
 	networks: NetworkData[] = [];
@@ -250,10 +250,10 @@ export class IrssiClient {
 
 		// Step 4: Connect to irssi fe-web (ASYNCHRONOUSLY - don't block login!)
 		// Don't await - let it connect in background
-		// If it fails, user can still use The Lounge UI and fix config in Settings
+		// If it fails, user can still use Nexus Lounge UI and fix config in Settings
 		this.connectToIrssi().catch((error) => {
 			log.error(`Failed to connect to irssi for user ${colors.bold(this.name)}: ${error}`);
-			// Don't throw - user is already logged in to The Lounge
+			// Don't throw - user is already logged in to Nexus Lounge
 		});
 
 		log.info(`User ${colors.bold(this.name)} logged in successfully`);
@@ -603,7 +603,7 @@ export class IrssiClient {
 
 	/**
 	 * Command Translation Layer
-	 * Translates Vue/The Lounge specific commands to irssi-compatible commands
+	 * Translates Vue/Nexus Lounge specific commands to irssi-compatible commands
 	 * Returns:
 	 * - null: no translation needed, use original command
 	 * - string: translated command to send to irssi
@@ -1419,9 +1419,7 @@ export class IrssiClient {
 				this.messageStorage
 					.saveUnreadMarker(network, channel, marker.lastReadTime)
 					.catch((err) => {
-						log.error(
-							`Failed to save unread marker for ${network}/${channel}: ${err}`
-						);
+						log.error(`Failed to save unread marker for ${network}/${channel}: ${err}`);
 					});
 			}
 		}

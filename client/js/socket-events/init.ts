@@ -57,7 +57,7 @@ socket.on("init", async function (data) {
 });
 
 function mergeNetworkData(newNetworks: SharedNetwork[]): ClientNetwork[] {
-	const stored = storage.get("thelounge.networks.collapsed");
+	const stored = storage.get("nexuslounge.networks.collapsed");
 	const collapsedNetworks = stored ? new Set(JSON.parse(stored)) : new Set();
 	const result: ReturnType<typeof mergeNetworkData> = [];
 

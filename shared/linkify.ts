@@ -54,7 +54,7 @@ linkify.add("web+", {
 
 // we must rewrite protocol less urls to http, else if TL is hosted
 // on https, this would incorrectly use https for the remote link.
-// See https://github.com/thelounge/thelounge/issues/2525
+// See https://github.com/nexuslounge/nexuslounge/issues/2525
 //
 // We take the validation logic from linkify and just add our own
 // normalizer.

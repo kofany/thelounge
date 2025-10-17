@@ -1,5 +1,5 @@
 // @ts-nocheck
-// The Lounge - https://github.com/thelounge/thelounge
+// Nexus Lounge - https://github.com/nexuslounge/nexuslounge
 /* global clients */
 "use strict";
 

@@ -194,7 +194,7 @@ class Chan {
 		// If client is reconnecting, only send new messages that client has not seen yet
 		if (lastMessage && lastMessage > -1) {
 			// When reconnecting, always send up to 100 messages to prevent message gaps on the client
-			// See https://github.com/thelounge/thelounge/issues/1883
+			// See https://github.com/nexuslounge/nexuslounge/issues/1883
 			msgs = this.messages.filter((m) => m.id > lastMessage).slice(-100);
 		} else {
 			// If channel is active, send up to 100 last messages, for all others send just 1

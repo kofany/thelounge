@@ -162,7 +162,7 @@ class Config {
 
 	getDefaultNick() {
 		if (!this.values.defaults.nick) {
-			return "thelounge";
+			return "nexuslounge";
 		}
 
 		return this.values.defaults.nick.replace(/%/g, () =>
@@ -245,7 +245,7 @@ class Config {
 			}
 		}
 
-		const manifestPath = Utils.getFileFromRelativeToRoot("public", "thelounge.webmanifest");
+		const manifestPath = Utils.getFileFromRelativeToRoot("public", "nexuslounge.webmanifest");
 
 		// Check if manifest exists, if not, the app most likely was not built
 		if (!fs.existsSync(manifestPath)) {

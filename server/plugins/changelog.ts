@@ -34,13 +34,16 @@ async function fetch() {
 	}
 
 	try {
-		const response = await got("https://api.github.com/repos/thelounge/thelounge/releases", {
-			headers: {
-				Accept: "application/vnd.github.v3.html", // Request rendered markdown
-				"User-Agent": pkg.name + "; +" + pkg.repository.url, // Identify the client
-			},
-			localAddress: Config.values.bind,
-		});
+		const response = await got(
+			"https://api.github.com/repos/nexuslounge/nexuslounge/releases",
+			{
+				headers: {
+					Accept: "application/vnd.github.v3.html", // Request rendered markdown
+					"User-Agent": pkg.name + "; +" + pkg.repository.url, // Identify the client
+				},
+				localAddress: Config.values.bind,
+			}
+		);
 
 		if (response.statusCode !== 200) {
 			return versions;
@@ -114,7 +117,7 @@ function checkForUpdates(manager: ClientManager) {
 			}
 
 			log.info(
-				`The Lounge ${colors.green(
+				`Nexus Lounge ${colors.green(
 					versionData.latest.version
 				)} is available. Read more on GitHub: ${versionData.latest.url}`
 			);

@@ -380,7 +380,7 @@ function getRequestHeaders(headers: Record<string, string>) {
 		// Certain websites like Amazon only add <meta> tags to known bots,
 		// lets pretend to be them to get the metadata
 		"User-Agent":
-			"Mozilla/5.0 (compatible; The Lounge IRC Client; +https://github.com/thelounge/thelounge)" +
+			"Mozilla/5.0 (compatible; Nexus Lounge IRC Client; +https://github.com/nexuslounge/nexuslounge)" +
 			" facebookexternalhit/1.1 Twitterbot/1.0",
 		Accept: headers.accept || "*/*",
 		"X-Purpose": "preview",
@@ -406,7 +406,7 @@ function fetch(uri: string, headers: Record<string, string>) {
 
 	if (!prefetchTimeout) {
 		log.warn(
-			"prefetchTimeout is missing from your The Lounge configuration, defaulting to 5000 ms"
+			"prefetchTimeout is missing from your Nexus Lounge configuration, defaulting to 5000 ms"
 		);
 	}
 

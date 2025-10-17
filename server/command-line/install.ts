@@ -9,7 +9,7 @@ import {Command} from "commander";
 import {FullMetadata} from "package-json";
 
 type CustomMetadata = FullMetadata & {
-	thelounge: {
+	nexuslounge: {
 		supports: string;
 	};
 };
@@ -72,23 +72,23 @@ program
 			.then((json: CustomMetadata) => {
 				const humanVersion = isLocalFile ? packageName : `${json.name} v${json.version}`;
 
-				if (!("thelounge" in json)) {
-					log.error(`${colors.red(humanVersion)} does not have The Lounge metadata.`);
+				if (!("nexuslounge" in json)) {
+					log.error(`${colors.red(humanVersion)} does not have Nexus Lounge metadata.`);
 
 					process.exit(1);
 				}
 
 				if (
-					json.thelounge.supports &&
-					!semver.satisfies(Helper.getVersionNumber(), json.thelounge.supports, {
+					json.nexuslounge.supports &&
+					!semver.satisfies(Helper.getVersionNumber(), json.nexuslounge.supports, {
 						includePrerelease: true,
 					})
 				) {
 					log.error(
 						`${colors.red(
 							humanVersion
-						)} does not support The Lounge v${Helper.getVersionNumber()}. Supported version(s): ${
-							json.thelounge.supports
+						)} does not support Nexus Lounge v${Helper.getVersionNumber()}. Supported version(s): ${
+							json.nexuslounge.supports
 						}`
 					);
 

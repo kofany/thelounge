@@ -1,16 +1,16 @@
 {
-  "name": "thelounge",
+  "name": "nexuslounge",
   "description": "The self-hosted Web IRC client",
   "version": "4.4.3",
   "preferGlobal": true,
   "bin": {
-    "thelounge": "index.js"
+    "nexuslounge": "index.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/thelounge/thelounge.git"
+    "url": "https://github.com/erssi-org/nexuslounge.git"
   },
-  "homepage": "https://thelounge.chat/",
+  "homepage": "https://nexus.erssi.org/",
   "scripts": {
     "build:client": "webpack",
     "build:server": "tsc -p server/tsconfig.json",
@@ -39,7 +39,7 @@
     "client",
     "irc",
     "server",
-    "thelounge"
+    "nexuslounge"
   ],
   "license": "MIT",
   "engines": {

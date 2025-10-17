@@ -294,7 +294,7 @@
 15:09:56 -!- -     - ssl.cloak.ircnet.io  With cloak and SSL/TLS support
 15:09:56 -!- -   * Webchat available at:
 15:09:56 -!- -     - https://webchat.ircnet.net  qwebirc
-15:09:56 -!- -     - https://ircnet.chat/        The Lounge
+15:09:56 -!- -     - https://ircnet.chat/        Nexus Lounge
 15:09:56 -!- -
 15:09:56 -!- - ] If you require any further information, join #ircnet
 15:09:56 -!- -
@@ -440,7 +440,7 @@
 15:10:18 -!- Irssi: fe-web-ssl: SSL_write returned 151
 15:10:18 -!- Irssi: fe-web-ssl: Successfully wrote 151 bytes
 15:10:18 -!- Irssi: fe-web: [1760447380-0026] Sent activity_update (151 bytes frame) [SSL] [ENCRYPTED]
-15:10:21 -!- Irssi: fe-web: [1760447380-0026] Sending channel_join: {"id":"1760447421-0058","type":"channel_join","server":"IRCnet","channel":"#polska","nick":"gibi~","timestamp":1760447421,"extra":{"hostname":"thelounge@nx.ignorelist.com"}}
+15:10:21 -!- Irssi: fe-web: [1760447380-0026] Sending channel_join: {"id":"1760447421-0058","type":"channel_join","server":"IRCnet","channel":"#polska","nick":"gibi~","timestamp":1760447421,"extra":{"hostname":"nexuslounge@nx.ignorelist.com"}}
 15:10:21 -!- Irssi: fe-web: [1760447380-0026] Encrypted channel_join (173 -> 201 bytes)
 15:10:21 -!- Irssi: fe-web-ssl: Attempting SSL_write (205 bytes)...
 15:10:21 -!- Irssi: fe-web-ssl: SSL_write returned 205

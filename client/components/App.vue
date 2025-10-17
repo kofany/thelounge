@@ -123,13 +123,13 @@ export default defineComponent({
 
 		const prepareOpenStates = () => {
 			const viewportWidth = window.innerWidth;
-			let isUserlistOpen = storage.get("thelounge.state.userlist");
+			let isUserlistOpen = storage.get("nexuslounge.state.userlist");
 
 			if (viewportWidth > constants.mobileViewportPixels) {
-				store.commit("sidebarOpen", storage.get("thelounge.state.sidebar") !== "false");
+				store.commit("sidebarOpen", storage.get("nexuslounge.state.sidebar") !== "false");
 			}
 
-			// If The Lounge is opened on a small screen (less than 1024px), and we don't have stored
+			// If Nexus Lounge is opened on a small screen (less than 1024px), and we don't have stored
 			// user list state, close it by default
 			if (viewportWidth >= 1024 && isUserlistOpen !== "true" && isUserlistOpen !== "false") {
 				isUserlistOpen = "true";

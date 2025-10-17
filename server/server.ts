@@ -71,7 +71,7 @@ export default async function (
 		dev: false,
 	}
 ) {
-	log.info(`The Lounge ${colors.green(Helper.getVersion())} \
+	log.info(`Nexus Lounge ${colors.green(Helper.getVersion())} \
 (Node.js ${colors.green(process.versions.node)} on ${colors.green(process.platform)} ${
 		process.arch
 	})`);
@@ -681,7 +681,7 @@ function initializeClient(
 				client.manager.webPush.pushSingle(client, registration, {
 					type: "notification",
 					timestamp: Date.now(),
-					title: "The Lounge",
+					title: "Nexus Lounge",
 					body: "🚀 Push notifications have been enabled",
 				});
 			}
@@ -1318,7 +1318,7 @@ function initializeIrssiClient(
 			const testSocket = new FeWebSocket({
 				host,
 				port,
-				password: irssiWebSocketPassword, // irssi WebSocket password (NOT The Lounge password!)
+				password: irssiWebSocketPassword, // irssi WebSocket password (NOT Nexus Lounge password!)
 				encryption: true,
 				useTLS: true,
 				rejectUnauthorized: rejectUnauthorized ?? false,
@@ -1623,7 +1623,7 @@ function performAuthentication(this: Socket, data: AuthPerformData) {
 
 function reverseDnsLookup(ip: string, callback: (hostname: string) => void) {
 	// node can throw, even if we provide valid input based on the DNS server
-	// returning SERVFAIL it seems: https://github.com/thelounge/thelounge/issues/4768
+	// returning SERVFAIL it seems: https://github.com/nexuslounge/nexuslounge/issues/4768
 	// so we manually resolve with the ip as a fallback in case something fails
 	try {
 		dns.reverse(ip, (reverseErr, hostnames) => {

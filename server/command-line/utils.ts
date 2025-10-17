@@ -33,12 +33,12 @@ class Utils {
 	}
 
 	static getFileFromRelativeToRoot(...fileName: string[]) {
-		// e.g. /thelounge/server/command-line/utils.ts
+		// e.g. /nexuslounge/server/command-line/utils.ts
 		if (process.env.NODE_ENV === "test" || process.env.NODE_ENV === "development") {
 			return path.resolve(path.join(__dirname, "..", "..", ...fileName));
 		}
 
-		// e.g. /thelounge/dist/server/command-line/utils.ts
+		// e.g. /nexuslounge/dist/server/command-line/utils.ts
 		return path.resolve(path.join(__dirname, "..", "..", "..", ...fileName));
 	}
 
@@ -122,7 +122,7 @@ class Utils {
 			// We only ever operate in production mode
 			NODE_ENV: "production",
 
-			// If The Lounge runs from a user that does not have a home directory,
+			// If Nexus Lounge runs from a user that does not have a home directory,
 			// yarn may fail when it tries to read certain folders,
 			// we give it an existing folder so the reads do not throw a permission error.
 			// Yarn uses os.homedir() to figure out the path, which internally reads
@@ -153,7 +153,7 @@ class Utils {
 						} catch (e: any) {
 							// Stdout buffer has limitations and yarn may print
 							// big package trees, for example in the upgrade command
-							// See https://github.com/thelounge/thelounge/issues/3679
+							// See https://github.com/nexuslounge/nexuslounge/issues/3679
 						}
 					});
 			});

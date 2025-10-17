@@ -684,15 +684,15 @@
   6. ✅ irssi kompiluje się bez błędów!
 
   ---
-  FAZA 2: The Lounge Backend
+  FAZA 2: Nexus Lounge Backend
 
-  Teraz przechodzę do implementacji w The Lounge. Zacznę od rozszerzenia IrssiClient.
+  Teraz przechodzę do implementacji w Nexus Lounge. Zacznę od rozszerzenia IrssiClient.
 
   Będę kontynuował w kolejnej odpowiedzi ze względu na rozmiar kontekstu...
 
 > Kontynuuj
 
-⏺ FAZA 2: The Lounge Backend                                                                                                                                                                                                                                                       09:45 AM  claude-sonnet-4-5-20250929
+⏺ FAZA 2: Nexus Lounge Backend                                                                                                                                                                                                                                                       09:45 AM  claude-sonnet-4-5-20250929
 
   Zaczynam od czytania IrssiClient:
 
@@ -732,11 +732,11 @@
 Analysis:
 Let me chronologically analyze this conversation to create a comprehensive summary:
 
-1. **Initial Context**: The conversation is a continuation from a previous session that ran out of context. A summary was provided showing work on The Lounge + irssi fe-web integration with message storage encryption.
+1. **Initial Context**: The conversation is a continuation from a previous session that ran out of context. A summary was provided showing work on Nexus Lounge + irssi fe-web integration with message storage encryption.
 
 2. **User's First Request** (in Polish): "Na ten moment zaimplementuj 3, a) Zaimplementuj najpierw w irssi (zrób build tylko dla testów czy nie ma błędów kompilacji - normalny build i test przeprowadzam ja) b) zaimplementuj odpowiednio wszystko dla the lounge tak jak to wymyśliłeś. (test błędów kompilacji, test
 samego działania przeprowadzam ja) c) Jeśłi się da wyczyść obecną bazę sqllite (bo wprowadziliśmy zmiany nie chce aby coś się gryzło, chcę testować wszystko jako tabula rasa - z czystym stanem) - node jest teraz off."
-   - Translation: Implement problem 3 (unread markers), first in irssi (C code), then in The Lounge, and clean SQLite database
+   - Translation: Implement problem 3 (unread markers), first in irssi (C code), then in Nexus Lounge, and clean SQLite database
 
 3. **My Approach - Phase 1 (irssi fe-web)**:
    - Read fe-web.h to understand protocol
@@ -758,7 +758,7 @@ samego działania przeprowadzam ja) c) Jeśłi się da wyczyść obecną bazę s
 
 6. **User's Second Request**: "Kontynuuj" (Continue)
 
-7. **Current Work - Phase 2 (The Lounge Backend)**:
+7. **Current Work - Phase 2 (Nexus Lounge Backend)**:
    - Updated todo list to mark Phase 1 complete
    - Started implementing unread markers in IrssiClient
    - Added DataLevel enum and UnreadMarker interface to irssiClient.ts
@@ -767,15 +767,15 @@ samego działania przeprowadzam ja) c) Jeśłi się da wyczyść obecną bazę s
 **Key Technical Details**:
 - irssi uses `data_level` field (0=none, 1=TEXT, 2=MSG, 3=HILIGHT)
 - Unread markers stored in-memory (Map), NOT in SQLite
-- Activity syncs from irssi → The Lounge → all browsers
-- Mark read syncs from browser → The Lounge → irssi → all other browsers
+- Activity syncs from irssi → Nexus Lounge → all browsers
+- Mark read syncs from browser → Nexus Lounge → irssi → all other browsers
 
 Summary:
 ## 1. Primary Request and Intent:
 
-The user requested implementation of Problem 3 (unread markers with 2-way synchronization between irssi and The Lounge) in three phases:
+The user requested implementation of Problem 3 (unread markers with 2-way synchronization between irssi and Nexus Lounge) in three phases:
 - **Phase 1a**: Implement in irssi fe-web (C code) with compilation test only
-- **Phase 1b**: Implement in The Lounge backend and frontend (TypeScript)
+- **Phase 1b**: Implement in Nexus Lounge backend and frontend (TypeScript)
 - **Phase 1c**: Clean SQLite database for fresh testing state
 
 The architecture requires:
@@ -919,7 +919,7 @@ else if (g_strcmp0(type, "mark_read") == 0) {
 ```
 
 ### **/Users/kfn/irssilounge/server/irssiClient.ts**
-- **Purpose**: IrssiClient class for The Lounge backend
+- **Purpose**: IrssiClient class for Nexus Lounge backend
 - **Changes**: Started adding unread marker support
 - **Added types and enums** (lines 73-88):
 ```typescript
@@ -1006,12 +1006,12 @@ From the todo list:
 - **Phase 2a** [IN PROGRESS]: Rozszerzyć IrssiClient o unread markers
 - **Phase 2b** [PENDING]: Obsłużyć ACTIVITY_UPDATE z irssi
 - **Phase 2c** [PENDING]: Zaimplementować mark_read i broadcast
-- **Phase 3** [PENDING]: Zaimplementować unread markers w The Lounge frontend (Vue.js)
+- **Phase 3** [PENDING]: Zaimplementować unread markers w Nexus Lounge frontend (Vue.js)
 - **Database cleanup** [PENDING]: Wyczyścić bazę SQLite (tabula rasa)
 
 ## 8. Current Work:
 
-Immediately before the summary request, I was implementing Phase 2a of the unread markers feature in The Lounge backend. Specifically:
+Immediately before the summary request, I was implementing Phase 2a of the unread markers feature in Nexus Lounge backend. Specifically:
 
 **File being modified**: `/Users/kfn/irssilounge/server/irssiClient.ts`
 
@@ -1283,11 +1283,11 @@ Please continue the conversation from where we left it off without asking the us
 ⏺ Teraz sprawdzam błędy kompilacji TypeScript:                                                                                                                                                                                                                                     09:48 AM  claude-sonnet-4-5-20250929
 
 ⏺ Bash(cd /Users/kfn/irssilounge && npm run build 2>&1 | head -100) timeout: 1m 0s
-  ⎿  > thelounge@4.4.3 build
+  ⎿  > nexuslounge@4.4.3 build
      > run-p --aggregate-output build:client build:server
 
 
-     > thelounge@4.4.3 build:server
+     > nexuslounge@4.4.3 build:server
      > tsc -p server/tsconfig.json
 
      server/irssiClient.ts(1024,8): error TS2339: Property 'catch' does not exist on type 'void'.
@@ -1344,15 +1344,15 @@ Please continue the conversation from where we left it off without asking the us
 ⏺ Teraz sprawdzam błędy kompilacji ponownie:                                                                                                                                                                                                                                       09:48 AM  claude-sonnet-4-5-20250929
 
 ⏺ Bash(npm run build 2>&1 | head -100) timeout: 1m 0s
-  ⎿  > thelounge@4.4.3 build
+  ⎿  > nexuslounge@4.4.3 build
      > run-p --aggregate-output build:client build:server
 
 
-     > thelounge@4.4.3 build:server
+     > nexuslounge@4.4.3 build:server
      > tsc -p server/tsconfig.json
 
 
-     > thelounge@4.4.3 build:client
+     > nexuslounge@4.4.3 build:client
      > webpack
 
      assets by path img/ 50.1 KiB
@@ -1389,7 +1389,7 @@ Please continue the conversation from where we left it off without asking the us
 
 ⏺ Świetnie! Kompilacja przeszła pomyślnie. Teraz aktualizuję todo list i informuję użytkownika:                                                                                                                                                                                    09:48 AM  claude-sonnet-4-5-20250929
 
-⏺ Podsumowanie - Phase 2 zakończona (irssi + The Lounge backend) ✅                                                                                                                                                                                                                 09:49 AM  claude-sonnet-4-5-20250929
+⏺ Podsumowanie - Phase 2 zakończona (irssi + Nexus Lounge backend) ✅                                                                                                                                                                                                                 09:49 AM  claude-sonnet-4-5-20250929
 
   Zakończyłem Phase 2 - Backend unread markers:
 
@@ -1405,7 +1405,7 @@ Please continue the conversation from where we left it off without asking the us
   - Dodałem mark_read handler w fe-web-client.c:252-301
   - Build successful: brak błędów kompilacji C
 
-  2. The Lounge backend (TypeScript) - zaimplementowałem w /Users/kfn/irssilounge/server/:
+  2. Nexus Lounge backend (TypeScript) - zaimplementowałem w /Users/kfn/irssilounge/server/:
   - Dodałem typy i enumy w irssiClient.ts:
     - DataLevel enum (NONE=0, TEXT=1, MSG=2, HILIGHT=3)
     - UnreadMarker interface z polami: network, channel, unreadCount, lastReadTime, lastMessageTime, dataLevel
@@ -1436,7 +1436,7 @@ Please continue the conversation from where we left it off without asking the us
 
 > Kontynuuj
 
-⏺ Kontynuuję - teraz implementuję Phase 3: Frontend unread markers w The Lounge (Vue.js).                                                                                                                                                                                          09:56 AM  claude-sonnet-4-5-20250929
+⏺ Kontynuuję - teraz implementuję Phase 3: Frontend unread markers w Nexus Lounge (Vue.js).                                                                                                                                                                                          09:56 AM  claude-sonnet-4-5-20250929
 
   Najpierw sprawdzam strukturę frontendu aby zrozumieć gdzie dodać obsługę activity:update:
 

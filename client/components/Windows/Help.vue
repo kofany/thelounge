@@ -7,7 +7,7 @@
 			<h1 class="title">Help</h1>
 
 			<h2 class="help-version-title">
-				<span>About The Lounge</span>
+				<span>About Nexus Lounge</span>
 				<small>
 					v{{ store.state.serverConfiguration?.version }} (<router-link
 						id="view-changelog"
@@ -22,8 +22,8 @@
 
 				<template v-if="store.state.serverConfiguration?.gitCommit">
 					<p>
-						The Lounge is running from source (<a
-							:href="`https://github.com/thelounge/thelounge/tree/${store.state.serverConfiguration?.gitCommit}`"
+						Nexus Lounge is running from source (<a
+							:href="`https://github.com/nexuslounge/nexuslounge/tree/${store.state.serverConfiguration?.gitCommit}`"
 							target="_blank"
 							rel="noopener"
 							>commit <code>{{ store.state.serverConfiguration?.gitCommit }}</code></a
@@ -34,7 +34,7 @@
 						<li>
 							Compare
 							<a
-								:href="`https://github.com/thelounge/thelounge/compare/${store.state.serverConfiguration?.gitCommit}...master`"
+								:href="`https://github.com/nexuslounge/nexuslounge/compare/${store.state.serverConfiguration?.gitCommit}...master`"
 								target="_blank"
 								rel="noopener"
 								>between
@@ -46,7 +46,7 @@
 						<li>
 							Compare
 							<a
-								:href="`https://github.com/thelounge/thelounge/compare/${store.state.serverConfiguration?.version}...${store.state.serverConfiguration?.gitCommit}`"
+								:href="`https://github.com/nexuslounge/nexuslounge/compare/${store.state.serverConfiguration?.version}...${store.state.serverConfiguration?.gitCommit}`"
 								target="_blank"
 								rel="noopener"
 								>between
@@ -60,7 +60,7 @@
 
 				<p>
 					<a
-						href="https://thelounge.chat/"
+						href="https://nexuslounge.chat/"
 						target="_blank"
 						rel="noopener"
 						class="website-link"
@@ -69,7 +69,7 @@
 				</p>
 				<p>
 					<a
-						href="https://thelounge.chat/docs/"
+						href="https://nexuslounge.chat/docs/"
 						target="_blank"
 						rel="noopener"
 						class="documentation-link"
@@ -78,7 +78,7 @@
 				</p>
 				<p>
 					<a
-						href="https://github.com/thelounge/thelounge/issues/new"
+						href="https://github.com/nexuslounge/nexuslounge/issues/new"
 						target="_blank"
 						rel="noopener"
 						class="report-issue-link"
@@ -640,7 +640,7 @@
 				</div>
 				<div class="description">
 					<p>
-						Send an action message to the current channel. The Lounge will display it
+						Send an action message to the current channel. Nexus Lounge will display it
 						inline, as if the message was posted in the third person.
 					</p>
 				</div>

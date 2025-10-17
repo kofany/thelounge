@@ -8,7 +8,7 @@ import Helper from "../helper";
 import Config from "../config";
 import Utils from "./utils";
 
-const program = new Command("thelounge");
+const program = new Command("nexuslounge");
 program
 	.version(Helper.getVersion(), "-v, --version")
 	.option(
@@ -75,7 +75,7 @@ function createPackagesFolder() {
 				{
 					private: true,
 					description:
-						"Packages for The Lounge. Use `thelounge install <package>` command to add a package.",
+						"Packages for Nexus Lounge. Use `nexuslounge install <package>` command to add a package.",
 					dependencies: {},
 				},
 				null,
@@ -94,7 +94,7 @@ function verifyFileOwner() {
 
 	if (uid === 0) {
 		log.warn(
-			`You are currently running The Lounge as root. ${colors.bold.red(
+			`You are currently running Nexus Lounge as root. ${colors.bold.red(
 				"We highly discourage running as root!"
 			)}`
 		);
@@ -104,14 +104,14 @@ function verifyFileOwner() {
 
 	if (configStat && configStat.uid !== uid) {
 		log.warn(
-			"Config file owner does not match the user you are currently running The Lounge as."
+			"Config file owner does not match the user you are currently running Nexus Lounge as."
 		);
 		log.warn(
-			"To prevent any issues, please run thelounge commands " +
+			"To prevent any issues, please run nexuslounge commands " +
 				"as the correct user that owns the config folder."
 		);
 		log.warn(
-			"See https://thelounge.chat/docs/usage#using-the-correct-system-user for more information."
+			"See https://nexuslounge.chat/docs/usage#using-the-correct-system-user for more information."
 		);
 	}
 }

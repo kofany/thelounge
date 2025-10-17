@@ -1,7 +1,7 @@
 /**
  * fe-web Event Adapter (Server-side)
  *
- * Maps fe-web JSON messages to The Lounge event format.
+ * Maps fe-web JSON messages to Nexus Lounge event format.
  * Implements 100% of CLIENT-SPEC.md message types.
  *
  * This is a server-side port of client/js/feWebAdapter.ts
@@ -55,7 +55,11 @@ export class FeWebAdapter {
 	private initEmitted = false;
 	private networkUuidMap: Map<string, string>; // server_tag -> UUID (persistent)
 
-	constructor(socket: FeWebSocket, callbacks: FeWebAdapterCallbacks, existingUuidMap?: Map<string, string>) {
+	constructor(
+		socket: FeWebSocket,
+		callbacks: FeWebAdapterCallbacks,
+		existingUuidMap?: Map<string, string>
+	) {
 		this.socket = socket;
 		this.callbacks = callbacks;
 		this.networkUuidMap = existingUuidMap || new Map();
@@ -167,7 +171,7 @@ export class FeWebAdapter {
 			return;
 		}
 
-		// Convert to The Lounge message format
+		// Convert to Nexus Lounge message format
 		const loungeMsg = new Msg({
 			type: MessageType.MESSAGE,
 			time: msg.timestamp ? new Date(msg.timestamp * 1000) : new Date(),
@@ -247,9 +251,9 @@ export class FeWebAdapter {
 		const nick = msg.nick!;
 
 		log.debug(
-			`[FeWebAdapter] handleChannelPart: nick="${nick}", network.nick="${network.nick}", match=${
-				nick === network.nick
-			}`
+			`[FeWebAdapter] handleChannelPart: nick="${nick}", network.nick="${
+				network.nick
+			}", match=${nick === network.nick}`
 		);
 
 		// Check if it's our own part
@@ -845,7 +849,7 @@ export class FeWebAdapter {
 			// Note: irssi fe-web doesn't send CHANTYPES/PREFIX/NETWORK in state_dump
 			// We use defaults + server tag as NETWORK name
 
-			// Create lobby channel (required by The Lounge frontend)
+			// Create lobby channel (required by Nexus Lounge frontend)
 			// Frontend expects network.channels[0] to be lobby, channels[1+] to be real channels
 			const lobbyChannel = new Chan({
 				name: serverTag,

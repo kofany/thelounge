@@ -1,10 +1,10 @@
  irssilounge  npm start
 
-> thelounge@4.4.3 start
+> nexuslounge@4.4.3 start
 > node index start
 
-2025-10-14 13:09:40 [INFO] The Lounge source (7882fd8c / v4.4.3) (Node.js 24.4.0 on darwin arm64)
-2025-10-14 13:09:40 [INFO] Configuration file: /Users/kfn/.thelounge/config.js
+2025-10-14 13:09:40 [INFO] Nexus Lounge source (7882fd8c / v4.4.3) (Node.js 24.4.0 on darwin arm64)
+2025-10-14 13:09:40 [INFO] Configuration file: /Users/kfn/.nexuslounge/config.js
 2025-10-14 13:09:40 [INFO] Available at http://[::]:9000/ in private mode
 2025-10-14 13:09:40 [INFO] Loading user kfn in irssi proxy mode
 2025-10-14 13:09:40 [INFO] irssi client created for user kfn
@@ -477,7 +477,7 @@
 [FeWebSocket] No handlers registered for message type: activity_update
 [FeWebSocket] Received message, type: binary, length: 201
 [FeWebSocket] Decrypting binary message (201 bytes)...
-[FeWebSocket] Decrypted message: {"id":"1760447421-0058","type":"channel_join","server":"IRCnet","channel":"#polska","nick":"gibi~","timestamp":1760447421,"extra":{"hostname":"thelounge@nx.ignorelist.com"}}
+[FeWebSocket] Decrypted message: {"id":"1760447421-0058","type":"channel_join","server":"IRCnet","channel":"#polska","nick":"gibi~","timestamp":1760447421,"extra":{"hostname":"nexuslounge@nx.ignorelist.com"}}
 [FeWebSocket] Received: {
   id: '1760447421-0058',
   type: 'channel_join',
@@ -485,7 +485,7 @@
   channel: '#polska',
   nick: 'gibi~',
   timestamp: 1760447421,
-  extra: { hostname: 'thelounge@nx.ignorelist.com' }
+  extra: { hostname: 'nexuslounge@nx.ignorelist.com' }
 }
 [FeWebSocket] Calling 1 handler(s) for type: channel_join
 2025-10-14 13:10:21 [DEBUG] [IrssiClient] Message:

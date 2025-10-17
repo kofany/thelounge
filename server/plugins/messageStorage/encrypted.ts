@@ -238,7 +238,7 @@ export class EncryptedMessageStorage implements SearchableMessageStorage {
 		const version = await this.current_version();
 
 		if (version > currentSchemaVersion) {
-			throw `sqlite messages schema version is higher than expected (${version} > ${currentSchemaVersion}). Is The Lounge out of date?`;
+			throw `sqlite messages schema version is higher than expected (${version} > ${currentSchemaVersion}). Is Nexus Lounge out of date?`;
 		} else if (version === currentSchemaVersion) {
 			return; // nothing to do
 		}
@@ -807,7 +807,9 @@ export class EncryptedMessageStorage implements SearchableMessageStorage {
 			return new Map();
 		}
 
-		const rows = await this.serialize_fetchall("SELECT network, channel, last_read_time FROM unread_markers");
+		const rows = await this.serialize_fetchall(
+			"SELECT network, channel, last_read_time FROM unread_markers"
+		);
 
 		const markers = new Map<string, number>();
 		for (const row of rows) {
