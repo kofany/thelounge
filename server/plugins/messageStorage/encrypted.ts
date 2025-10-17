@@ -68,7 +68,7 @@ try {
 	);
 }
 
-export const currentSchemaVersion = 1736842800000; // 2025-01-14 (added type column)
+export const currentSchemaVersion = 1760689200000; // 2025-10-17 (added unread_markers table)
 
 // Schema for encrypted message storage
 const schema = [
@@ -80,6 +80,11 @@ const schema = [
 	"CREATE INDEX network_channel ON messages (network, channel)",
 	"CREATE INDEX time ON messages (time)",
 	"CREATE INDEX type ON messages (type)",
+	// Unread markers table - stores last read timestamp per network+channel/query
+	// - network: network UUID
+	// - channel: channel name (e.g. "#linux") or query nick (e.g. "JohnDoe")
+	// - last_read_time: Unix timestamp (milliseconds) when channel was last marked as read
+	"CREATE TABLE unread_markers (network TEXT NOT NULL, channel TEXT NOT NULL, last_read_time INTEGER NOT NULL, PRIMARY KEY (network, channel))",
 ];
 
 class Deferred {
@@ -766,6 +771,71 @@ export class EncryptedMessageStorage implements SearchableMessageStorage {
 			await this.serialize_run("ROLLBACK");
 			throw error;
 		}
+	}
+
+	/**
+	 * Save unread marker for a channel
+	 * Used to persist when user marks a channel as read
+	 */
+	async saveUnreadMarker(
+		networkUuid: string,
+		channelName: string,
+		lastReadTime: number
+	): Promise<void> {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			return;
+		}
+
+		await this.serialize_run(
+			"INSERT OR REPLACE INTO unread_markers (network, channel, last_read_time) VALUES (?, ?, ?)",
+			networkUuid,
+			channelName.toLowerCase(),
+			lastReadTime
+		);
+	}
+
+	/**
+	 * Load all unread markers for all channels
+	 * Returns map of "network:channel" -> lastReadTime
+	 */
+	async loadUnreadMarkers(): Promise<Map<string, number>> {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			return new Map();
+		}
+
+		const rows = await this.serialize_fetchall("SELECT network, channel, last_read_time FROM unread_markers");
+
+		const markers = new Map<string, number>();
+		for (const row of rows) {
+			const key = `${row.network}:${row.channel}`;
+			markers.set(key, row.last_read_time);
+		}
+
+		return markers;
+	}
+
+	/**
+	 * Load unread marker for a specific channel
+	 * Returns lastReadTime or undefined if not found
+	 */
+	async loadUnreadMarker(networkUuid: string, channelName: string): Promise<number | undefined> {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			return undefined;
+		}
+
+		const row = await this.serialize_get(
+			"SELECT last_read_time FROM unread_markers WHERE network = ? AND channel = ?",
+			networkUuid,
+			channelName.toLowerCase()
+		);
+
+		return row ? row.last_read_time : undefined;
 	}
 }
 
