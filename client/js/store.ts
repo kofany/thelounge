@@ -98,7 +98,7 @@ const state = (): State => ({
 	sessions: [],
 	sidebarOpen: false,
 	sidebarDragging: false,
-	userlistOpen: storage.get("thelounge.state.userlist") !== "false",
+	userlistOpen: storage.get("nexuslounge.state.userlist") !== "false",
 	versionData: null,
 	versionStatus: "loading",
 	versionDataExpired: false,

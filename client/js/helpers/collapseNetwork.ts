@@ -1,7 +1,7 @@
 import storage from "../localStorage";
 
 export default (network, isCollapsed) => {
-	const stored = storage.get("thelounge.networks.collapsed");
+	const stored = storage.get("nexuslounge.networks.collapsed");
 	const networks = stored ? new Set(JSON.parse(stored)) : new Set();
 
 	network.isCollapsed = isCollapsed;
@@ -12,5 +12,5 @@ export default (network, isCollapsed) => {
 		networks.delete(network.uuid);
 	}
 
-	storage.set("thelounge.networks.collapsed", JSON.stringify([...networks]));
+	storage.set("nexuslounge.networks.collapsed", JSON.stringify([...networks]));
 };
