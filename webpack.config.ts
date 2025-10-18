@@ -1,11 +1,12 @@
 import * as webpack from "webpack";
 import * as path from "path";
+import * as crypto from "crypto";
 import CopyPlugin from "copy-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import {VueLoaderPlugin} from "vue-loader";
 import babelConfig from "./babel.config.cjs";
-import Helper from "./server/helper";
+import pkg from "./package.json";
 
 const tsCheckerPlugin = new ForkTsCheckerWebpackPlugin({
 	typescript: {
@@ -145,12 +146,14 @@ const config: webpack.Configuration = {
 					from: path.resolve(__dirname, "./client/service-worker.js"),
 					to: "[name][ext]",
 					transform(content) {
+						// Inline version cache bust to avoid importing server code
+						const version = `v${pkg.version}`;
+						const hash = crypto.createHash("sha256").update(version).digest("hex");
+						const cacheBust = hash.substring(0, 10);
+
 						return content
 							.toString()
-							.replace(
-								"__HASH__",
-								isProduction ? Helper.getVersionCacheBust() : "dev"
-							);
+							.replace("__HASH__", isProduction ? cacheBust : "dev");
 					},
 				},
 				{
