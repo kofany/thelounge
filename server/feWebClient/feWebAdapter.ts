@@ -519,6 +519,15 @@ export class FeWebAdapter {
 					return;
 				}
 
+				// Check if it's our own nick and update network.nick
+				const isSelf = network.nick === nick;
+				if (isSelf) {
+					network.nick = newNick;
+					log.debug(
+						`[FeWebAdapter] Updated own nick: ${nick} → ${newNick} on ${msg.server}`
+					);
+				}
+
 				// Update nick in ALL channels where this user exists
 				let updatedChannels = 0;
 				network.channels.forEach((ch) => {
