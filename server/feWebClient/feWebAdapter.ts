@@ -55,7 +55,11 @@ export class FeWebAdapter {
 	private initEmitted = false;
 	private networkUuidMap: Map<string, string>; // server_tag -> UUID (persistent)
 
-	constructor(socket: FeWebSocket, callbacks: FeWebAdapterCallbacks, existingUuidMap?: Map<string, string>) {
+	constructor(
+		socket: FeWebSocket,
+		callbacks: FeWebAdapterCallbacks,
+		existingUuidMap?: Map<string, string>
+	) {
 		this.socket = socket;
 		this.callbacks = callbacks;
 		this.networkUuidMap = existingUuidMap || new Map();
@@ -247,9 +251,9 @@ export class FeWebAdapter {
 		const nick = msg.nick!;
 
 		log.debug(
-			`[FeWebAdapter] handleChannelPart: nick="${nick}", network.nick="${network.nick}", match=${
-				nick === network.nick
-			}`
+			`[FeWebAdapter] handleChannelPart: nick="${nick}", network.nick="${
+				network.nick
+			}", match=${nick === network.nick}`
 		);
 
 		// Check if it's our own part
@@ -517,6 +521,15 @@ export class FeWebAdapter {
 				if (!newNick) {
 					log.error(`[FeWebAdapter] Nick change missing new_nick in extra`);
 					return;
+				}
+
+				// Check if it's our own nick and update network.nick
+				const isSelf = network.nick === nick;
+				if (isSelf) {
+					network.nick = newNick;
+					log.debug(
+						`[FeWebAdapter] Updated own nick: ${nick} → ${newNick} on ${msg.server}`
+					);
 				}
 
 				// Update nick in ALL channels where this user exists
