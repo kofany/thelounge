@@ -99,6 +99,25 @@ export default async function (
 		.use(express.static(Utils.getFileFromRelativeToRoot("public"), staticOptions))
 		.use("/storage/", express.static(Config.getStoragePath(), staticOptions));
 
+	// Fallback: serve local client themes if not present in built public/themes (helps dev/private mode)
+	app.get("/themes/:file", (req, res, next) => {
+		const filename = req.params.file;
+		if (!filename.endsWith(".css")) return next();
+		const publicPath = Utils.getFileFromRelativeToRoot("public", "themes", filename);
+		try {
+			if (fs.existsSync(publicPath)) {
+				return res.sendFile(publicPath);
+			}
+		} catch {}
+		const clientPath = Utils.getFileFromRelativeToRoot("client", "themes", filename);
+		try {
+			if (fs.existsSync(clientPath)) {
+				return res.sendFile(clientPath);
+			}
+		} catch {}
+		return next();
+	});
+
 	if (Config.values.fileUpload.enable) {
 		Uploader.router(app);
 	}
