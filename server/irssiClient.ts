@@ -805,9 +805,8 @@ export class IrssiClient {
 		let messages: Msg[] = [];
 
 		try {
-			if (data.lastId < 0 || targetChannel.messages.length === 0) {
+			if (data.lastId < 0) {
 				// Initial load - last 100 messages
-				// Also treat as initial load if channel has no messages in memory
 				messages = await this.messageStorage.getLastMessages(
 					targetNetwork.uuid,
 					targetChannel.name,
@@ -815,35 +814,33 @@ export class IrssiClient {
 				);
 			} else {
 				// Lazy load - 100 messages before lastId
-				// Find the message in channel.messages to get its timestamp
-				let lastMsg = targetChannel.messages.find((m) => m.id === data.lastId);
+				// We need to get the timestamp of the message with lastId
+				// Since we don't store messages in targetChannel.messages on server,
+				// we need to load it from storage
+				const allMessages = await this.messageStorage.getLastMessages(
+					targetNetwork.uuid,
+					targetChannel.name,
+					200 // Load enough to find lastId
+				);
 
-				// If message not found in memory, use the oldest message in memory
-				if (!lastMsg && targetChannel.messages.length > 0) {
-					// Find oldest message (messages are sorted by time ascending)
-					lastMsg = targetChannel.messages[0];
-					log.debug(
-						`User ${colors.bold(this.name)}: message ${
-							data.lastId
-						} not found in channel ${data.target}, using oldest message in memory (id=${
-							lastMsg.id
-						}, time=${lastMsg.time.toISOString()})`
-					);
-				}
+				const lastMsgIndex = allMessages.findIndex((m) => m.id === data.lastId);
 
-				if (lastMsg) {
+				if (lastMsgIndex >= 0 && lastMsgIndex < allMessages.length) {
+					// Get timestamp of the message with lastId
+					const beforeTime = allMessages[lastMsgIndex].time.getTime();
+
 					// Load 100 messages before that timestamp
 					messages = await this.messageStorage.getMessagesBefore(
 						targetNetwork.uuid,
 						targetChannel.name,
-						lastMsg.time.getTime(),
+						beforeTime,
 						100
 					);
 				} else {
 					log.warn(
-						`User ${colors.bold(this.name)}: no messages in memory for channel ${
-							data.target
-						}, cannot load older messages`
+						`User ${colors.bold(this.name)}: message ${
+							data.lastId
+						} not found in last 200 messages for channel ${data.target}`
 					);
 				}
 			}
