@@ -805,8 +805,9 @@ export class IrssiClient {
 		let messages: Msg[] = [];
 
 		try {
-			if (data.lastId < 0) {
+			if (data.lastId < 0 || targetChannel.messages.length === 0) {
 				// Initial load - last 100 messages
+				// Also treat as initial load if channel has no messages in memory
 				messages = await this.messageStorage.getLastMessages(
 					targetNetwork.uuid,
 					targetChannel.name,
