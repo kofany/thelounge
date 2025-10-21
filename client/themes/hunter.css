@@ -78,16 +78,22 @@ body {
 	scrollbar-color: #888888ee rgba(0, 0, 0, 0);
 }
 
-/* Scrollbar styling - Safari 18+ compatible (standard properties only) */
-:root {
-	--scrollbar-thumb: #888888ee;
-	--scrollbar-track: transparent;
+/* Scrollbar styling - Safari 18.6 compatible (webkit only) */
+::-webkit-scrollbar {
+	width: 5px;
+	height: 5px;
 }
 
-/* Apply to all scrollable containers */
-* {
-	scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-	scrollbar-width: thin;
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #888888ee;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #555555;
 }
 
 /* Window styling */
