@@ -70,6 +70,8 @@ html,
 body {
 	font-family: Hack, monospace;
 	background-color: #2d2d2d !important;
+	/* Ensure Firefox track matches dark body */
+	scrollbar-color: #888888ee #2d2d2d;
 }
 
 body {
@@ -637,4 +639,32 @@ code,
 #footer .help.notified::after {
 	color: var(--link-color);
 	background: #383838;
+
+/* Scrollbar track color overrides to match adjacent containers (Safari/Firefox) */
+/* Global/viewport/chat use body background */
+body::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track-piece,
+#viewport::-webkit-scrollbar-track,
+#viewport::-webkit-scrollbar-track-piece,
+#chat .chat::-webkit-scrollbar-track,
+#chat .chat::-webkit-scrollbar-track-piece {
+  background-color: #2d2d2d !important;
+  background: #2d2d2d !important;
+}
+/* Sidebar and userlist use their own darker background */
+#sidebar .scrollable-area::-webkit-scrollbar-track,
+#sidebar .scrollable-area::-webkit-scrollbar-track-piece,
+#chat .userlist .names::-webkit-scrollbar-track,
+#chat .userlist .names::-webkit-scrollbar-track-piece {
+  background-color: #383838 !important;
+  background: #383838 !important;
+}
+/* Firefox track colors per container */
+body, #viewport, #chat .chat {
+  scrollbar-color: #888888ee #2d2d2d !important;
+}
+#sidebar .scrollable-area, #chat .userlist .names {
+  scrollbar-color: #888888ee #383838 !important;
+}
+
 }

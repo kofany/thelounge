@@ -266,12 +266,18 @@ export default async function (
 		const defaultTheme = themes.getByName(Config.values.theme);
 
 		if (defaultTheme === undefined) {
-			log.warn(
-				`The specified default theme "${colors.red(
-					Config.values.theme
-				)}" does not exist, verify your config.`
-			);
-			Config.values.theme = "default";
+			// If not an installed theme, accept local CSS theme if present in public or client
+			const candidate = `${Config.values.theme}.css`;
+			const publicPath = Utils.getFileFromRelativeToRoot("public", "themes", candidate);
+			const clientPath = Utils.getFileFromRelativeToRoot("client", "themes", candidate);
+			if (!(fs.existsSync(publicPath) || fs.existsSync(clientPath))) {
+				log.warn(
+					`The specified default theme "${colors.red(
+						Config.values.theme
+					)}" does not exist, verify your config.`
+				);
+				Config.values.theme = "default";
+			}
 		} else if (defaultTheme.themeColor) {
 			Config.values.themeColor = defaultTheme.themeColor;
 		}
