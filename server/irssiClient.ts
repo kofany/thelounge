@@ -815,7 +815,20 @@ export class IrssiClient {
 			} else {
 				// Lazy load - 100 messages before lastId
 				// Find the message in channel.messages to get its timestamp
-				const lastMsg = targetChannel.messages.find((m) => m.id === data.lastId);
+				let lastMsg = targetChannel.messages.find((m) => m.id === data.lastId);
+
+				// If message not found in memory, use the oldest message in memory
+				if (!lastMsg && targetChannel.messages.length > 0) {
+					// Find oldest message (messages are sorted by time ascending)
+					lastMsg = targetChannel.messages[0];
+					log.debug(
+						`User ${colors.bold(this.name)}: message ${
+							data.lastId
+						} not found in channel ${data.target}, using oldest message in memory (id=${
+							lastMsg.id
+						}, time=${lastMsg.time.toISOString()})`
+					);
+				}
 
 				if (lastMsg) {
 					// Load 100 messages before that timestamp
@@ -827,9 +840,9 @@ export class IrssiClient {
 					);
 				} else {
 					log.warn(
-						`User ${colors.bold(this.name)}: message ${
-							data.lastId
-						} not found in channel ${data.target}, cannot load older messages`
+						`User ${colors.bold(this.name)}: no messages in memory for channel ${
+							data.target
+						}, cannot load older messages`
 					);
 				}
 			}
