@@ -730,14 +730,14 @@ export class IrssiClient {
 
 			case "me":
 			case "slap":
-				// /me text → /me #channel text (irssi requires target)
-				// /slap nick → /me #channel slaps nick around a bit with a large trout
+				// /me text → /action #channel text (irssi /me requires active_item context which we don't have via WebSocket)
+				// /slap nick → /action #channel slaps nick around a bit with a large trout
 				if (channel.type === ChanType.CHANNEL || channel.type === ChanType.QUERY) {
 					let text = args.join(" ");
 					if (command === "slap" && args.length > 0) {
 						text = `slaps ${args[0]} around a bit with a large trout`;
 					}
-					const translated = `me ${channel.name} ${text}`;
+					const translated = `action ${channel.name} ${text}`;
 					log.info(
 						`[CommandTranslator] /${command} ${args.join(" ")} → /${translated} on ${
 							network.serverTag
