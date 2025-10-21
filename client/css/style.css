@@ -2209,7 +2209,7 @@ part/quit messages where we don't load previews (adds a blank line otherwise) */
 	border-top: 1px solid #e7e7e7;
 	border-radius: 0;
 	margin: 0;
-	padding: 6px;
+	padding: 4px; /* Reduced from 6px */
 	background: white;
 	display: flex;
 	align-items: flex-end;
@@ -2232,10 +2232,10 @@ part/quit messages where we don't load previews (adds a blank line otherwise) */
 #form #nick {
 	background: #f6f6f6;
 	color: #666;
-	font-size: 13px;
-	margin: 4px;
-	line-height: 24px;
-	padding: 0 8px;
+	font-size: 11px; /* Reduced from 13px */
+	margin: 2px; /* Reduced from 4px */
+	line-height: 18px; /* Reduced from 24px */
+	padding: 0 6px; /* Reduced from 8px */
 	border-radius: 2px;
 	display: none;
 }
@@ -2248,12 +2248,12 @@ part/quit messages where we don't load previews (adds a blank line otherwise) */
 	background: transparent;
 	border: none;
 	font: inherit;
-	min-height: 19px; /* Required when computing input height at char deletion */
-	height: 19px;
-	max-height: 95px; /* min-height/height x number of lines maximum */
-	line-height: 19px; /* should match height */
+	min-height: 16px; /* Reduced from 19px - Required when computing input height at char deletion */
+	height: 16px; /* Reduced from 19px */
+	max-height: 80px; /* Reduced from 95px - min-height/height x number of lines maximum */
+	line-height: 16px; /* Reduced from 19px - should match height */
 	outline: none;
-	margin: 5px;
+	margin: 3px; /* Reduced from 5px */
 	padding: 0;
 	resize: none;
 	flex: 1 0 auto;
@@ -2268,9 +2268,9 @@ part/quit messages where we don't load previews (adds a blank line otherwise) */
 #form #upload,
 #form #submit {
 	color: #607992;
-	font-size: 14px;
-	height: 32px;
-	width: 32px;
+	font-size: 12px; /* Reduced from 14px */
+	height: 22px; /* Reduced from 32px to match input height */
+	width: 22px; /* Reduced from 32px */
 	flex: 0 0 auto;
 }
 
@@ -2926,14 +2926,3 @@ part/quit messages where we don't load previews (adds a blank line otherwise) */
 	justify-content: center;
 	align-items: center;
 }
-
-
-/* Compact UI overrides: smaller topic bar and message input height */
-/* Topic text smaller */
-.header .topic { font-size: 13px; }
-/* Topic edit input slightly lower */
-.header .topic-input { height: 30px; }
-/* Save-topic button match input size */
-.topic-container .save-topic span { width: 30px; height: 30px; }
-/* Message input a bit lower (from 19px to 17px) */
-#form #input { min-height: 17px; height: 17px; line-height: 17px; }
