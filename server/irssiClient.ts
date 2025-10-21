@@ -814,25 +814,22 @@ export class IrssiClient {
 				);
 			} else {
 				// Lazy load - 100 messages before lastId
-				// Find the message with lastId to get its timestamp
-				const allMessages = await this.messageStorage.getLastMessages(
-					targetNetwork.uuid,
-					targetChannel.name,
-					1000 // Get more to find the lastId
-				);
+				// Find the message in channel.messages to get its timestamp
+				const lastMsg = targetChannel.messages.find((m) => m.id === data.lastId);
 
-				const lastMsgIndex = allMessages.findIndex((m) => m.id === data.lastId);
-
-				if (lastMsgIndex > 0) {
-					// Get timestamp of the message before lastId
-					const beforeTime = allMessages[lastMsgIndex - 1].time.getTime();
-
+				if (lastMsg) {
 					// Load 100 messages before that timestamp
 					messages = await this.messageStorage.getMessagesBefore(
 						targetNetwork.uuid,
 						targetChannel.name,
-						beforeTime,
+						lastMsg.time.getTime(),
 						100
+					);
+				} else {
+					log.warn(
+						`User ${colors.bold(this.name)}: message ${
+							data.lastId
+						} not found in channel ${data.target}, cannot load older messages`
 					);
 				}
 			}

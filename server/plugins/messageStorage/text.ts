@@ -123,6 +123,21 @@ class TextFileMessageStorage implements MessageStorage {
 		return Promise.resolve([]);
 	}
 
+	getLastMessages() {
+		// Not implemented for text log files
+		return Promise.resolve([]);
+	}
+
+	getMessagesBefore() {
+		// Not implemented for text log files
+		return Promise.resolve([]);
+	}
+
+	getMessageCount() {
+		// Not implemented for text log files
+		return Promise.resolve(0);
+	}
+
 	canProvideMessages() {
 		return false;
 	}
