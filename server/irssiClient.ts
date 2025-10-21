@@ -1329,15 +1329,6 @@ export class IrssiClient {
 		const key = this.getMarkerKey(network.uuid, channel.name);
 		const dataLevel = msg.level || DataLevel.NONE;
 
-		// Check if this channel is active in irssi
-		// If it is, IGNORE activity_update from irssi (user is already reading it in irssi)
-		if (this.activeWindowInIrssi === key) {
-			log.debug(
-				`[IrssiClient] Ignoring activity_update for ${network.name}/${channel.name} (active in irssi)`
-			);
-			return;
-		}
-
 		// Update or create unread marker
 		const marker = this.unreadMarkers.get(key) || {
 			network: network.uuid,
@@ -1376,6 +1367,14 @@ export class IrssiClient {
 			});
 			return; // Done - no need to query DB
 		} else {
+			// New activity (level > 0) - this channel is NO LONGER active in irssi!
+			// Clear activeWindowInIrssi if it was pointing to this channel
+			if (this.activeWindowInIrssi === key) {
+				log.debug(
+					`[IrssiClient] Channel ${network.name}/${channel.name} is no longer active in irssi (got activity level=${dataLevel})`
+				);
+				this.activeWindowInIrssi = null;
+			}
 			// New activity - count unread from message storage
 			if (this.messageStorage) {
 				this.messageStorage
