@@ -1018,10 +1018,10 @@ background on hover (unless active) */
 
 textarea.input {
 	resize: vertical;
-	min-height: 30px; /* Reduced from 35px to 30px */
-	padding: 5px 10px; /* Reduced padding from 6px to 5px */
-	line-height: 1.4; /* Reduced from 1.5 to 1.4 */
-	font-size: 13px; /* Explicit font size */
+	min-height: 22px; /* Half of original 35px */
+	padding: 3px 8px; /* Reduced padding */
+	line-height: 1.2; /* Compact line height */
+	font-size: 12px; /* Smaller font */
 }
 
 .window {
@@ -1105,8 +1105,8 @@ textarea.input {
 	word-break: break-all;
 	flex-grow: 1;
 	overflow: hidden;
-	font-size: 13px; /* Reduced from 14px to 13px */
-	line-height: 1.3; /* Compact line height */
+	font-size: 11px; /* Half of original 14px */
+	line-height: 1.2; /* Very compact */
 	flex-shrink: 99999999;
 	min-width: 25px;
 }
@@ -1123,11 +1123,10 @@ textarea.input {
 	padding-right: 37px;
 	padding-left: 10px;
 	width: 100%;
-	height: 30px; /* Reduced from 35px to 30px */
-	font-size: 13px; /* Match topic font size */
+	height: 22px; /* Half of original 35px */
+	font-size: 11px; /* Match topic font size */
 	overflow: hidden;
-	font-size: 14px;
-	line-height: normal;
+	line-height: 1.2;
 	outline: none;
 }
 
@@ -1138,10 +1137,10 @@ textarea.input {
 }
 
 .topic-container .save-topic span {
-	font-size: 14px; /* Reduced from 16px to 14px */
+	font-size: 11px; /* Half of original 16px */
 	color: #607992;
-	width: 30px; /* Reduced from 35px to 30px to match input height */
-	height: 30px; /* Reduced from 35px to 30px to match input height */
+	width: 22px; /* Match input height */
+	height: 22px; /* Match input height */
 	display: flex;
 	justify-content: center;
 	align-items: center;
