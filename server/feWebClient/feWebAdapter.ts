@@ -43,6 +43,7 @@ export type FeWebAdapterCallbacks = {
 	onChannelPart: (networkUuid: string, channelId: number) => void;
 	onNicklistUpdate: (networkUuid: string, channelId: number, users: User[]) => void;
 	onTopicUpdate: (networkUuid: string, channelId: number, topic: string) => void;
+	onNickChange: (networkUuid: string, newNick: string) => void;
 	onInit: (networks: NetworkData[]) => Promise<void>;
 };
 
@@ -646,6 +647,10 @@ export class FeWebAdapter {
 		const isSelf = network.nick === oldNick;
 		if (isSelf) {
 			network.nick = newNick;
+			log.info(`[FeWebAdapter] Own nick changed: ${oldNick} → ${newNick} on ${msg.server}`);
+
+			// Emit nick event to update UI (like IRC handler does)
+			this.callbacks.onNickChange(network.uuid, newNick);
 		}
 
 		// Update nick in all channels
@@ -666,6 +671,10 @@ export class FeWebAdapter {
 				});
 				nickMsg.id = this.messageIdCounter++;
 				this.callbacks.onMessage(network.uuid, channel.id, nickMsg);
+
+				// Emit nicklist update for this channel
+				const usersArray = Array.from(channel.users.values());
+				this.callbacks.onNicklistUpdate(network.uuid, channel.id, usersArray);
 			}
 		});
 	}
