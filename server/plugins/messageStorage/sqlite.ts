@@ -523,6 +523,85 @@ class SqliteMessageStorage implements SearchableMessageStorage {
 		return this.serialize_run(sql);
 	}
 
+	/**
+	 * Get last N messages for a channel (for initial load)
+	 */
+	async getLastMessages(
+		networkUuid: string,
+		channelName: string,
+		limit: number
+	): Promise<Message[]> {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			return [];
+		}
+
+		const rows = await this.serialize_fetchall(
+			"SELECT msg, type, time FROM messages WHERE network = ? AND channel = ? ORDER BY time DESC LIMIT ?",
+			networkUuid,
+			channelName.toLowerCase(),
+			limit
+		);
+
+		return rows.reverse().map((row: any): Message => {
+			const msg = JSON.parse(row.msg);
+			msg.time = row.time;
+			msg.type = row.type;
+			return new Msg(msg);
+		});
+	}
+
+	/**
+	 * Get messages before a specific timestamp (for lazy loading)
+	 */
+	async getMessagesBefore(
+		networkUuid: string,
+		channelName: string,
+		beforeTime: number,
+		limit: number
+	): Promise<Message[]> {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			return [];
+		}
+
+		const rows = await this.serialize_fetchall(
+			"SELECT msg, type, time FROM messages WHERE network = ? AND channel = ? AND time < ? ORDER BY time DESC LIMIT ?",
+			networkUuid,
+			channelName.toLowerCase(),
+			beforeTime,
+			limit
+		);
+
+		return rows.reverse().map((row: any): Message => {
+			const msg = JSON.parse(row.msg);
+			msg.time = row.time;
+			msg.type = row.type;
+			return new Msg(msg);
+		});
+	}
+
+	/**
+	 * Get total message count for a channel
+	 */
+	async getMessageCount(networkUuid: string, channelName: string): Promise<number> {
+		await this.initDone.promise;
+
+		if (!this.isEnabled) {
+			return 0;
+		}
+
+		const row = await this.serialize_get(
+			"SELECT COUNT(*) as count FROM messages WHERE network = ? AND channel = ?",
+			networkUuid,
+			channelName.toLowerCase()
+		);
+
+		return row ? row.count : 0;
+	}
+
 	canProvideMessages() {
 		return this.isEnabled;
 	}

@@ -26,6 +26,28 @@ interface MessageStorage {
 
 	getMessages(network: Network, channel: Channel, nextID: () => number): Promise<Message[]>;
 
+	/**
+	 * Get last N messages for a channel (for initial load)
+	 * Used by irssi proxy mode to load messages when browser connects
+	 */
+	getLastMessages(networkUuid: string, channelName: string, limit: number): Promise<Message[]>;
+
+	/**
+	 * Get messages before a specific timestamp (for lazy loading)
+	 * Used when user scrolls up and clicks "Show older messages"
+	 */
+	getMessagesBefore(
+		networkUuid: string,
+		channelName: string,
+		beforeTime: number,
+		limit: number
+	): Promise<Message[]>;
+
+	/**
+	 * Get total message count for a channel
+	 */
+	getMessageCount(networkUuid: string, channelName: string): Promise<number>;
+
 	canProvideMessages(): boolean;
 }
 
