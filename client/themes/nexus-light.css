@@ -219,15 +219,7 @@ body {
 	font-size: 0.95em;
 }
 
-#chat .hostmask::before {
-	content: "❮";
-	color: var(--hostmask-color);
-}
 
-#chat .hostmask::after {
-	content: "❯";
-	color: var(--hostmask-color);
-}
 
 /* Channel names */
 #chat .channel {

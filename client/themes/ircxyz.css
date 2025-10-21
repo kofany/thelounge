@@ -508,15 +508,7 @@ a:hover {
 	font-size: 0.95em;
 }
 
-#chat .hostmask::before {
-	content: "(";
-	color: #5f8787;
-}
 
-#chat .hostmask::after {
-	content: ")";
-	color: #5f8787;
-}
 
 #chat .channel {
 	color: #5fafaf;
