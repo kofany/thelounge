@@ -14,6 +14,31 @@
 
 body {
 	scrollbar-color: rgb(0 0 0 / 30%) rgb(0 0 0 / 5%);
+	scrollbar-width: thin;
+}
+
+/* Safari and older Chrome with ::-webkit-scrollbar-* support */
+@supports selector(::-webkit-scrollbar) {
+	::-webkit-scrollbar {
+		-webkit-appearance: none;
+		width: 8px;
+		height: 8px;
+	}
+
+	::-webkit-scrollbar-track {
+		-webkit-appearance: none;
+		background: rgb(0 0 0 / 5%);
+	}
+
+	::-webkit-scrollbar-thumb {
+		-webkit-appearance: none;
+		background: rgb(0 0 0 / 30%);
+		border-radius: 4px;
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background: rgb(0 0 0 / 40%);
+	}
 }
 
 #chat .chat-view[data-type="channel"] .msg.highlight .time {

@@ -1,5 +1,6 @@
 import "./connection";
 import "./auth";
+import "./token";
 import "./commands";
 import "./init";
 import "./join";
@@ -26,3 +27,4 @@ import "./mentions";
 import "./search";
 import "./mute_changed";
 import "./activity_update";
+import "./irssi_status";

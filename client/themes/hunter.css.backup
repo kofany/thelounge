@@ -1,0 +1,613 @@
+/* Hunter Theme - Based on irc.xyz design */
+/* Exact 1:1 clone of irc.xyz with Hack font and proper colors */
+
+@import url("https://cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.css");
+@import "default.css";
+
+/* Force Hack monospace font EVERYWHERE */
+* {
+	font-family: Hack, monospace !important;
+}
+
+:root {
+	/* Main colors - EXACT from irc.xyz */
+	--body-color: #e0e0e0;
+	--body-color-muted: #9a9a9a;
+	--body-bg-color: #2d2d2d;
+	--link-color: #409aed;
+
+	/* Window colors */
+	--window-bg-color: #2d2d2d;
+	--window-heading-color: #e0e0e0;
+
+	/* Timestamp color */
+	--timestamp-color: #6d6d6d;
+
+	/* Nick colors - from irc.xyz HTML */
+	--nick-op-color: #ffaf00;
+	--nick-voice-color: #87d7ff;
+	--nick-normal-color: #afd787;
+	--nick-system-color: #d7875f;
+	--nick-bot-color: #af87ff;
+
+	/* Event symbol colors - EXACT from xyz/style */
+	--join-color: #91b14f;
+	--part-color: #af8700;
+	--quit-color: #db4437;
+	--kick-color: #d75f5f;
+	--mode-color: #dba937;
+	--topic-color: #5fafaf;
+
+	/* Other colors */
+	--hostmask-color: #5f8787;
+	--channel-color: #5fafaf;
+	--separator-color: #5f5f87;
+	--info-color: #666666;
+	--reason-color: #af8787;
+	--mode-change-color: #d787d7;
+
+	/* Markers */
+	--date-marker-color: #dba937;
+	--unread-marker-color: #db4437;
+	--highlight-bg-color: #46546e;
+	--highlight-border-color: #46546e;
+
+	/* Button colors */
+	--button-color: #409aed;
+	--button-text-color-hover: #fff;
+
+	/* Sidebar/List colors - EXACT from xyz/style */
+	--sidebar-bg-color: #383838;
+	--list-item-hover-bg: #323232;
+	--list-item-selected-bg: #2b2b2b;
+
+	/* Input colors */
+	--input-bg-color: #444444;
+	--input-border-color: #404040;
+}
+
+html,
+body {
+	font-family: Hack, monospace;
+	background-color: #2d2d2d !important;
+}
+
+body {
+	scrollbar-color: #888888ee rgba(0, 0, 0, 0);
+}
+
+/* Global scrollbar styling - Safari compatible */
+::-webkit-scrollbar {
+	-webkit-appearance: none !important;
+	height: 5px !important;
+	width: 5px !important;
+	background: rgba(0, 0, 0, 0) !important;
+	background-color: rgba(0, 0, 0, 0) !important;
+}
+
+/* Safari workaround: use rgba instead of transparent keyword */
+::-webkit-scrollbar-track {
+	-webkit-appearance: none !important;
+	background-color: rgba(0, 0, 0, 0) !important;
+	background: rgba(0, 0, 0, 0) !important;
+}
+
+::-webkit-scrollbar-track-piece {
+	-webkit-appearance: none !important;
+	background-color: rgba(0, 0, 0, 0) !important;
+	background: rgba(0, 0, 0, 0) !important;
+}
+
+::-webkit-scrollbar-thumb {
+	-webkit-appearance: none !important;
+	background-color: #888888ee !important;
+	background: #888888ee !important;
+	border-radius: 10px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background-color: #555555 !important;
+	background: #555555 !important;
+}
+
+/* Safari hover workaround to force recomputation */
+.scrollable-area:hover,
+#chat .chat:hover {
+	--safari-scrollbar-fix: 1;
+}
+
+/* Firefox scrollbar */
+* {
+	scrollbar-color: #888888ee rgba(0, 0, 0, 0) !important;
+	scrollbar-width: thin !important;
+}
+
+/* Force scrollbar style on all scrollable elements - Safari specific */
+#chat .chat::-webkit-scrollbar,
+#sidebar .scrollable-area::-webkit-scrollbar,
+#chat .userlist .names::-webkit-scrollbar {
+	-webkit-appearance: none !important;
+	height: 5px !important;
+	width: 5px !important;
+	background: rgba(0, 0, 0, 0) !important;
+	background-color: rgba(0, 0, 0, 0) !important;
+}
+
+#chat .chat::-webkit-scrollbar-track,
+#sidebar .scrollable-area::-webkit-scrollbar-track,
+#chat .userlist .names::-webkit-scrollbar-track {
+	-webkit-appearance: none !important;
+	background-color: rgba(0, 0, 0, 0) !important;
+	background: rgba(0, 0, 0, 0) !important;
+}
+
+#chat .chat::-webkit-scrollbar-track-piece,
+#sidebar .scrollable-area::-webkit-scrollbar-track-piece,
+#chat .userlist .names::-webkit-scrollbar-track-piece {
+	-webkit-appearance: none !important;
+	background-color: rgba(0, 0, 0, 0) !important;
+	background: rgba(0, 0, 0, 0) !important;
+}
+
+#chat .chat::-webkit-scrollbar-thumb,
+#sidebar .scrollable-area::-webkit-scrollbar-thumb,
+#chat .userlist .names::-webkit-scrollbar-thumb {
+	-webkit-appearance: none !important;
+	background-color: #888888ee !important;
+	background: #888888ee !important;
+	border-radius: 10px !important;
+}
+
+#chat .chat::-webkit-scrollbar-thumb:hover,
+#sidebar .scrollable-area::-webkit-scrollbar-thumb:hover,
+#chat .userlist .names::-webkit-scrollbar-thumb:hover {
+	background-color: #555555 !important;
+	background: #555555 !important;
+}
+
+/* Window styling */
+.window {
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Chat area */
+#chat {
+	font-family: Hack, monospace;
+	font-size: 13px;
+	line-height: 1.2;
+}
+
+/* Reduce spacing between messages for more compact view like Irssi */
+#chat .msg {
+	line-height: 1.1;
+	margin: 0;
+	padding: 0;
+}
+
+/* Remove vertical padding from time, from, content - reduce from 3px to 0px */
+#chat .time,
+#chat .from,
+#chat .content {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+/* Keep horizontal padding minimal */
+#chat .time {
+	padding-left: 10px;
+}
+
+#chat .from {
+	padding-right: 10px;
+}
+
+#chat .content {
+	padding-left: 10px;
+	padding-right: 6px;
+}
+
+/* Reduce container padding */
+#chat .messages {
+	padding: 5px 0;
+}
+
+/* Set consistent width for nick/event column - 90px for all message types */
+#chat .from {
+	width: 90px;
+}
+
+/* Sidebar (networks/channels) - compact spacing and monospace font */
+.channel-list-item,
+#sidebar .empty {
+	font-family: Hack, monospace;
+	font-size: 13px;
+}
+
+.channel-list-item {
+	padding: 2px 14px;
+	line-height: 1.1;
+}
+
+#sidebar .network {
+	margin-bottom: 10px;
+}
+
+/* Userlist (nicklist) - compact spacing and monospace font */
+.userlist {
+	font-family: Hack, monospace;
+	font-size: 13px;
+	line-height: 1.1;
+}
+
+#chat .names .user {
+	line-height: 1.1;
+	padding: 0 16px;
+}
+
+/* Sidebar background */
+#sidebar {
+	background-color: #383838;
+}
+
+/* Channel list item hover and active states */
+.channel-list-item:hover {
+	background-color: #323232 !important;
+}
+
+.channel-list-item.active {
+	background-color: #2b2b2b !important;
+}
+
+/* Userlist background */
+#chat .userlist {
+	background-color: #383838;
+}
+
+#chat .userlist .count {
+	background: #444444;
+}
+
+/* Input styling */
+#form .input {
+	background-color: #444444;
+	border-color: #404040;
+	color: #e0e0e0;
+}
+
+/* Timestamp styling - brackets are already in HTML */
+#chat .time {
+	color: var(--timestamp-color);
+	font-weight: normal;
+	white-space: nowrap !important;
+	word-break: keep-all !important;
+	min-width: 100px !important;
+	width: auto !important;
+}
+
+/* Ensure time brackets are visible */
+#chat .time-bracket {
+	color: var(--timestamp-color);
+}
+
+/* From/Nick area - align right for better nick/event alignment */
+#chat .from {
+	color: var(--body-color-muted);
+	display: inline-block !important;
+	text-align: right !important;
+	padding-right: 10px !important;
+	width: 90px !important;
+	min-width: 90px !important;
+	max-width: 90px !important;
+	vertical-align: top !important;
+	white-space: nowrap !important;
+	overflow: hidden !important;
+	text-overflow: ellipsis !important;
+}
+
+/* Show <> brackets around nicks - they're in HTML but hidden by .only-copy */
+#chat .from .only-copy {
+	font-size: inherit !important;
+	opacity: 1 !important;
+	width: auto !important;
+	display: inline !important;
+}
+
+/* Content area */
+#chat .content {
+	color: var(--body-color);
+}
+
+/* Hostmask styling */
+#chat .hostmask {
+	color: var(--hostmask-color);
+	font-size: 0.95em;
+}
+
+#chat .hostmask::before {
+	content: "(";
+	color: var(--hostmask-color);
+}
+
+#chat .hostmask::after {
+	content: ")";
+	color: var(--hostmask-color);
+}
+
+/* Channel names */
+#chat .channel {
+	color: var(--channel-color);
+	font-weight: bold;
+}
+
+/* Reasons (part, quit, kick) */
+#chat .part-reason,
+#chat .quit-reason {
+	color: var(--reason-color);
+	font-style: italic;
+}
+
+/* Info messages - colorless like irc.xyz */
+#chat .msg[data-type="condensed"] .content,
+#chat .msg[data-type="away"] .content,
+#chat .msg[data-type="back"] .content,
+#chat .msg[data-type="join"] .content,
+#chat .msg[data-type="kick"] .content,
+#chat .msg[data-type="mode"] .content,
+#chat .msg[data-type="nick"] .content,
+#chat .msg[data-type="chghost"] .content,
+#chat .msg[data-type="part"] .content,
+#chat .msg[data-type="quit"] .content,
+#chat .msg[data-type="topic"] .content,
+#chat .msg[data-type="topic_set_by"] .content {
+	color: var(--info-color);
+	font-style: normal;
+}
+
+/* JOIN - green » symbol */
+#chat .msg[data-type="join"] .from::before {
+	content: "» ";
+	color: var(--join-color);
+	font-weight: bold;
+	font-style: normal;
+}
+
+#chat .msg[data-type="join"] .from {
+	color: var(--info-color);
+}
+
+/* PART - red « symbol */
+#chat .msg[data-type="part"] .from::before {
+	content: "« ";
+	color: var(--quit-color);
+	font-weight: bold;
+	font-style: normal;
+	transform: none;
+	display: inline;
+}
+
+#chat .msg[data-type="part"] .from {
+	color: var(--info-color);
+}
+
+/* QUIT - red « symbol */
+#chat .msg[data-type="quit"] .from::before {
+	content: "« ";
+	color: var(--quit-color);
+	font-weight: bold;
+	font-style: normal;
+	transform: none;
+	display: inline;
+}
+
+#chat .msg[data-type="quit"] .from {
+	color: var(--info-color);
+}
+
+/* KICK - * symbol */
+#chat .msg[data-type="kick"] .from::before {
+	content: "* ";
+	color: var(--mode-color);
+	font-weight: bold;
+	font-style: normal;
+}
+
+#chat .msg[data-type="kick"] .from {
+	color: var(--info-color);
+}
+
+/* MODE - * symbol */
+#chat .msg[data-type="mode_channel"] .from::before,
+#chat .msg[data-type="mode_user"] .from::before,
+#chat .msg[data-type="mode"] .from::before {
+	content: "* ";
+	color: var(--mode-color);
+	font-weight: bold;
+	font-style: normal;
+}
+
+#chat .msg[data-type="mode_channel"] .from,
+#chat .msg[data-type="mode_user"] .from,
+#chat .msg[data-type="mode"] .from {
+	color: var(--info-color);
+}
+
+/* TOPIC - * symbol */
+#chat .msg[data-type="topic"] .from::before {
+	content: "* ";
+	color: var(--mode-color);
+	font-weight: bold;
+	font-style: normal;
+}
+
+#chat .msg[data-type="topic"] .from {
+	color: var(--info-color);
+}
+
+/* NICK change - * symbol */
+#chat .msg[data-type="nick"] .from::before,
+#chat .msg[data-type="chghost"] .from::before {
+	content: "* ";
+	color: var(--mode-color);
+	font-weight: bold;
+	font-style: normal;
+}
+
+#chat .msg[data-type="nick"] .from,
+#chat .msg[data-type="chghost"] .from {
+	color: var(--info-color);
+}
+
+/* User colors based on mode */
+.user {
+	font-weight: bold;
+	color: #9a9a9a; /* Neutral gray when coloredNicks is OFF */
+}
+
+/* Operator - gold */
+.user.color-op,
+#chat .userlist .user[data-mode="~"],
+#chat .userlist .user[data-mode="&"],
+#chat .userlist .user[data-mode="@"] {
+	color: var(--nick-op-color) !important;
+}
+
+/* Voice - cyan */
+.user.color-voice,
+#chat .userlist .user[data-mode="+"] {
+	color: var(--nick-voice-color) !important;
+}
+
+/* Normal users - green */
+.user.color-normal,
+#chat .userlist .user[data-mode=""] {
+	color: var(--nick-normal-color) !important;
+}
+
+/* System/bot nicks */
+.user.color-system {
+	color: var(--nick-system-color) !important;
+}
+
+.user.color-bot {
+	color: var(--nick-bot-color) !important;
+}
+
+/* Nick colors - 32 subtle pastel colors based on irc.xyz palette */
+/* Soft greens, cyans, yellows, pinks - RGB values in 100-230 range for pastel effect */
+.user.color-1 { color: #8ce467; }   /* soft green */
+.user.color-2 { color: #67e47c; }   /* soft lime */
+.user.color-3 { color: #67e4ba; }   /* soft teal */
+.user.color-4 { color: #e4d967; }   /* soft yellow */
+.user.color-5 { color: #e4ba67; }   /* soft orange */
+.user.color-6 { color: #e49567; }   /* soft coral */
+.user.color-7 { color: #e467ba; }   /* soft pink */
+.user.color-8 { color: #ba67e4; }   /* soft purple */
+.user.color-9 { color: #9567e4; }   /* soft violet */
+.user.color-10 { color: #67bae4; }  /* soft blue */
+.user.color-11 { color: #67d9e4; }  /* soft cyan */
+.user.color-12 { color: #67e4a8; }  /* soft aqua */
+.user.color-13 { color: #95e467; }  /* soft leaf */
+.user.color-14 { color: #bae467; }  /* soft chartreuse */
+.user.color-15 { color: #d9e467; }  /* soft lime-yellow */
+.user.color-16 { color: #e4c167; }  /* soft gold */
+.user.color-17 { color: #e4a867; }  /* soft amber */
+.user.color-18 { color: #e48167; }  /* soft peach */
+.user.color-19 { color: #e46795; }  /* soft rose */
+.user.color-20 { color: #d967e4; }  /* soft magenta */
+.user.color-21 { color: #ba95e4; }  /* soft lavender */
+.user.color-22 { color: #8195e4; }  /* soft periwinkle */
+.user.color-23 { color: #67a8e4; }  /* soft sky */
+.user.color-24 { color: #67c1e4; }  /* soft turquoise */
+.user.color-25 { color: #81e4ba; }  /* soft mint */
+.user.color-26 { color: #81e495; }  /* soft spring */
+.user.color-27 { color: #a8e467; }  /* soft olive */
+.user.color-28 { color: #c1e467; }  /* soft yellow-green */
+.user.color-29 { color: #e4d981; }  /* soft cream */
+.user.color-30 { color: #e4ba81; }  /* soft tan */
+.user.color-31 { color: #e49581; }  /* soft salmon */
+.user.color-32 { color: #e467a8; }  /* soft fuchsia */
+
+/* Day change marker */
+.date-marker {
+	color: var(--date-marker-color);
+	font-weight: bold;
+	background-color: #282828;
+	border-left: 3px solid var(--date-marker-color);
+}
+
+/* Unread marker */
+.unread-marker {
+	border-color: var(--unread-marker-color);
+}
+
+/* Highlights */
+#chat .msg.highlight {
+	background-color: var(--highlight-bg-color);
+	border-left-color: var(--highlight-border-color);
+}
+
+#chat .chat-view[data-type="channel"] .msg.highlight .time {
+	color: var(--timestamp-color);
+}
+
+/* Code blocks */
+#chat .msg[data-type="monospace_block"] .text,
+code,
+.irc-monospace {
+	background: #202020;
+	color: #e0e0e0;
+	font-family: Hack, monospace;
+}
+
+/* Userlist */
+#chat .userlist {
+	background-color: #383838;
+	border-color: #252525;
+}
+
+#chat .userlist .count {
+	background-color: #444444;
+	color: var(--body-color-muted);
+}
+
+#chat .userlist .user.active {
+	background-color: #323232;
+}
+
+/* Input form - dark background */
+#form {
+	background-color: #2d2d2d !important;
+	border-color: #252525 !important;
+	color: var(--body-color) !important;
+}
+
+#form #nick {
+	background: #444444 !important;
+	color: #e0e0e0 !important;
+}
+
+/* Input text field - dark background like sidebar */
+#form .input,
+.input {
+	background-color: #444444 !important;
+	border-color: #404040 !important;
+	color: #e0e0e0 !important;
+}
+
+#form .input::placeholder,
+.input::placeholder {
+	color: #777777 !important;
+}
+
+/* Borders */
+#chat .content,
+#chat .header,
+#chat .user-mode::before,
+#chat .userlist {
+	border-color: #252525;
+}
+
+/* Topic bar */
+#chat .header {
+	background-color: #282828;
+}

@@ -17,7 +17,8 @@
 			aria-hidden="true"
 			:aria-label="messageTimeLocale"
 			class="time tooltipped tooltipped-e"
-			>{{ `${messageTime}&#32;` }}
+			><span class="time-bracket">[</span>{{ messageTime
+			}}<span class="time-bracket">]</span>&#32;
 		</span>
 		<template v-if="message.type === 'unhandled'">
 			<span class="from">[{{ message.command }}]</span>
@@ -28,11 +29,11 @@
 			</span>
 		</template>
 		<template v-else-if="isAction()">
-			<span class="from"><span class="only-copy" aria-hidden="true">***&nbsp;</span></span>
+			<span class="from"><span class="only-copy" aria-hidden="true"></span></span>
 			<component :is="messageComponent" :network="network" :message="message" />
 		</template>
 		<template v-else-if="message.type === 'action'">
-			<span class="from"><span class="only-copy">*&nbsp;</span></span>
+			<span class="from"><span class="only-copy"></span></span>
 			<span class="content" dir="auto">
 				<Username
 					:user="message.from"

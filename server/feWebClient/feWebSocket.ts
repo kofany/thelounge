@@ -97,15 +97,19 @@ export interface FeWebConfig {
 	reconnectDelay?: number;
 	maxReconnectDelay?: number;
 	pingInterval?: number;
+
+	// Callback for disconnect event (for IrssiClient reconnect handling)
+	onDisconnect?: (code: number, reason: string) => void;
 }
 
 type MessageHandler = (message: FeWebMessage) => void;
 
 // Internal config type with all required fields
-type InternalFeWebConfig = Required<Omit<FeWebConfig, "ca" | "cert" | "key">> & {
+type InternalFeWebConfig = Required<Omit<FeWebConfig, "ca" | "cert" | "key" | "onDisconnect">> & {
 	ca?: Buffer;
 	cert?: Buffer;
 	key?: Buffer;
+	onDisconnect?: (code: number, reason: string) => void;
 };
 
 export class FeWebSocket extends EventEmitter {
@@ -291,6 +295,14 @@ export class FeWebSocket extends EventEmitter {
 				this._isConnected = false;
 				this.isAuthenticated = false;
 				this.stopPing();
+
+				// Emit 'disconnected' event for EventEmitter listeners
+				this.emit("disconnected", code, reasonStr);
+
+				// Notify parent (IrssiClient) about disconnect
+				if (this.config.onDisconnect) {
+					this.config.onDisconnect(code, reasonStr);
+				}
 
 				// Check for authentication failure (HTTP 401 → WebSocket close code 1002)
 				if (code === 1002) {

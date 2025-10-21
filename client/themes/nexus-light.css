@@ -63,61 +63,84 @@
 body {
 	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
 	scrollbar-color: #888888ee transparent;
+	scrollbar-width: thin;
 }
 
 /* Scrollbar styling - specific for chat, sidebar, userlist */
-/* Sidebar (chanlist) scrollbar - background #383838 */
-#sidebar .scrollable-area::-webkit-scrollbar {
-	width: 8px;
+/* Modern browsers with scrollbar-* support */
+@supports (scrollbar-color: auto) {
+	#sidebar .scrollable-area,
+	#chat .chat,
+	#chat .userlist .names {
+		scrollbar-color: #2d2d2d #383838;
+		scrollbar-width: thin;
+	}
 }
 
-#sidebar .scrollable-area::-webkit-scrollbar-track {
-	background: #383838;
-}
+/* Safari and older Chrome with ::-webkit-scrollbar-* support */
+@supports selector(::-webkit-scrollbar) {
+	/* Sidebar (chanlist) scrollbar - background #383838 */
+	#sidebar .scrollable-area::-webkit-scrollbar {
+		-webkit-appearance: none;
+		width: 8px;
+	}
 
-#sidebar .scrollable-area::-webkit-scrollbar-thumb {
-	background: #2d2d2d;
-	border-radius: 5px;
-}
+	#sidebar .scrollable-area::-webkit-scrollbar-track {
+		-webkit-appearance: none;
+		background: #383838;
+	}
 
-#sidebar .scrollable-area::-webkit-scrollbar-thumb:hover {
-	background: #252525;
-}
+	#sidebar .scrollable-area::-webkit-scrollbar-thumb {
+		-webkit-appearance: none;
+		background: #2d2d2d;
+		border-radius: 5px;
+	}
 
-/* Chat window scrollbar - background #2d2d2d */
-#chat .chat::-webkit-scrollbar {
-	width: 8px;
-}
+	#sidebar .scrollable-area::-webkit-scrollbar-thumb:hover {
+		background: #252525;
+	}
 
-#chat .chat::-webkit-scrollbar-track {
-	background: #2d2d2d;
-}
+	/* Chat window scrollbar - background #2d2d2d */
+	#chat .chat::-webkit-scrollbar {
+		-webkit-appearance: none;
+		width: 8px;
+	}
 
-#chat .chat::-webkit-scrollbar-thumb {
-	background: #232323;
-	border-radius: 5px;
-}
+	#chat .chat::-webkit-scrollbar-track {
+		-webkit-appearance: none;
+		background: #2d2d2d;
+	}
 
-#chat .chat::-webkit-scrollbar-thumb:hover {
-	background: #1a1a1a;
-}
+	#chat .chat::-webkit-scrollbar-thumb {
+		-webkit-appearance: none;
+		background: #232323;
+		border-radius: 5px;
+	}
 
-/* Userlist (nicklist) scrollbar - background #383838 */
-#chat .userlist .names::-webkit-scrollbar {
-	width: 8px;
-}
+	#chat .chat::-webkit-scrollbar-thumb:hover {
+		background: #1a1a1a;
+	}
 
-#chat .userlist .names::-webkit-scrollbar-track {
-	background: #383838;
-}
+	/* Userlist (nicklist) scrollbar - background #383838 */
+	#chat .userlist .names::-webkit-scrollbar {
+		-webkit-appearance: none;
+		width: 8px;
+	}
 
-#chat .userlist .names::-webkit-scrollbar-thumb {
-	background: #2d2d2d;
-	border-radius: 5px;
-}
+	#chat .userlist .names::-webkit-scrollbar-track {
+		-webkit-appearance: none;
+		background: #383838;
+	}
 
-#chat .userlist .names::-webkit-scrollbar-thumb:hover {
-	background: #252525;
+	#chat .userlist .names::-webkit-scrollbar-thumb {
+		-webkit-appearance: none;
+		background: #2d2d2d;
+		border-radius: 5px;
+	}
+
+	#chat .userlist .names::-webkit-scrollbar-thumb:hover {
+		background: #252525;
+	}
 }
 
 /* Window styling */

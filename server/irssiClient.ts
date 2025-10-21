@@ -353,6 +353,8 @@ export class IrssiClient {
 			reconnect: true,
 			reconnectDelay: 1000,
 			maxReconnectDelay: 30000,
+
+			// Note: disconnect is handled via EventEmitter in setupIrssiEventHandlers()
 		};
 
 		this.irssiConnection = new FeWebSocket(feWebConfig);
@@ -411,14 +413,37 @@ export class IrssiClient {
 			return;
 		}
 
-		// Connection events (for logging only - FeWebAdapter handles the actual events)
-		// Note: Using 'as any' because these are custom events not in ServerMessageType
+		// Connection events
 		(this.irssiConnection as any).on("connected", () => {
 			log.info(`User ${colors.bold(this.name)}: irssi WebSocket connected`);
 		});
 
-		(this.irssiConnection as any).on("disconnected", () => {
-			log.warn(`User ${colors.bold(this.name)}: irssi WebSocket disconnected`);
+		// DISCONNECT HANDLER - czyści sieci i broadcast do przeglądarek
+		(this.irssiConnection as any).on("disconnected", (code: number, reason: string) => {
+			log.warn(
+				`User ${colors.bold(this.name)}: irssi WebSocket disconnected (code: ${code})`
+			);
+
+			// CLEAR networks on disconnect
+			const clearedCount = this.networks.length;
+			this.networks = [];
+			this.lastActiveChannel = -1;
+
+			// Broadcast disconnect status to all browsers
+			this.broadcastToAllBrowsers("irssi:status" as any, {
+				connected: false,
+				error: `Lost connection to irssi WebSocket (code: ${code})`,
+			});
+
+			// Also send empty init to clear UI networks
+			this.broadcastToAllBrowsers("init", {
+				networks: [],
+				active: -1,
+			});
+
+			log.info(
+				`User ${colors.bold(this.name)}: cleared ${clearedCount} networks after irssi disconnect`
+			);
 		});
 
 		this.irssiConnection.on("error", (msg: FeWebMessage) => {
@@ -815,7 +840,7 @@ export class IrssiClient {
 	/**
 	 * Attach a browser session
 	 */
-	attachBrowser(socket: Socket, openChannel: number = -1): void {
+	attachBrowser(socket: Socket, openChannel: number = -1, token?: string): void {
 		const socketId = socket.id;
 
 		this.attachedBrowsers.set(socketId, {
@@ -839,7 +864,7 @@ export class IrssiClient {
 					this.networks.length
 				} networks)`
 			);
-			this.sendInitialState(socket);
+			void this.sendInitialState(socket, token);
 		} else if (!this.config.irssiConnection.passwordEncrypted) {
 			log.info(
 				`User ${colors.bold(
@@ -850,13 +875,21 @@ export class IrssiClient {
 			socket.emit("init", {
 				networks: [],
 				active: -1,
+				token: token,
 			});
 		} else {
+			// Irssi configured but no networks yet - send empty init with status
+			const isConnected = this.irssiConnection?.isConnected() ?? false;
 			log.info(
-				`User ${colors.bold(
-					this.name
-				)}: waiting for state_dump before sending init to ${socketId}`
+				`User ${colors.bold(this.name)}: sending empty init to ${socketId} (irssi ${
+					isConnected ? "connecting" : "NOT connected"
+				})`
 			);
+			socket.emit("init", {
+				networks: [],
+				active: -1,
+				token: token,
+			});
 		}
 	}
 
@@ -881,7 +914,7 @@ export class IrssiClient {
 	 * Converts NetworkData[] to SharedNetwork[] format for frontend
 	 * LOADS 100 LAST MESSAGES from storage for each channel/query
 	 */
-	private async sendInitialState(socket: Socket): Promise<void> {
+	private async sendInitialState(socket: Socket, token?: string): Promise<void> {
 		try {
 			log.info(`[IrssiClient] ⏰ TIMING: sendInitialState() START for socket ${socket.id}`);
 
@@ -996,6 +1029,7 @@ export class IrssiClient {
 			// STEP 4: Send init event to browser
 			socket.emit("init", {
 				networks: sharedNetworks,
+				token: token,
 				active: this.lastActiveChannel || -1,
 			});
 
@@ -1197,6 +1231,24 @@ export class IrssiClient {
 	 */
 	save(): void {
 		this.manager.saveUser(this as any); // IrssiClient is compatible with Client interface
+	}
+
+	/**
+	 * Set The Lounge password (login password, NOT irssi password!)
+	 */
+	setPassword(hash: string, callback: (success: boolean) => void): void {
+		const oldHash = this.config.password;
+		this.config.password = hash;
+		
+		this.manager.saveUser(this as any, (err) => {
+			if (err) {
+				// If user file fails to write, reset it back
+				this.config.password = oldHash;
+				return callback(false);
+			}
+			
+			return callback(true);
+		});
 	}
 
 	// Unread marker helpers
@@ -1449,14 +1501,21 @@ export class IrssiClient {
 				// Send mark_read to irssi ONLY if NOT from irssi
 				// This prevents infinite loop and unnecessary window switches
 				if (this.irssiConnection && !fromIrssi) {
-					this.irssiConnection.send({
-						type: "mark_read" as any,
-						server: net.serverTag,
-						target: chan.name,
-					});
-					log.debug(
-						`[IrssiClient] Sent mark_read to irssi for ${net.serverTag}/${chan.name}`
-					);
+					// Check if actually connected before sending
+					if (this.irssiConnection.isConnected()) {
+						this.irssiConnection.send({
+							type: "mark_read" as any,
+							server: net.serverTag,
+							target: chan.name,
+						});
+						log.debug(
+							`[IrssiClient] Sent mark_read to irssi for ${net.serverTag}/${chan.name}`
+						);
+					} else {
+						log.debug(
+							`[IrssiClient] Skipping mark_read for ${net.serverTag}/${chan.name} (not connected)`
+						);
+					}
 				}
 			}
 		}
@@ -1776,8 +1835,12 @@ export class IrssiClient {
 	}
 
 	private async handleInit(networks: NetworkData[]): Promise<void> {
-		log.info(`[IrssiClient] Init with ${networks.length} networks`);
+		log.info(`[HANDLEINIT] ========================================`);
+		log.info(`[HANDLEINIT] Init with ${networks.length} networks`);
+		log.info(`[HANDLEINIT] BEFORE assignment: this.networks.length = ${this.networks.length}`);
 		this.networks = networks;
+		log.info(`[HANDLEINIT] AFTER assignment: this.networks.length = ${this.networks.length}`);
+		log.info(`[HANDLEINIT] attachedBrowsers.size = ${this.attachedBrowsers.size}`);
 
 		// Load messages from storage for all channels (on node restart!)
 		if (this.messageStorage) {
@@ -1889,6 +1952,7 @@ export class IrssiClient {
 		);
 
 		// Broadcast to all browsers
+		log.info(`[HANDLEINIT] Broadcasting init to ${this.attachedBrowsers.size} browsers with ${sharedNetworks.length} networks`);
 		this.broadcastToAllBrowsers("init", {
 			networks: sharedNetworks,
 			active: -1,

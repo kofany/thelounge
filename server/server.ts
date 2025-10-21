@@ -1094,19 +1094,26 @@ function initializeIrssiClient(
 
 	void socket.join(client.id);
 
-	// Attach browser to IrssiClient
-	// This will call client.sendInitialState() which sends proper init event with networks
-	client.attachBrowser(socket, openChannel);
+	// Generate token BEFORE attachBrowser (token = The Lounge auth, independent from irssi)
+	const continueInit = (tokenToSend?: string) => {
+		// Attach browser to IrssiClient
+		// Pass token so it's included in init event payload
+		client.attachBrowser(socket, openChannel, tokenToSend);
 
-	// Send commands list
-	socket.emit("commands", inputs.getCommands());
+		// Send commands list
+		socket.emit("commands", inputs.getCommands());
+	};
 
 	// Handle token generation for non-public mode
-	if (!Config.values.public && !token) {
+	if (!Config.values.public) {
 		client.generateToken((newToken) => {
-			token = client.calculateTokenHash(newToken);
-			// Token will be sent in init event by sendInitialState()
+			const tokenHash = client.calculateTokenHash(newToken);
+			client.updateSession(tokenHash, getClientIp(socket), socket.request);
+			// Continue with init, passing token to attachBrowser
+			continueInit(newToken);
 		});
+	} else {
+		continueInit();
 	}
 
 	// Handle disconnect
@@ -1191,6 +1198,49 @@ function initializeIrssiClient(
 		const clientSettings = client.config.clientSettings;
 		socket.emit("setting:all", clientSettings);
 	});
+
+	// Handle password change (The Lounge login password, NOT irssi password!)
+	if (!Config.values.public && !Config.values.ldap.enable) {
+		socket.on("change-password", (data) => {
+			if (_.isPlainObject(data)) {
+				const old = data.old_password;
+				const p1 = data.new_password;
+				const p2 = data.verify_password;
+
+				if (typeof p1 === "undefined" || p1 === "" || p1 !== p2) {
+					socket.emit("change-password", {
+						error: "",
+						success: false,
+					});
+					return;
+				}
+
+				Helper.password
+					.compare(old || "", client.config.password)
+					.then((matching) => {
+						if (!matching) {
+							socket.emit("change-password", {
+								error: "password_incorrect",
+								success: false,
+							});
+							return;
+						}
+
+						const hash = Helper.password.hash(p1);
+
+						client.setPassword(hash, (success: boolean) => {
+							socket.emit("change-password", {
+								success: success,
+								error: success ? undefined : "update_failed",
+							});
+						});
+					})
+					.catch((error: Error) => {
+						log.error(`Error while checking users password. Error: ${error.message}`);
+					});
+			}
+		});
+	}
 
 	// irssi connection configuration
 	(socket as any).on("irssi:config:get", () => {

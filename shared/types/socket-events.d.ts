@@ -86,7 +86,18 @@ interface ServerToClientEvents {
 	// Activity tracking (unread markers from irssi)
 	activity_update: EventHandler<{chan: number; unread: number; highlight: number}>;
 
-	init: EventHandler<{active: number; networks: SharedNetwork[]; token?: string}>;
+	init: EventHandler<{
+		active: number;
+		networks: SharedNetwork[];
+		token?: string;
+		irssiConnectionStatus?: {connected: boolean; error?: string};
+	}>;
+
+	// Token sent to browser for localStorage persistence
+	token: (token: string) => void;
+
+	// irssi WebSocket connection status (broadcasted to all browsers)
+	"irssi:status": EventHandler<{connected: boolean; error?: string}>;
 
 	"search:results": (response: SearchResponse) => void;
 
