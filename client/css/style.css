@@ -2792,23 +2792,7 @@ part/quit messages where we don't load previews (adds a blank line otherwise) */
 	}
 }
 
-::-webkit-scrollbar {
-	width: 8px;
-	background-color: rgb(0 0 0 / 0%);
-}
-
-::-webkit-scrollbar:hover {
-	background-color: rgb(0 0 0 / 9%);
-}
-
-::-webkit-scrollbar-thumb:vertical {
-	background: rgb(0 0 0 / 50%);
-	border-radius: 100px;
-}
-
-::-webkit-scrollbar-thumb:vertical:active {
-	background: rgb(0 0 0 / 60%);
-}
+/* Removed global ::-webkit-scrollbar defaults to let themes fully control scrollbar styling (Safari-friendly). */
 
 /* Image viewer and drag-and-drop overlay */
 
@@ -2940,3 +2924,14 @@ part/quit messages where we don't load previews (adds a blank line otherwise) */
 	justify-content: center;
 	align-items: center;
 }
+
+
+/* Compact UI overrides: smaller topic bar and message input height */
+/* Topic text smaller */
+.header .topic { font-size: 13px; }
+/* Topic edit input slightly lower */
+.header .topic-input { height: 30px; }
+/* Save-topic button match input size */
+.topic-container .save-topic span { width: 30px; height: 30px; }
+/* Message input a bit lower (from 19px to 17px) */
+#form #input { min-height: 17px; height: 17px; line-height: 17px; }

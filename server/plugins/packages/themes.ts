@@ -53,6 +53,9 @@ function getAll() {
 	const filteredThemes: ThemeForClient[] = [];
 
 	for (const theme of themes.values()) {
+		if (theme.name === "default") {
+			continue; // hide built-in default theme from the list
+		}
 		filteredThemes.push(_.pick(theme, ["displayName", "name", "themeColor"]));
 	}
 
