@@ -1702,37 +1702,10 @@ export class IrssiClient {
 	private async handleChannelJoin(networkUuid: string, channel: Chan): Promise<void> {
 		log.info(`[IrssiClient] Channel join: ${channel.name}`);
 
-		// Load messages from storage for new channel
-		if (this.messageStorage) {
-			try {
-				const {ChanType} = await import("../shared/types/chan");
-
-				// Don't load messages for lobby
-				if (channel.type !== ChanType.LOBBY) {
-					// Load last 100 messages from encrypted storage
-					const messages = await this.messageStorage.getLastMessages(
-						networkUuid,
-						channel.name,
-						100
-					);
-
-					// Assign IDs to messages
-					for (const msg of messages) {
-						msg.id = this.nextMessageId();
-					}
-
-					// Add to channel.messages
-					channel.messages = messages;
-
-					log.info(
-						`[IrssiClient] Loaded ${messages.length} messages for ${channel.name} from storage`
-					);
-				}
-			} catch (err) {
-				log.error(`Failed to load messages for ${channel.name}: ${err}`);
-				channel.messages = [];
-			}
-		}
+		// DON'T load messages from storage here!
+		// Frontend will request them via lazy loading (more request) if needed.
+		// Loading here causes duplicates when browser reconnects with existing messages in local store.
+		channel.messages = [];
 
 		// Broadcast to all browsers
 		// Note: join event expects SharedNetworkChan which includes network info
