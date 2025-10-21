@@ -78,93 +78,16 @@ body {
 	scrollbar-color: #888888ee rgba(0, 0, 0, 0);
 }
 
-/* Global scrollbar styling - Safari compatible */
-::-webkit-scrollbar {
-	-webkit-appearance: none !important;
-	height: 5px !important;
-	width: 5px !important;
-	background: rgba(0, 0, 0, 0) !important;
-	background-color: rgba(0, 0, 0, 0) !important;
-}
-
-/* Safari workaround: use rgba instead of transparent keyword */
-::-webkit-scrollbar-track {
-	-webkit-appearance: none !important;
-	background-color: rgba(0, 0, 0, 0) !important;
-	background: rgba(0, 0, 0, 0) !important;
-}
-
-::-webkit-scrollbar-track-piece {
-	-webkit-appearance: none !important;
-	background-color: rgba(0, 0, 0, 0) !important;
-	background: rgba(0, 0, 0, 0) !important;
-}
-
-::-webkit-scrollbar-thumb {
-	-webkit-appearance: none !important;
-	background-color: #888888ee !important;
-	background: #888888ee !important;
-	border-radius: 10px !important;
-}
-
-::-webkit-scrollbar-thumb:hover {
-	background-color: #555555 !important;
-	background: #555555 !important;
-}
-
-/* Safari hover workaround to force recomputation */
-.scrollable-area:hover,
-#chat .chat:hover {
-	--safari-scrollbar-fix: 1;
-}
-
-/* Firefox scrollbar */
-* {
-	scrollbar-color: #888888ee rgba(0, 0, 0, 0) !important;
-	scrollbar-width: thin !important;
-}
-
-/* Force scrollbar style on all scrollable elements - Safari specific */
-#chat .chat::-webkit-scrollbar,
-#sidebar .scrollable-area::-webkit-scrollbar,
-#chat .userlist .names::-webkit-scrollbar {
-	-webkit-appearance: none !important;
-	height: 5px !important;
-	width: 5px !important;
-	background: rgba(0, 0, 0, 0) !important;
-	background-color: rgba(0, 0, 0, 0) !important;
-}
-
-#chat .chat::-webkit-scrollbar-track,
-#sidebar .scrollable-area::-webkit-scrollbar-track,
-#chat .userlist .names::-webkit-scrollbar-track {
-	-webkit-appearance: none !important;
-	background-color: rgba(0, 0, 0, 0) !important;
-	background: rgba(0, 0, 0, 0) !important;
-}
-
-#chat .chat::-webkit-scrollbar-track-piece,
-#sidebar .scrollable-area::-webkit-scrollbar-track-piece,
-#chat .userlist .names::-webkit-scrollbar-track-piece {
-	-webkit-appearance: none !important;
-	background-color: rgba(0, 0, 0, 0) !important;
-	background: rgba(0, 0, 0, 0) !important;
-}
-
-#chat .chat::-webkit-scrollbar-thumb,
-#sidebar .scrollable-area::-webkit-scrollbar-thumb,
-#chat .userlist .names::-webkit-scrollbar-thumb {
-	-webkit-appearance: none !important;
-	background-color: #888888ee !important;
-	background: #888888ee !important;
-	border-radius: 10px !important;
-}
-
-#chat .chat::-webkit-scrollbar-thumb:hover,
-#sidebar .scrollable-area::-webkit-scrollbar-thumb:hover,
-#chat .userlist .names::-webkit-scrollbar-thumb:hover {
-	background-color: #555555 !important;
-	background: #555555 !important;
+/* Scrollbar styling (xyz 1:1) */
+:root { --scrollbar-track: transparent; --scrollbar-thumb: #888888ee; --scrollbar-thumb-hover: #555555; }
+::-webkit-scrollbar { height: 5px; width: 5px; }
+::-webkit-scrollbar-track { background-color: var(--scrollbar-track, transparent); margin-bottom: 8px; }
+::-webkit-scrollbar-thumb { background-color: var(--scrollbar-thumb, #888888ee); }
+::-webkit-scrollbar-thumb:hover { background-color: var(--scrollbar-thumb-hover, #555555); }
+/* Cross-browser fallback */
+body, #sidebar .scrollable-area, #chat .chat, #chat .userlist .names {
+  scrollbar-color: var(--scrollbar-thumb, #888888ee) var(--scrollbar-track, transparent);
+  scrollbar-width: auto;
 }
 
 /* Window styling */
