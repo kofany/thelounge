@@ -371,6 +371,7 @@ export class IrssiClient {
 				this.handleNicklistUpdate(networkUuid, channelId, users),
 			onTopicUpdate: (networkUuid, channelId, topic) =>
 				this.handleTopicUpdate(networkUuid, channelId, topic),
+			onNickChange: (networkUuid, newNick) => this.handleNickChange(networkUuid, newNick),
 			onInit: (networks) => this.handleInit(networks),
 		};
 
@@ -1848,6 +1849,16 @@ export class IrssiClient {
 		this.broadcastToAllBrowsers("topic", {
 			chan: channelId,
 			topic: topic,
+		});
+	}
+
+	private handleNickChange(networkUuid: string, newNick: string): void {
+		log.info(`[IrssiClient] Nick change: ${networkUuid} → ${newNick}`);
+
+		// Broadcast to all browsers
+		this.broadcastToAllBrowsers("nick", {
+			network: networkUuid,
+			nick: newNick,
 		});
 	}
 
