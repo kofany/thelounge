@@ -54,7 +54,7 @@ export class FeWebAdapter {
 	private channelIdCounter = 1;
 	private initEmitted = false;
 	private networkUuidMap: Map<string, string>; // server_tag -> UUID (persistent)
-	private stateDumpReceivedForNetwork: Map<string, boolean> = new Map(); // Track if state_dump was already received for a network
+	private stateDumpReceivedForNetwork: Map<string, number> = new Map(); // serverTag -> timestamp // Track if state_dump was already received for a network
 
 	constructor(
 		socket: FeWebSocket,
@@ -763,21 +763,21 @@ export class FeWebAdapter {
 		const network = this.getOrCreateNetwork(serverTag);
 		if (!network) return;
 
-		// Check if this is a duplicate state_dump (irssi sends it twice on reconnect)
+		// Check if this is a duplicate state_dump (within 2 seconds of previous one)
+		// This prevents channel duplication when irssi sends state_dump multiple times
 		const alreadyReceived = this.stateDumpReceivedForNetwork.get(serverTag);
+		const now = Date.now();
 
-		if (alreadyReceived) {
+		if (alreadyReceived && now - alreadyReceived < 2000) {
 			log.warn(
-				`[FeWebAdapter] ⚠️ DUPLICATE state_dump for ${serverTag} - IGNORING to prevent channel duplication`
+				`[FeWebAdapter] ⚠️ DUPLICATE state_dump for ${serverTag} within 2s - IGNORING to prevent channel duplication`
 			);
 			return; // Ignore duplicate state_dump
 		}
 
-		// Mark as received
-		this.stateDumpReceivedForNetwork.set(serverTag, true);
-		log.info(
-			`[FeWebAdapter] First state_dump for ${serverTag} - clearing channels and processing`
-		);
+		// Mark as received with timestamp
+		this.stateDumpReceivedForNetwork.set(serverTag, now);
+		log.info(`[FeWebAdapter] Processing state_dump for ${serverTag} - clearing channels`);
 
 		// Clear existing channels (except lobby) to prepare for fresh state
 		const lobby = network.channels.find((ch) => ch.type === "lobby");
