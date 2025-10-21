@@ -541,15 +541,32 @@ class Network {
 		// Don't sort special channels in amongst channels/users.
 		if (newChan.type === ChanType.CHANNEL || newChan.type === ChanType.QUERY) {
 			// We start at 1 so we don't test against the lobby
+			// Sort order: CHANNEL (alphabetically) → QUERY (alphabetically)
 			for (let i = 1; i < this.channels.length; i++) {
 				const compareChan = this.channels[i];
 
-				// Negative if the new chan is alphabetically before the next chan in the list, positive if after
+				// Skip non-channel/query types (special channels)
+				if (compareChan.type !== ChanType.CHANNEL && compareChan.type !== ChanType.QUERY) {
+					index = i;
+					break;
+				}
+
+				// If new channel is CHANNEL and compare is QUERY, insert before (channels come first)
+				if (newChan.type === ChanType.CHANNEL && compareChan.type === ChanType.QUERY) {
+					index = i;
+					break;
+				}
+
+				// If new channel is QUERY and compare is CHANNEL, continue (queries come after channels)
+				if (newChan.type === ChanType.QUERY && compareChan.type === ChanType.CHANNEL) {
+					continue;
+				}
+
+				// Both are same type (both CHANNEL or both QUERY) - sort alphabetically
 				if (
 					newChan.name.localeCompare(compareChan.name, undefined, {
 						sensitivity: "base",
-					}) <= 0 ||
-					(compareChan.type !== ChanType.CHANNEL && compareChan.type !== ChanType.QUERY)
+					}) <= 0
 				) {
 					index = i;
 					break;
