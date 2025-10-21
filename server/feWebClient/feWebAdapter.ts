@@ -679,6 +679,9 @@ export class FeWebAdapter {
 				user.nick = newNick;
 				channel.users.set(newNick.toLowerCase(), user);
 
+				// Sort users alphabetically (important for own nick change!)
+				this.sortChannelUsers(channel);
+
 				const nickMsg = new Msg({
 					type: MessageType.NICK,
 					time: new Date(),
