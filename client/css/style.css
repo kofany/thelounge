@@ -619,10 +619,10 @@ p {
 #chat button.close {
 	color: #607992;
 	display: flex;
-	font-size: 14px;
+	font-size: 12px; /* Reduced from 14px */
 	line-height: 1;
-	height: 36px;
-	width: 36px;
+	height: 24px; /* Reduced from 36px */
+	width: 24px; /* Reduced from 36px */
 	flex-shrink: 0;
 }
 
@@ -632,8 +632,8 @@ p {
 #chat button.search::before,
 #chat button.menu::before,
 #chat button.close::before {
-	width: 36px;
-	line-height: 36px; /* Fix alignment in Microsoft Edge */
+	width: 24px; /* Reduced from 36px */
+	line-height: 24px; /* Reduced from 36px - Fix alignment in Microsoft Edge */
 }
 
 /* Channel list button stays fixed when scrolling... */
@@ -650,11 +650,11 @@ p {
 #viewport .lt::after {
 	content: "";
 	position: absolute;
-	top: 9px;
-	right: 7px;
+	top: 4px; /* Adjusted for smaller button (24px instead of 36px) */
+	right: 4px; /* Adjusted for smaller button */
 	background-color: #e74c3c;
-	width: 10px;
-	height: 10px;
+	width: 8px; /* Smaller dot (8px instead of 10px) */
+	height: 8px; /* Smaller dot */
 	border-radius: 50%;
 	border: 2px solid var(--window-bg-color);
 	opacity: 0;
@@ -958,8 +958,8 @@ background on hover (unless active) */
 }
 
 #footer {
-	height: 45px;
-	font-size: 14px;
+	height: 30px; /* Reduced from 45px */
+	font-size: 12px; /* Reduced from 14px */
 	flex-shrink: 0;
 	display: flex;
 	justify-content: center;
@@ -968,7 +968,7 @@ background on hover (unless active) */
 #footer button {
 	color: #b7c5d1;
 	display: inline-block;
-	width: 45px;
+	width: 30px; /* Reduced from 45px */
 	height: 100%;
 	border-radius: 5px;
 }
@@ -976,10 +976,10 @@ background on hover (unless active) */
 #footer .help.notified::after {
 	content: "\f021";
 	position: absolute;
-	bottom: 10px;
-	right: 7px;
+	bottom: 6px; /* Adjusted for smaller footer (30px instead of 45px) */
+	right: 4px; /* Adjusted for smaller button */
 	padding: 2px;
-	font-size: 10px;
+	font-size: 8px; /* Smaller icon */
 	border-radius: 50%;
 	color: var(--link-color);
 	background: var(--body-bg-color);
@@ -1072,8 +1072,8 @@ textarea.input {
 
 .header {
 	align-items: center;
-	line-height: 45px;
-	height: 45px;
+	line-height: 30px; /* Reduced from 45px */
+	height: 30px; /* Reduced from 45px */
 	padding: 0 6px;
 	display: flex;
 	flex-shrink: 0;
@@ -1132,7 +1132,7 @@ textarea.input {
 
 .topic-container .save-topic {
 	position: absolute;
-	top: 6px;
+	top: 4px; /* Adjusted for smaller header (30px instead of 45px) */
 	right: 0;
 }
 
