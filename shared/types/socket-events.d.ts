@@ -166,7 +166,7 @@ interface ClientToServerEvents {
 	"mentions:dismiss_all": NoPayloadEventHandler;
 	"mentions:get": NoPayloadEventHandler;
 
-	more: EventHandler<{target: number; lastId: number; condensed: boolean}>;
+	more: EventHandler<{target: number; lastTime: number; condensed: boolean}>;
 
 	"msg:preview:toggle": EventHandler<{
 		target: number;

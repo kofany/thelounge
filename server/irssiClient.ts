@@ -767,7 +767,7 @@ export class IrssiClient {
 	 * Get message history for a channel (lazy loading)
 	 * ALWAYS loads from storage (not from cache!)
 	 */
-	async more(data: {target: number; lastId: number; condensed?: boolean}): Promise<{
+	async more(data: {target: number; lastTime: number; condensed?: boolean}): Promise<{
 		chan: number;
 		messages: Msg[];
 		totalMessages: number;
@@ -805,7 +805,7 @@ export class IrssiClient {
 		let messages: Msg[] = [];
 
 		try {
-			if (data.lastId < 0) {
+			if (data.lastTime < 0) {
 				// Initial load - last 100 messages
 				messages = await this.messageStorage.getLastMessages(
 					targetNetwork.uuid,
@@ -813,36 +813,13 @@ export class IrssiClient {
 					100
 				);
 			} else {
-				// Lazy load - 100 messages before lastId
-				// We need to get the timestamp of the message with lastId
-				// Since we don't store messages in targetChannel.messages on server,
-				// we need to load it from storage
-				const allMessages = await this.messageStorage.getLastMessages(
+				// Lazy load - 100 messages before lastTime (timestamp in milliseconds)
+				messages = await this.messageStorage.getMessagesBefore(
 					targetNetwork.uuid,
 					targetChannel.name,
-					200 // Load enough to find lastId
+					data.lastTime,
+					100
 				);
-
-				const lastMsgIndex = allMessages.findIndex((m) => m.id === data.lastId);
-
-				if (lastMsgIndex >= 0 && lastMsgIndex < allMessages.length) {
-					// Get timestamp of the message with lastId
-					const beforeTime = allMessages[lastMsgIndex].time.getTime();
-
-					// Load 100 messages before that timestamp
-					messages = await this.messageStorage.getMessagesBefore(
-						targetNetwork.uuid,
-						targetChannel.name,
-						beforeTime,
-						100
-					);
-				} else {
-					log.warn(
-						`User ${colors.bold(this.name)}: message ${
-							data.lastId
-						} not found in last 200 messages for channel ${data.target}`
-					);
-				}
 			}
 
 			// Assign IDs to messages

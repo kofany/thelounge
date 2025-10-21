@@ -130,13 +130,14 @@ export default defineComponent({
 				return;
 			}
 
-			let lastMessage = -1;
+			let lastTime = -1;
 
-			// Find the id of first message that isn't showInActive
+			// Find the timestamp of first message that isn't showInActive
 			// If showInActive is set, this message is actually in another channel
 			for (const message of props.channel.messages) {
 				if (!message.showInActive) {
-					lastMessage = message.id;
+					// Send timestamp in milliseconds
+					lastTime = new Date(message.time).getTime();
 					break;
 				}
 			}
@@ -145,7 +146,7 @@ export default defineComponent({
 
 			socket.emit("more", {
 				target: props.channel.id,
-				lastId: lastMessage,
+				lastTime: lastTime,
 				condensed: store.state.settings.statusMessages !== "shown",
 			});
 		};
