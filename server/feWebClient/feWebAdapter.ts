@@ -162,7 +162,7 @@ export class FeWebAdapter {
 	}
 
 	/**
-	 * 2. message - IRC message (public/private)
+	 * 2. message - IRC message (public/private/action)
 	 */
 	private handleMessage(msg: FeWebMessage): void {
 		const network = this.getOrCreateNetwork(msg.server!);
@@ -171,8 +171,12 @@ export class FeWebAdapter {
 		const channelName = msg.channel!;
 		let channel = this.findChannel(network, channelName);
 
+		// MSGLEVEL constants from irssi/src/core/levels.h
+		const MSGLEVEL_MSGS = 0x0000002; // Private messages (8 decimal)
+		const MSGLEVEL_ACTIONS = 0x0000080; // CTCP ACTION (/me) (128 decimal)
+
 		// Create query channel if private message and doesn't exist
-		if (!channel && msg.level === 8) {
+		if (!channel && (msg.level === MSGLEVEL_MSGS || msg.level === MSGLEVEL_ACTIONS)) {
 			channel = this.createQueryChannel(network, channelName);
 		}
 
@@ -181,9 +185,13 @@ export class FeWebAdapter {
 			return;
 		}
 
+		// Determine message type based on level
+		const messageType =
+			msg.level === MSGLEVEL_ACTIONS ? MessageType.ACTION : MessageType.MESSAGE;
+
 		// Convert to The Lounge message format
 		const loungeMsg = new Msg({
-			type: MessageType.MESSAGE,
+			type: messageType,
 			time: msg.timestamp ? new Date(msg.timestamp * 1000) : new Date(),
 			from: new User({nick: msg.nick!}),
 			text: msg.text!,

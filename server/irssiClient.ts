@@ -728,6 +728,25 @@ export class IrssiClient {
 				);
 				return `mode ${channel.name} +b`;
 
+			case "me":
+			case "slap":
+				// /me text → /me #channel text (irssi requires target)
+				// /slap nick → /me #channel slaps nick around a bit with a large trout
+				if (channel.type === ChanType.CHANNEL || channel.type === ChanType.QUERY) {
+					let text = args.join(" ");
+					if (command === "slap" && args.length > 0) {
+						text = `slaps ${args[0]} around a bit with a large trout`;
+					}
+					const translated = `me ${channel.name} ${text}`;
+					log.info(
+						`[CommandTranslator] /${command} ${args.join(" ")} → /${translated} on ${
+							network.serverTag
+						}`
+					);
+					return translated;
+				}
+				break;
+
 			case "quit":
 				// /quit in lobby → /disconnect (for this network only!)
 				if (channel.type === ChanType.LOBBY) {
@@ -1641,8 +1660,8 @@ export class IrssiClient {
 		const channel = network?.channels.find((c) => c.id === channelId);
 
 		// Save to encrypted storage (ASYNC - don't block!)
-		// Create minimal Network/Channel objects for storage
-		if (this.messageStorage && network && channel) {
+		// Only save loggable messages (skip TOPIC without nick, MODE_CHANNEL, etc.)
+		if (this.messageStorage && network && channel && msg.isLoggable()) {
 			// Create minimal Network object (only uuid and name needed for storage)
 			const networkForStorage = {
 				uuid: network.uuid,
