@@ -1,7 +1,7 @@
 <template>
 	<span class="content">
 		<Username :user="message.from" />
-		is now known as
+		has evolved into
 		<Username :user="{nick: message.new_nick, mode: message.from.mode}" />
 	</span>
 </template>

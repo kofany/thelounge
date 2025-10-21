@@ -25,7 +25,7 @@ class Utils {
 			return home;
 		}
 
-		const distConfig = Utils.getFileFromRelativeToRoot(".thelounge_home");
+		const distConfig = Utils.getFileFromRelativeToRoot(".nexuslounge_home");
 
 		home = fs.readFileSync(distConfig, "utf-8").trim();
 

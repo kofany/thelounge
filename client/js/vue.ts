@@ -30,7 +30,7 @@ store.watch(
 	(state) => state.sidebarOpen,
 	(sidebarOpen) => {
 		if (window.innerWidth > constants.mobileViewportPixels) {
-			storage.set("thelounge.state.sidebar", sidebarOpen.toString());
+			storage.set("nexuslounge.state.sidebar", sidebarOpen.toString());
 			eventbus.emit("resize");
 		}
 	}
@@ -39,7 +39,7 @@ store.watch(
 store.watch(
 	(state) => state.userlistOpen,
 	(userlistOpen) => {
-		storage.set("thelounge.state.userlist", userlistOpen.toString());
+		storage.set("nexuslounge.state.userlist", userlistOpen.toString());
 		eventbus.emit("resize");
 	}
 );

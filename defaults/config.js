@@ -32,8 +32,8 @@ module.exports = {
 	//
 	// Set the port to listen to.
 	//
-	// This value is set to `9000` by default.
-	port: 9000,
+	// This value is set to `19000` by default.
+	port: 19000,
 
 	// ### `bind`
 	//
