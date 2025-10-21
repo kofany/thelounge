@@ -3,9 +3,7 @@
   "description": "The self-hosted Web IRC client",
   "version": "4.4.3",
   "preferGlobal": true,
-  "bin": {
-    "thelounge": "index.js"
-  },
+  "bin": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/thelounge/thelounge.git"
