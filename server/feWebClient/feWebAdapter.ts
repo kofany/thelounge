@@ -543,12 +543,22 @@ export class FeWebAdapter {
 				}
 
 				// Check if it's our own nick and update network.nick
-				const isSelf = network.nick === nick;
+				// Note: irssi may have already updated server->nick to newNick,
+				// so check both oldNick and newNick against network.nick
+				const isSelf = network.nick === nick || network.nick === newNick;
+
+				log.info(
+					`[FeWebAdapter] nicklist_update change: ${nick} → ${newNick} on ${msg.server} (isSelf: ${isSelf}, network.nick: ${network.nick})`
+				);
+
 				if (isSelf) {
 					network.nick = newNick;
-					log.debug(
+					log.info(
 						`[FeWebAdapter] Updated own nick: ${nick} → ${newNick} on ${msg.server}`
 					);
+
+					// Emit nick event to update UI
+					this.callbacks.onNickChange(network.uuid, newNick);
 				}
 
 				// Update nick in ALL channels where this user exists
@@ -644,7 +654,14 @@ export class FeWebAdapter {
 		const newNick = msg.text!;
 
 		// Check if it's our own nick
-		const isSelf = network.nick === oldNick;
+		// Note: irssi may have already updated server->nick to newNick before sending this event,
+		// so check both oldNick and newNick against network.nick
+		const isSelf = network.nick === oldNick || network.nick === newNick;
+
+		log.info(
+			`[FeWebAdapter] Nick change: ${oldNick} → ${newNick} on ${msg.server} (isSelf: ${isSelf}, network.nick: ${network.nick})`
+		);
+
 		if (isSelf) {
 			network.nick = newNick;
 			log.info(`[FeWebAdapter] Own nick changed: ${oldNick} → ${newNick} on ${msg.server}`);
