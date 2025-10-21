@@ -12,10 +12,7 @@
 	--highlight-border-color: #b08c4f;
 }
 
-body {
-	scrollbar-color: rgb(0 0 0 / 30%) rgb(0 0 0 / 5%);
-	scrollbar-width: thin;
-}
+
 
 /* Scrollbar styling - Safari 18.6 compatible (webkit only) */
 ::-webkit-scrollbar {

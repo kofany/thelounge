@@ -121,7 +121,6 @@ body {
 	font-size: 14px;
 	background-color: var(--primary-bg);
 	color: var(--primary-font);
-	scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 a {

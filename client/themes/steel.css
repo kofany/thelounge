@@ -62,8 +62,6 @@
 
 body {
 	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
-	scrollbar-color: #888888ee transparent;
-	scrollbar-width: thin;
 }
 
 /* Scrollbar styling - Safari 18.6 compatible (webkit only) */
