@@ -66,16 +66,16 @@ body {
 	scrollbar-width: thin;
 }
 
-/* Scrollbar styling (xyz 1:1) */
-:root { --scrollbar-track: transparent; --scrollbar-thumb: #888888ee; --scrollbar-thumb-hover: #555555; }
-::-webkit-scrollbar { height: 5px; width: 5px; }
-::-webkit-scrollbar-track { background-color: var(--scrollbar-track, transparent); margin-bottom: 8px; }
-::-webkit-scrollbar-thumb { background-color: var(--scrollbar-thumb, #888888ee); }
-::-webkit-scrollbar-thumb:hover { background-color: var(--scrollbar-thumb-hover, #555555); }
-/* Cross-browser fallback */
-body, #sidebar .scrollable-area, #chat .chat, #chat .userlist .names {
-  scrollbar-color: var(--scrollbar-thumb, #888888ee) var(--scrollbar-track, transparent);
-  scrollbar-width: auto;
+/* Scrollbar styling - Safari 18+ compatible (standard properties only) */
+:root {
+	--scrollbar-thumb: #888888ee;
+	--scrollbar-track: transparent;
+}
+
+/* Apply to all scrollable containers */
+* {
+	scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+	scrollbar-width: thin;
 }
 
 /* Window styling */
