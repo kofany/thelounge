@@ -4,6 +4,7 @@
   "version": "4.4.3",
   "preferGlobal": true,
   "bin": "index.js",
+  "packageManager": "yarn@4.10.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/thelounge/thelounge.git"
@@ -78,8 +79,7 @@
     "tlds": "1.228.0",
     "ua-parser-js": "1.0.39",
     "uuid": "8.3.2",
-    "web-push": "3.4.5",
-    "yarn": "1.22.22"
+    "web-push": "3.4.5"
   },
   "optionalDependencies": {
     "sqlite3": "5.1.7"
