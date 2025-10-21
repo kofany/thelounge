@@ -54,8 +54,13 @@ export class FeWebAdapter {
 	private channelIdCounter = 1;
 	private initEmitted = false;
 	private networkUuidMap: Map<string, string>; // server_tag -> UUID (persistent)
+	private stateDumpReceivedForNetwork: Map<string, boolean> = new Map(); // Track if state_dump was already received for a network
 
-	constructor(socket: FeWebSocket, callbacks: FeWebAdapterCallbacks, existingUuidMap?: Map<string, string>) {
+	constructor(
+		socket: FeWebSocket,
+		callbacks: FeWebAdapterCallbacks,
+		existingUuidMap?: Map<string, string>
+	) {
 		this.socket = socket;
 		this.callbacks = callbacks;
 		this.networkUuidMap = existingUuidMap || new Map();
@@ -67,6 +72,15 @@ export class FeWebAdapter {
 	 */
 	getNetworkUuidMap(): Map<string, string> {
 		return this.networkUuidMap;
+	}
+
+	/**
+	 * Reset state_dump tracking (call on disconnect to allow fresh state_dump on reconnect)
+	 */
+	resetStateDumpTracking(): void {
+		log.info(`[FeWebAdapter] Resetting state_dump tracking for all networks`);
+		this.stateDumpReceivedForNetwork.clear();
+		this.initEmitted = false;
 	}
 
 	/**
@@ -247,9 +261,9 @@ export class FeWebAdapter {
 		const nick = msg.nick!;
 
 		log.debug(
-			`[FeWebAdapter] handleChannelPart: nick="${nick}", network.nick="${network.nick}", match=${
-				nick === network.nick
-			}`
+			`[FeWebAdapter] handleChannelPart: nick="${nick}", network.nick="${
+				network.nick
+			}", match=${nick === network.nick}`
 		);
 
 		// Check if it's our own part
@@ -743,10 +757,27 @@ export class FeWebAdapter {
 	 * Marker message, followed by channel_join, topic, nicklist
 	 */
 	private async handleStateDump(msg: FeWebMessage): Promise<void> {
-		log.info(`[FeWebAdapter] State dump started for server: ${msg.server}`);
+		const serverTag = msg.server!;
+		log.info(`[FeWebAdapter] State dump started for server: ${serverTag}`);
 
-		const network = this.getOrCreateNetwork(msg.server!);
+		const network = this.getOrCreateNetwork(serverTag);
 		if (!network) return;
+
+		// Check if this is a duplicate state_dump (irssi sends it twice on reconnect)
+		const alreadyReceived = this.stateDumpReceivedForNetwork.get(serverTag);
+
+		if (alreadyReceived) {
+			log.warn(
+				`[FeWebAdapter] ⚠️ DUPLICATE state_dump for ${serverTag} - IGNORING to prevent channel duplication`
+			);
+			return; // Ignore duplicate state_dump
+		}
+
+		// Mark as received
+		this.stateDumpReceivedForNetwork.set(serverTag, true);
+		log.info(
+			`[FeWebAdapter] First state_dump for ${serverTag} - clearing channels and processing`
+		);
 
 		// Clear existing channels (except lobby) to prepare for fresh state
 		const lobby = network.channels.find((ch) => ch.type === "lobby");
@@ -755,7 +786,7 @@ export class FeWebAdapter {
 		// Mark network as connected
 		network.connected = true;
 
-		log.info(`[FeWebAdapter] Network ${msg.server} status: connected=${network.connected}`);
+		log.info(`[FeWebAdapter] Network ${serverTag} status: connected=${network.connected}`);
 
 		// Emit network status update
 		this.callbacks.onNetworkUpdate(network);

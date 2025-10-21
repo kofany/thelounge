@@ -424,25 +424,40 @@ export class IrssiClient {
 				`User ${colors.bold(this.name)}: irssi WebSocket disconnected (code: ${code})`
 			);
 
+			log.info(`[DISCONNECT] ===============================================`);
+			log.info(`[DISCONNECT] BEFORE: this.networks.length = ${this.networks.length}`);
+
 			// CLEAR networks on disconnect
 			const clearedCount = this.networks.length;
 			this.networks = [];
 			this.lastActiveChannel = -1;
 
+			// Reset state_dump tracking in FeWebAdapter (allow fresh state_dump on reconnect)
+			if (this.feWebAdapter) {
+				this.feWebAdapter.resetStateDumpTracking();
+			}
+
+			log.info(`[DISCONNECT] AFTER: this.networks.length = ${this.networks.length}`);
+			log.info(`[DISCONNECT] Broadcasting to ${this.attachedBrowsers.size} browsers`);
+
 			// Broadcast disconnect status to all browsers
+			log.info(`[DISCONNECT] 1. Sending irssi:status {connected: false}`);
 			this.broadcastToAllBrowsers("irssi:status" as any, {
 				connected: false,
 				error: `Lost connection to irssi WebSocket (code: ${code})`,
 			});
 
 			// Also send empty init to clear UI networks
+			log.info(`[DISCONNECT] 2. Sending init {networks: []}`);
 			this.broadcastToAllBrowsers("init", {
 				networks: [],
 				active: -1,
 			});
 
 			log.info(
-				`User ${colors.bold(this.name)}: cleared ${clearedCount} networks after irssi disconnect`
+				`User ${colors.bold(
+					this.name
+				)}: cleared ${clearedCount} networks after irssi disconnect`
 			);
 		});
 
@@ -1239,14 +1254,14 @@ export class IrssiClient {
 	setPassword(hash: string, callback: (success: boolean) => void): void {
 		const oldHash = this.config.password;
 		this.config.password = hash;
-		
+
 		this.manager.saveUser(this as any, (err) => {
 			if (err) {
 				// If user file fails to write, reset it back
 				this.config.password = oldHash;
 				return callback(false);
 			}
-			
+
 			return callback(true);
 		});
 	}
@@ -1471,9 +1486,7 @@ export class IrssiClient {
 				this.messageStorage
 					.saveUnreadMarker(network, channel, marker.lastReadTime)
 					.catch((err) => {
-						log.error(
-							`Failed to save unread marker for ${network}/${channel}: ${err}`
-						);
+						log.error(`Failed to save unread marker for ${network}/${channel}: ${err}`);
 					});
 			}
 		}
@@ -1952,7 +1965,9 @@ export class IrssiClient {
 		);
 
 		// Broadcast to all browsers
-		log.info(`[HANDLEINIT] Broadcasting init to ${this.attachedBrowsers.size} browsers with ${sharedNetworks.length} networks`);
+		log.info(
+			`[HANDLEINIT] Broadcasting init to ${this.attachedBrowsers.size} browsers with ${sharedNetworks.length} networks`
+		);
 		this.broadcastToAllBrowsers("init", {
 			networks: sharedNetworks,
 			active: -1,

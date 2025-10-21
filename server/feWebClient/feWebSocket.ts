@@ -237,35 +237,29 @@ export class FeWebSocket extends EventEmitter {
 				return;
 			}
 
-			// Register auth handler BEFORE opening connection
-			const authHandler = (msg: FeWebMessage) => {
-				console.log("[FeWebSocket] authHandler called, msg.type:", msg.type);
-				if (msg.type === "auth_ok") {
-					console.log("[FeWebSocket] Authenticated - resolving promise");
-					this.isAuthenticated = true;
-					this.off("auth_ok", authHandler);
-					clearTimeout(authTimeout);
+			// Register auth handler BEFORE opening connection (use .once() to ensure it runs only once)
+			this.once("auth_ok", (msg: FeWebMessage) => {
+				console.log("[FeWebSocket] authHandler called (ONCE), msg.type:", msg.type);
+				console.log("[FeWebSocket] Authenticated - resolving promise");
+				this.isAuthenticated = true;
+				clearTimeout(authTimeout);
 
-					// Start keepalive ping
-					this.startPing();
+				// Start keepalive ping
+				this.startPing();
 
-					// Auto sync to default server
-					if (this.config.defaultServer) {
-						this.syncServer(this.config.defaultServer);
-					}
-
-					console.log("[FeWebSocket] Calling resolve()");
-					resolve();
-					console.log("[FeWebSocket] resolve() called");
+				// Auto sync to default server
+				if (this.config.defaultServer) {
+					this.syncServer(this.config.defaultServer);
 				}
-			};
 
-			this.on("auth_ok", authHandler);
+				console.log("[FeWebSocket] Calling resolve()");
+				resolve();
+				console.log("[FeWebSocket] resolve() called");
+			});
 
 			// Timeout if no auth_ok received
 			const authTimeout = setTimeout(() => {
 				if (!this.isAuthenticated) {
-					this.off("auth_ok", authHandler);
 					reject(new Error("Authentication timeout - no auth_ok received from server"));
 				}
 			}, 10000); // 10 seconds
