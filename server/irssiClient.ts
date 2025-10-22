@@ -731,6 +731,55 @@ export class IrssiClient {
 				);
 				return `mode ${channel.name} +b`;
 
+			case "mode":
+				// /mode +o nick → /mode #channel +o nick
+				// /mode -v nick → /mode #channel -v nick
+				if (channel.type === ChanType.CHANNEL && args.length > 0) {
+					// Check if first arg is a mode string (starts with + or -)
+					if (args[0].startsWith("+") || args[0].startsWith("-")) {
+						const translated = `mode ${channel.name} ${args.join(" ")}`;
+						log.info(
+							`[CommandTranslator] /mode ${args.join(" ")} → /${translated} on ${
+								network.serverTag
+							}`
+						);
+						return translated;
+					}
+				}
+				break;
+
+			case "op":
+			case "deop":
+			case "voice":
+			case "devoice":
+			case "hop":
+			case "dehop":
+				// /op nick → /mode #channel +o nick
+				// /deop nick → /mode #channel -o nick
+				// /voice nick → /mode #channel +v nick
+				// /devoice nick → /mode #channel -v nick
+				// /hop nick → /mode #channel +h nick
+				// /dehop nick → /mode #channel -h nick
+				if (channel.type === ChanType.CHANNEL && args.length > 0) {
+					const modeMap: {[key: string]: string} = {
+						op: "+o",
+						deop: "-o",
+						voice: "+v",
+						devoice: "-v",
+						hop: "+h",
+						dehop: "-h",
+					};
+					const modeString = modeMap[command];
+					const translated = `mode ${channel.name} ${modeString} ${args.join(" ")}`;
+					log.info(
+						`[CommandTranslator] /${command} ${args.join(" ")} → /${translated} on ${
+							network.serverTag
+						}`
+					);
+					return translated;
+				}
+				break;
+
 			case "me":
 			case "slap":
 				// /me text → /action #channel text (irssi /me requires active_item context which we don't have via WebSocket)
