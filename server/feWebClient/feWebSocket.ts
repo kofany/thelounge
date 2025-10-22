@@ -73,6 +73,7 @@ export type ServerMessageType =
 	| "query_opened"
 	| "query_closed"
 	| "activity_update" // Activity level changed (unread markers)
+	| "mark_read" // Channel marked as read (from irssi window change)
 	| "error"
 	| "pong"
 	| "network_list_response"

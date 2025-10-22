@@ -373,6 +373,8 @@ export class IrssiClient {
 				this.handleTopicUpdate(networkUuid, channelId, topic),
 			onNickChange: (networkUuid, newNick) => this.handleNickChange(networkUuid, newNick),
 			onInit: (networks) => this.handleInit(networks),
+			onMarkRead: (networkUuid, channelName) =>
+				this.handleMarkReadFromIrssi(networkUuid, channelName),
 		};
 
 		// Load existing network UUID map from config (for persistent UUIDs across reconnects)
@@ -1555,6 +1557,19 @@ export class IrssiClient {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Handle mark_read from irssi (user switched window in irssi)
+	 * Syncs read status to all browsers
+	 */
+	private handleMarkReadFromIrssi(networkUuid: string, channelName: string): void {
+		log.info(
+			`[IrssiClient] Mark read from irssi: ${networkUuid}/${channelName} - syncing to all clients`
+		);
+
+		// Mark as read (fromIrssi=true prevents sending back to irssi)
+		this.markAsRead(networkUuid, channelName, true);
 	}
 
 	/**
