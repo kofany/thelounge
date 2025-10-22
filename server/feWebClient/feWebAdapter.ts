@@ -86,6 +86,13 @@ export class FeWebAdapter {
 	}
 
 	/**
+	 * Get next channel ID (for creating channels outside of adapter)
+	 */
+	getNextChannelId(): number {
+		return this.channelIdCounter++;
+	}
+
+	/**
 	 * Register all message handlers according to CLIENT-SPEC.md
 	 */
 	private registerHandlers(): void {
