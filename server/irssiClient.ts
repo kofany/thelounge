@@ -1895,6 +1895,18 @@ export class IrssiClient {
 		// Loading here causes duplicates when browser reconnects with existing messages in local store.
 		channel.messages = [];
 
+		// BUT we need to set totalMessagesInStorage so frontend knows there's history to load
+		if (this.messageStorage) {
+			try {
+				const count = await this.messageStorage.getMessageCount(networkUuid, channel.name);
+				channel.totalMessagesInStorage = count;
+				log.debug(`[IrssiClient] Channel ${channel.name} has ${count} messages in storage`);
+			} catch (err) {
+				log.error(`Failed to get message count for ${channel.name}: ${err}`);
+				channel.totalMessagesInStorage = 0;
+			}
+		}
+
 		// Broadcast to all browsers
 		// Note: join event expects SharedNetworkChan which includes network info
 		this.broadcastToAllBrowsers("join", {
