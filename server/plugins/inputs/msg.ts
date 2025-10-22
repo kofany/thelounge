@@ -19,16 +19,19 @@ function getTarget(cmd: string, args: string[], chan: Chan) {
 const input: PluginInputHandler = function (network, chan, cmd, args) {
 	let targetName = getTarget(cmd, args, chan);
 
-	if (cmd === "query") {
+	// For both /query and /msg, create query window if it doesn't exist
+	if (cmd === "query" || cmd === "msg") {
 		if (!targetName) {
-			chan.pushMessage(
-				this,
-				new Msg({
-					type: MessageType.ERROR,
-					text: "You cannot open a query window without an argument.",
-				})
-			);
-			return;
+			if (cmd === "query") {
+				chan.pushMessage(
+					this,
+					new Msg({
+						type: MessageType.ERROR,
+						text: "You cannot open a query window without an argument.",
+					})
+				);
+			}
+			return cmd === "query" ? undefined : true;
 		}
 
 		const target = network.getChannel(targetName);

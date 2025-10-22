@@ -24,6 +24,7 @@ export interface FeWebMessage {
 	text?: string;
 	level?: number; // Activity level (for activity_update): 0=NONE, 1=TEXT, 2=MSG, 3=HILIGHT
 	is_own?: boolean;
+	is_highlight?: boolean; // Message is a highlight (mentions user's nick)
 	response_to?: string;
 	extra?: Record<string, any>;
 	command?: string;
