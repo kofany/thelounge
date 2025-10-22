@@ -998,6 +998,40 @@ export class IrssiClient {
 							// Store total count for getFilteredClone to use
 							channel.totalMessagesInStorage = totalCount;
 
+							// Set firstUnread based on lastReadTime from unread markers
+							const key = this.getMarkerKey(network.uuid, channel.name);
+							const marker = this.unreadMarkers.get(key);
+
+							if (marker && marker.lastReadTime > 0 && messages.length > 0) {
+								// Find first message AFTER lastReadTime
+								const firstUnreadMsg = messages.find(
+									(msg) => msg.time.getTime() > marker.lastReadTime
+								);
+
+								if (firstUnreadMsg) {
+									channel.firstUnread = firstUnreadMsg.id;
+									log.debug(
+										`[IrssiClient] Set firstUnread=${firstUnreadMsg.id} for ${
+											network.name
+										}/${channel.name} (lastReadTime=${new Date(
+											marker.lastReadTime
+										).toISOString()})`
+									);
+								} else {
+									// All messages are read, set to last message
+									channel.firstUnread = messages[messages.length - 1].id;
+									log.debug(
+										`[IrssiClient] All messages read for ${network.name}/${channel.name}, set firstUnread to last message`
+									);
+								}
+							} else if (messages.length > 0) {
+								// No marker or marker is 0 - set to last message (all unread)
+								channel.firstUnread = messages[0].id;
+								log.debug(
+									`[IrssiClient] No marker for ${network.name}/${channel.name}, set firstUnread to first message`
+								);
+							}
+
 							log.debug(
 								`[IrssiClient] Loaded ${messages.length}/${totalCount} messages for ${network.name}/${channel.name}`
 							);
@@ -1861,6 +1895,34 @@ export class IrssiClient {
 		log.info(`[HANDLEINIT] AFTER assignment: this.networks.length = ${this.networks.length}`);
 		log.info(`[HANDLEINIT] attachedBrowsers.size = ${this.attachedBrowsers.size}`);
 
+		// Load unread markers from storage FIRST (persistent read status across restarts!)
+		if (this.messageStorage) {
+			log.info(`[IrssiClient] Loading unread markers from storage...`);
+			try {
+				const markers = await this.messageStorage.loadUnreadMarkers();
+
+				// Populate unreadMarkers Map with loaded data
+				for (const [key, lastReadTime] of markers) {
+					// Parse key (format: "network_uuid:channel_name")
+					const [networkUuid, channelName] = key.split(":");
+
+					// Create marker with loaded lastReadTime
+					this.unreadMarkers.set(key, {
+						network: networkUuid,
+						channel: channelName,
+						unreadCount: 0, // Will be recalculated if needed
+						lastReadTime: lastReadTime,
+						lastMessageTime: 0, // Will be updated by activity_update
+						dataLevel: DataLevel.NONE, // Default to read
+					});
+				}
+
+				log.info(`[IrssiClient] Loaded ${markers.size} unread markers from storage`);
+			} catch (err) {
+				log.error(`Failed to load unread markers from storage: ${err}`);
+			}
+		}
+
 		// Load messages from storage for all channels (on node restart!)
 		if (this.messageStorage) {
 			log.info(
@@ -1892,6 +1954,40 @@ export class IrssiClient {
 						// Add to channel.messages
 						channel.messages = messages;
 
+						// Set firstUnread based on lastReadTime from unread markers
+						const key = this.getMarkerKey(network.uuid, channel.name);
+						const marker = this.unreadMarkers.get(key);
+
+						if (marker && marker.lastReadTime > 0 && messages.length > 0) {
+							// Find first message AFTER lastReadTime
+							const firstUnreadMsg = messages.find(
+								(msg) => msg.time.getTime() > marker.lastReadTime
+							);
+
+							if (firstUnreadMsg) {
+								channel.firstUnread = firstUnreadMsg.id;
+								log.debug(
+									`[IrssiClient] Set firstUnread=${firstUnreadMsg.id} for ${
+										network.name
+									}/${channel.name} (lastReadTime=${new Date(
+										marker.lastReadTime
+									).toISOString()})`
+								);
+							} else {
+								// All messages are read, set to last message
+								channel.firstUnread = messages[messages.length - 1].id;
+								log.debug(
+									`[IrssiClient] All messages read for ${network.name}/${channel.name}, set firstUnread to last message`
+								);
+							}
+						} else if (messages.length > 0) {
+							// No marker or marker is 0 - set to first message (all unread)
+							channel.firstUnread = messages[0].id;
+							log.debug(
+								`[IrssiClient] No marker for ${network.name}/${channel.name}, set firstUnread to first message`
+							);
+						}
+
 						log.info(
 							`[IrssiClient] Loaded ${messages.length} messages for ${network.name}/${channel.name} from storage`
 						);
@@ -1902,32 +1998,6 @@ export class IrssiClient {
 						channel.messages = [];
 					}
 				}
-			}
-
-			// Load unread markers from storage (persistent read status across restarts!)
-			log.info(`[IrssiClient] Loading unread markers from storage...`);
-			try {
-				const markers = await this.messageStorage.loadUnreadMarkers();
-
-				// Populate unreadMarkers Map with loaded data
-				for (const [key, lastReadTime] of markers) {
-					// Parse key (format: "network_uuid:channel_name")
-					const [networkUuid, channelName] = key.split(":");
-
-					// Create marker with loaded lastReadTime
-					this.unreadMarkers.set(key, {
-						network: networkUuid,
-						channel: channelName,
-						unreadCount: 0, // Will be recalculated if needed
-						lastReadTime: lastReadTime,
-						lastMessageTime: 0, // Will be updated by activity_update
-						dataLevel: DataLevel.NONE, // Default to read
-					});
-				}
-
-				log.info(`[IrssiClient] Loaded ${markers.size} unread markers from storage`);
-			} catch (err) {
-				log.error(`Failed to load unread markers from storage: ${err}`);
 			}
 		}
 
