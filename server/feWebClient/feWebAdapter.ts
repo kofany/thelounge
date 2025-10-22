@@ -923,9 +923,7 @@ export class FeWebAdapter {
 	 */
 	private handleMarkRead(msg: FeWebMessage): void {
 		if (!msg.server_tag || !msg.target) {
-			log.warn(
-				`[FeWebAdapter] Invalid mark_read message: ${JSON.stringify(msg)}`
-			);
+			log.warn(`[FeWebAdapter] Invalid mark_read message: ${JSON.stringify(msg)}`);
 			return;
 		}
 
@@ -1015,7 +1013,7 @@ export class FeWebAdapter {
 			state: ChanState.JOINED, // We only create channels we're joined to
 		});
 		channel.id = this.channelIdCounter++;
-		network.channels.push(channel);
+		this.addChannelSorted(network, channel);
 		return channel;
 	}
 
@@ -1026,8 +1024,55 @@ export class FeWebAdapter {
 			state: ChanState.JOINED, // Query is opened = joined
 		});
 		channel.id = this.channelIdCounter++;
-		network.channels.push(channel);
+		this.addChannelSorted(network, channel);
 		return channel;
+	}
+
+	/**
+	 * Add channel to network in sorted order
+	 * Sort order: CHANNEL (alphabetically) → QUERY (alphabetically)
+	 * Lobby is always first (index 0)
+	 */
+	private addChannelSorted(network: NetworkData, newChan: Chan): void {
+		let index = network.channels.length; // Default to putting as the last item
+
+		// Don't sort special channels in amongst channels/users.
+		if (newChan.type === ChanType.CHANNEL || newChan.type === ChanType.QUERY) {
+			// We start at 1 so we don't test against the lobby
+			// Sort order: CHANNEL (alphabetically) → QUERY (alphabetically)
+			for (let i = 1; i < network.channels.length; i++) {
+				const compareChan = network.channels[i];
+
+				// Skip non-channel/query types (special channels)
+				if (compareChan.type !== ChanType.CHANNEL && compareChan.type !== ChanType.QUERY) {
+					index = i;
+					break;
+				}
+
+				// If new channel is CHANNEL and compare is QUERY, insert before (channels come first)
+				if (newChan.type === ChanType.CHANNEL && compareChan.type === ChanType.QUERY) {
+					index = i;
+					break;
+				}
+
+				// If new channel is QUERY and compare is CHANNEL, continue (queries come after channels)
+				if (newChan.type === ChanType.QUERY && compareChan.type === ChanType.CHANNEL) {
+					continue;
+				}
+
+				// Both are same type (both CHANNEL or both QUERY) - sort alphabetically
+				if (
+					newChan.name.localeCompare(compareChan.name, undefined, {
+						sensitivity: "base",
+					}) <= 0
+				) {
+					index = i;
+					break;
+				}
+			}
+		}
+
+		network.channels.splice(index, 0, newChan);
 	}
 
 	private addUserToChannel(channel: Chan, nick: string): void {

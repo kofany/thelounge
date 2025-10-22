@@ -127,7 +127,24 @@ export default defineComponent({
 				}
 			}
 
-			return groups as {
+			// Sort groups by mode priority: owner (~), admin (&), op (@), halfop (%), voice (+), normal ("")
+			// Then sort users within each group alphabetically
+			const modeOrder = ["~", "&", "!", "@", "%", "+", ""];
+			const sortedGroups = {};
+
+			// Process groups in priority order
+			for (const mode of modeOrder) {
+				if (groups[mode]) {
+					// Sort users within this group alphabetically (case-insensitive)
+					sortedGroups[mode] = groups[mode].sort((a, b) => {
+						const nickA = (a.nick || a.original?.nick || "").toLowerCase();
+						const nickB = (b.nick || b.original?.nick || "").toLowerCase();
+						return nickA.localeCompare(nickB);
+					});
+				}
+			}
+
+			return sortedGroups as {
 				[mode: string]: (ClientUser & {
 					original: UserInMessage;
 					string: string;
