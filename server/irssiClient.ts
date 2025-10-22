@@ -799,6 +799,78 @@ export class IrssiClient {
 				}
 				break;
 
+			case "msg":
+			case "query":
+				// /msg nick message → create query window if needed, then send message
+				// /query nick [message] → create query window if needed, optionally send message
+				if (args.length > 0) {
+					const targetNick = args[0];
+					const message = args.slice(1).join(" ");
+
+					// Check if query window already exists
+					let queryChannel = network.channels.find(
+						(c) =>
+							c.type === ChanType.QUERY &&
+							c.name.toLowerCase() === targetNick.toLowerCase()
+					);
+
+					// If query doesn't exist, create it
+					if (!queryChannel) {
+						const {ChanState} = await import("../shared/types/chan");
+						queryChannel = new Chan({
+							name: targetNick,
+							type: ChanType.QUERY,
+							state: ChanState.JOINED,
+						});
+
+						// Get next channel ID from feWebAdapter
+						if (!this.feWebAdapter) {
+							log.error("[CommandTranslator] feWebAdapter not initialized");
+							return null;
+						}
+						queryChannel.id = this.feWebAdapter.getNextChannelId();
+
+						// Add to network using sorted insertion
+						const Network = (await import("./models/network")).default;
+						if (network instanceof Network) {
+							network.addChannel(queryChannel);
+						} else {
+							// For NetworkData, just push (sorting is handled in feWebAdapter)
+							network.channels.push(queryChannel);
+						}
+
+						// Broadcast to all browsers
+						this.broadcastToAllBrowsers("join", {
+							shouldOpen: command === "query", // Open window for /query, not for /msg
+							index: queryChannel.id,
+							network: network.uuid,
+							chan: queryChannel.getFilteredClone(true) as any,
+						});
+
+						log.info(
+							`[CommandTranslator] Created query window for ${targetNick} on ${network.serverTag}`
+						);
+					}
+
+					// If there's a message, send it
+					if (message) {
+						const translated = `msg ${targetNick} ${message}`;
+						log.info(
+							`[CommandTranslator] /${command} ${args.join(
+								" "
+							)} → /${translated} on ${network.serverTag}`
+						);
+						return translated;
+					} else if (command === "query") {
+						// /query without message - just open window (already done above)
+						log.info(
+							`[CommandTranslator] /query ${targetNick} → opened query window on ${network.serverTag}`
+						);
+						return false; // Don't send to irssi
+					}
+				}
+				break;
+
 			case "quit":
 				// /quit in lobby → /disconnect (for this network only!)
 				if (channel.type === ChanType.LOBBY) {
