@@ -197,6 +197,7 @@ export class FeWebAdapter {
 			from: new User({nick: msg.nick!}),
 			text: msg.text!,
 			self: msg.is_own || false,
+			highlight: msg.is_highlight || false,
 		});
 		loungeMsg.id = this.messageIdCounter++;
 

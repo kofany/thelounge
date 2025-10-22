@@ -1462,11 +1462,16 @@ export class IrssiClient {
 		for (const network of this.networks) {
 			const channel = network.channels.find((c) => c.id === channelId);
 			if (channel) {
+				log.debug(
+					`[IrssiClient] Found channel ${network.name}/${channel.name} for ID ${channelId}, calling markAsRead()`
+				);
 				// Mark as read (this will broadcast to all browsers and send to irssi)
 				this.markAsRead(network.uuid, channel.name);
 				return;
 			}
 		}
+
+		log.warn(`[IrssiClient] Channel ${channelId} not found in any network!`);
 	}
 
 	/**
@@ -1476,6 +1481,10 @@ export class IrssiClient {
 	 * @param fromIrssi - true if mark_read came from irssi (window switch), false if from browser
 	 */
 	markAsRead(network: string, channel: string, fromIrssi: boolean = false): void {
+		log.debug(
+			`[IrssiClient] markAsRead() called: ${network}/${channel} (fromIrssi=${fromIrssi})`
+		);
+
 		const key = this.getMarkerKey(network, channel);
 		const marker = this.unreadMarkers.get(key);
 
@@ -1493,6 +1502,8 @@ export class IrssiClient {
 						log.error(`Failed to save unread marker for ${network}/${channel}: ${err}`);
 					});
 			}
+		} else {
+			log.debug(`[IrssiClient] No marker found for ${network}/${channel}, creating new one`);
 		}
 
 		log.debug(`[IrssiClient] Marked as read: ${network}/${channel} (fromIrssi=${fromIrssi})`);
@@ -1518,6 +1529,9 @@ export class IrssiClient {
 				// Send mark_read to irssi ONLY if NOT from irssi
 				// This prevents infinite loop and unnecessary window switches
 				if (this.irssiConnection && !fromIrssi) {
+					log.debug(
+						`[IrssiClient] Preparing to send mark_read to irssi (connection exists, fromIrssi=${fromIrssi})`
+					);
 					// Check if actually connected before sending
 					if (this.irssiConnection.isConnected()) {
 						this.irssiConnection.send({
@@ -1526,13 +1540,18 @@ export class IrssiClient {
 							target: chan.name,
 						});
 						log.debug(
-							`[IrssiClient] Sent mark_read to irssi for ${net.serverTag}/${chan.name}`
+							`[IrssiClient] ✅ Sent mark_read to irssi for ${net.serverTag}/${chan.name}`
 						);
 					} else {
 						log.debug(
-							`[IrssiClient] Skipping mark_read for ${net.serverTag}/${chan.name} (not connected)`
+							`[IrssiClient] ❌ Skipping mark_read for ${net.serverTag}/${chan.name} (not connected)`
 						);
 					}
+				} else {
+					log.debug(
+						`[IrssiClient] ❌ NOT sending mark_read to irssi (connection=${!!this
+							.irssiConnection}, fromIrssi=${fromIrssi})`
+					);
 				}
 			}
 		}
