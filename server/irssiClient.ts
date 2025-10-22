@@ -541,6 +541,29 @@ export class IrssiClient {
 	}
 
 	/**
+	 * Send /window 1 to irssi to switch to lobby window
+	 * This prevents irssi from staying on active channel and marking everything as read
+	 * Only sends if at least one browser is connected (prevents interfering with terminal usage)
+	 */
+	private sendWindowCommand(serverTag?: string): void {
+		// Only send if at least one browser is connected
+		if (this.attachedBrowsers.size === 0) {
+			log.debug(`[IrssiClient] Skipping /window 1 - no browsers connected (terminal usage)`);
+			return;
+		}
+
+		if (!this.irssiConnection) {
+			return;
+		}
+
+		// Send /window 1 to switch to lobby (window 1 is always the first window)
+		this.irssiConnection.executeCommand("window 1", serverTag);
+		log.debug(
+			`[IrssiClient] Sent /window 1 to irssi (browsers connected: ${this.attachedBrowsers.size})`
+		);
+	}
+
+	/**
 	 * Handle input from browser (user command/message)
 	 * Includes command translation layer for Vue-specific commands
 	 */
@@ -606,6 +629,21 @@ export class IrssiClient {
 						network.serverTag
 					}`
 				);
+
+				// Send /window 1 after window-management commands to prevent activity marker issues
+				// Commands that open/close windows: join, part, quit, disconnect, etc.
+				const windowManagementCommands = [
+					"join",
+					"part",
+					"quit",
+					"disconnect",
+					"close",
+					"wc",
+				];
+				const cmdName = finalCommand.split(" ")[0].toLowerCase();
+				if (windowManagementCommands.includes(cmdName)) {
+					this.sendWindowCommand(network.serverTag);
+				}
 			} else {
 				// Regular message - find channel in ALL networks
 				let channel: Chan | undefined;
@@ -679,6 +717,8 @@ export class IrssiClient {
 						server: network.serverTag,
 						nick: channel.name,
 					});
+					// Send /window 1 after closing query
+					this.sendWindowCommand(network.serverTag);
 					return false; // Handled
 				}
 				break;
@@ -859,6 +899,8 @@ export class IrssiClient {
 						);
 						// Send in background (don't wait for response)
 						this.irssiConnection?.executeCommand(queryCmd, network.serverTag);
+						// Send /window 1 after creating query
+						this.sendWindowCommand(network.serverTag);
 					}
 
 					// If there's a message, send it
@@ -890,6 +932,21 @@ export class IrssiClient {
 					return `disconnect ${network.serverTag}`;
 				}
 				// /quit in channel/query → pass through (normal IRC quit)
+				break;
+
+			case "whois":
+			case "wii":
+				// /whois nick → /whois nick nick (double nick for full info including idle time)
+				// /wii is alias for /whois
+				if (args.length === 1) {
+					const nick = args[0];
+					const translated = `whois ${nick} ${nick}`;
+					log.info(
+						`[CommandTranslator] /${command} ${nick} → /${translated} on ${network.serverTag}`
+					);
+					return translated;
+				}
+				// If more than 1 arg, pass through (user might be doing /whois server nick)
 				break;
 		}
 
@@ -2000,6 +2057,9 @@ export class IrssiClient {
 					} to irssi in background`
 				);
 			}
+
+			// Send /window 1 after closing channel/query to prevent activity marker issues
+			this.sendWindowCommand(network.serverTag);
 		}
 	}
 
