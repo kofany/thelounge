@@ -929,27 +929,31 @@ export class FeWebAdapter {
 	 * 21. mark_read - Channel marked as read (from irssi window change)
 	 */
 	private handleMarkRead(msg: FeWebMessage): void {
-		if (!msg.server_tag || !msg.target) {
+		// Note: fe-web sends server_tag as "server" and target as "channel" in JSON
+		const serverTag = msg.server || msg.server_tag;
+		const channelName = msg.channel || msg.target;
+
+		if (!serverTag || !channelName) {
 			log.warn(`[FeWebAdapter] Invalid mark_read message: ${JSON.stringify(msg)}`);
 			return;
 		}
 
-		const network = this.serverTagToNetworkMap.get(msg.server_tag);
+		const network = this.serverTagToNetworkMap.get(serverTag);
 		if (!network) {
-			log.warn(`[FeWebAdapter] Network ${msg.server_tag} not found for mark_read`);
+			log.warn(`[FeWebAdapter] Network ${serverTag} not found for mark_read`);
 			return;
 		}
 
-		const channel = this.findChannel(network, msg.target);
+		const channel = this.findChannel(network, channelName);
 		if (!channel) {
 			log.warn(
-				`[FeWebAdapter] Channel ${msg.target} not found for mark_read on ${msg.server_tag}`
+				`[FeWebAdapter] Channel ${channelName} not found for mark_read on ${serverTag}`
 			);
 			return;
 		}
 
 		log.info(
-			`[FeWebAdapter] Mark read from irssi: ${msg.server_tag}/${msg.target} - syncing to all clients`
+			`[FeWebAdapter] Mark read from irssi: ${serverTag}/${channelName} - syncing to all clients`
 		);
 
 		// Forward to IrssiClient (will broadcast to all browsers)
