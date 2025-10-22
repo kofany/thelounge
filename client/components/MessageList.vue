@@ -382,10 +382,23 @@ export default defineComponent({
 
 				// Re-add the intersection observer to trigger the check again on channel switch
 				// Otherwise if last channel had the button visible, switching to a new channel won't trigger the history
-				if (historyObserver.value && loadMoreButton.value) {
-					historyObserver.value.unobserve(loadMoreButton.value);
-					historyObserver.value.observe(loadMoreButton.value);
-				}
+				void nextTick(() => {
+					if (historyObserver.value && loadMoreButton.value) {
+						historyObserver.value.unobserve(loadMoreButton.value);
+						historyObserver.value.observe(loadMoreButton.value);
+					}
+
+					// Auto-load history if channel has no messages but has history available
+					// This fixes the issue where IntersectionObserver doesn't trigger on first channel open
+					if (
+						props.channel.moreHistoryAvailable &&
+						props.channel.messages.length === 0 &&
+						!props.channel.historyLoading &&
+						store.state.isConnected
+					) {
+						onShowMoreClick();
+					}
+				});
 			}
 		);
 
