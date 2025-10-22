@@ -45,6 +45,7 @@ export type FeWebAdapterCallbacks = {
 	onTopicUpdate: (networkUuid: string, channelId: number, topic: string) => void;
 	onNickChange: (networkUuid: string, newNick: string) => void;
 	onInit: (networks: NetworkData[]) => Promise<void>;
+	onMarkRead: (networkUuid: string, channelName: string) => void;
 };
 
 export class FeWebAdapter {
@@ -152,6 +153,9 @@ export class FeWebAdapter {
 
 		// 20. pong - Pong response
 		this.socket.onMessage("pong", (msg) => this.handlePong(msg));
+
+		// 21. mark_read - Channel marked as read (from irssi window change)
+		this.socket.onMessage("mark_read", (msg) => this.handleMarkRead(msg));
 	}
 
 	/**
@@ -912,6 +916,39 @@ export class FeWebAdapter {
 	 */
 	private handlePong(msg: FeWebMessage): void {
 		log.debug("[FeWebAdapter] Received pong");
+	}
+
+	/**
+	 * 21. mark_read - Channel marked as read (from irssi window change)
+	 */
+	private handleMarkRead(msg: FeWebMessage): void {
+		if (!msg.server_tag || !msg.target) {
+			log.warn(
+				`[FeWebAdapter] Invalid mark_read message: ${JSON.stringify(msg)}`
+			);
+			return;
+		}
+
+		const network = this.serverTagToNetworkMap.get(msg.server_tag);
+		if (!network) {
+			log.warn(`[FeWebAdapter] Network ${msg.server_tag} not found for mark_read`);
+			return;
+		}
+
+		const channel = this.findChannel(network, msg.target);
+		if (!channel) {
+			log.warn(
+				`[FeWebAdapter] Channel ${msg.target} not found for mark_read on ${msg.server_tag}`
+			);
+			return;
+		}
+
+		log.info(
+			`[FeWebAdapter] Mark read from irssi: ${msg.server_tag}/${msg.target} - syncing to all clients`
+		);
+
+		// Forward to IrssiClient (will broadcast to all browsers)
+		this.callbacks.onMarkRead(network.uuid, channel.name);
 	}
 
 	// Helper methods
