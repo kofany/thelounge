@@ -850,6 +850,15 @@ export class IrssiClient {
 						log.info(
 							`[CommandTranslator] Created query window for ${targetNick} on ${network.serverTag}`
 						);
+
+						// IMPORTANT: Send /query to irssi to create query window there too
+						// This ensures synchronization between Vue and erssi
+						const queryCmd = `query ${targetNick}`;
+						log.info(
+							`[CommandTranslator] Sending /query ${targetNick} to irssi for synchronization`
+						);
+						// Send in background (don't wait for response)
+						this.irssiConnection?.executeCommand(queryCmd, network.serverTag);
 					}
 
 					// If there's a message, send it
@@ -861,12 +870,12 @@ export class IrssiClient {
 							)} → /${translated} on ${network.serverTag}`
 						);
 						return translated;
-					} else if (command === "query") {
-						// /query without message - just open window (already done above)
+					} else {
+						// No message - query window already created and synced to irssi
 						log.info(
-							`[CommandTranslator] /query ${targetNick} → opened query window on ${network.serverTag}`
+							`[CommandTranslator] /${command} ${targetNick} → query window created and synced`
 						);
-						return false; // Don't send to irssi
+						return false; // Don't send to irssi (already sent above if needed)
 					}
 				}
 				break;
