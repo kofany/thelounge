@@ -39,7 +39,8 @@
 #chat .msg[data-type="nick"] .from::before,
 #chat .msg[data-type="topic"] .from::before,
 #chat .msg[data-type="topic_set_by"] .from::before,
-.context-menu-item::before {
+.context-menu-item::before,
+.password-container .reveal-password span {
 	font-family: FontAwesome !important;
 }
 

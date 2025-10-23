@@ -1,0 +1,390 @@
+/* Cyberpunk Theme - Hunter colors with UTF8 event icons from Nexus */
+/* Based on Hunter theme with cyberpunk UTF8 symbols for IRC events */
+
+@import url("https://cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.css");
+
+/* Force Hack monospace font EVERYWHERE except FontAwesome icons */
+* {
+	font-family: Hack, monospace !important;
+}
+
+/* Exception for FontAwesome icons - they need their own font */
+.settings-menu button::before,
+#viewport .lt::before,
+#viewport .rt::before,
+#chat button.mentions::before,
+#chat button.close::before,
+#chat button.menu::before,
+#chat button.search::before,
+.channel-list-item::before,
+#footer .icon,
+#chat .count::before,
+#connect .extra-help,
+#settings .extra-help,
+#settings #play::before,
+#form #upload::before,
+#form #submit::before,
+#chat .msg[data-type="away"] .from::before,
+#chat .msg[data-type="back"] .from::before,
+#chat .msg[data-type="invite"] .from::before,
+.context-menu-item::before,
+.password-container .reveal-password span {
+	font-family: FontAwesome !important;
+}
+
+:root {
+	/* Main colors - EXACT from Hunter/irc.xyz */
+	--body-color: #e0e0e0;
+	--body-color-muted: #9a9a9a;
+	--body-bg-color: #2d2d2d;
+	--link-color: #409aed;
+
+	/* Window colors */
+	--window-bg-color: #2d2d2d;
+	--window-heading-color: #e0e0e0;
+
+	/* Timestamp color */
+	--timestamp-color: #6d6d6d;
+
+	/* Nick colors - from Hunter */
+	--nick-op-color: #ffaf00;
+	--nick-voice-color: #87d7ff;
+	--nick-normal-color: #afd787;
+	--nick-system-color: #d7875f;
+	--nick-bot-color: #af87ff;
+
+	/* Event symbol colors - from Hunter */
+	--join-color: #91b14f;
+	--part-color: #af8700;
+	--quit-color: #db4437;
+	--kick-color: #d75f5f;
+	--mode-color: #dba937;
+	--topic-color: #5fafaf;
+
+	/* Other colors */
+	--hostmask-color: #5f8787;
+	--channel-color: #5fafaf;
+	--separator-color: #5f5f87;
+	--info-color: #666666;
+	--reason-color: #af8787;
+	--mode-change-color: #d787d7;
+
+	/* Markers */
+	--date-marker-color: #dba937;
+	--unread-marker-color: #db4437;
+	--highlight-bg-color: #46546e;
+	--highlight-border-color: #46546e;
+
+	/* Button colors */
+	--button-color: #409aed;
+	--button-text-color-hover: #fff;
+
+	/* Sidebar/List colors - from Hunter */
+	--sidebar-bg-color: #383838;
+	--list-item-hover-bg: #323232;
+	--list-item-selected-bg: #2b2b2b;
+
+	/* Input colors */
+	--input-bg-color: #444444;
+	--input-border-color: #555555;
+	--input-focus-border-color: #409aed;
+
+	/* Scrollbar colors */
+	--scrollbar-track: transparent;
+	--scrollbar-thumb: #888888ee;
+	--scrollbar-thumb-hover: #555555;
+
+	/* Border colors */
+	--border-color: #252525;
+	--form-border-color: #404040;
+	--list-border-color: #404040;
+	--server-border-color: #282828;
+	--notice-border-color: #5d3737;
+
+	/* Notice/highlight colors */
+	--notice-bg-color: #5d3737;
+	--reaction-bg-color: #383838;
+	--reaction-hover-bg-color: #323232;
+
+	/* Topic colors */
+	--topic-bg-color: #282828ee;
+	--topic-hover-bg-color: #282828ff;
+
+	/* Server colors */
+	--server-bg-color: #282828;
+
+	/* Selected colors */
+	--selected-bg-color: #404040;
+
+	/* Monospace background */
+	--monospace-bg-color: #202020;
+
+	/* Tooltip colors */
+	--tooltip-bg-color: #666666ee;
+	--tooltip-hover-bg-color: #666666;
+
+	/* Switch colors */
+	--switch-bg-color: rgba(255, 255, 255, 0.5);
+	--switch-thumb-color: #fff;
+	--switch-fill-color: var(--button-color);
+}
+
+/* ========================================
+   CYBERPUNK UTF8 EVENT ICONS (from Nexus)
+   ======================================== */
+
+/* JOIN - green arrow ⥤ */
+#chat .msg[data-type="join"] .from::before {
+	content: "⥤";
+	color: var(--join-color);
+	font-weight: bold;
+	font-style: normal;
+	font-family: Hack, monospace !important;
+}
+
+/* PART - yellow/orange arrow ⥢ */
+#chat .msg[data-type="part"] .from::before {
+	content: "⥢";
+	color: var(--part-color);
+	font-weight: bold;
+	font-style: normal;
+	font-family: Hack, monospace !important;
+	transform: none;
+	display: inline;
+}
+
+/* QUIT - orange power symbol ⏻ */
+#chat .msg[data-type="quit"] .from::before {
+	content: "⏻";
+	color: var(--quit-color);
+	font-weight: bold;
+	font-style: normal;
+	font-family: Hack, monospace !important;
+	transform: none;
+	display: inline;
+}
+
+/* KICK - red skull ☠ */
+#chat .msg[data-type="kick"] .from::before {
+	content: "☠";
+	color: var(--kick-color);
+	font-weight: bold;
+	font-style: normal;
+	font-family: Hack, monospace !important;
+}
+
+/* MODE - yellow lightning ⛈ */
+#chat .msg[data-type="mode_channel"] .from::before,
+#chat .msg[data-type="mode_user"] .from::before,
+#chat .msg[data-type="mode"] .from::before {
+	content: "⛈";
+	color: var(--mode-color);
+	font-weight: bold;
+	font-style: normal;
+	font-family: Hack, monospace !important;
+}
+
+/* TOPIC - cyan gear ⚙ */
+#chat .msg[data-type="topic"] .from::before {
+	content: "⚙";
+	color: var(--topic-color);
+	font-weight: bold;
+	font-style: normal;
+	font-family: Hack, monospace !important;
+}
+
+/* NICK change - green diamond ⬢ */
+#chat .msg[data-type="nick"] .from::before,
+#chat .msg[data-type="chghost"] .from::before {
+	content: "⬢";
+	color: var(--join-color);
+	font-weight: bold;
+	font-style: normal;
+	font-family: Hack, monospace !important;
+}
+
+/* Info messages styling */
+#chat .msg[data-type="condensed"] .content,
+#chat .msg[data-type="away"] .content,
+#chat .msg[data-type="back"] .content,
+#chat .msg[data-type="join"] .content,
+#chat .msg[data-type="kick"] .content,
+#chat .msg[data-type="mode"] .content,
+#chat .msg[data-type="nick"] .content,
+#chat .msg[data-type="chghost"] .content,
+#chat .msg[data-type="part"] .content,
+#chat .msg[data-type="quit"] .content,
+#chat .msg[data-type="topic"] .content,
+#chat .msg[data-type="topic_set_by"] .content {
+	color: var(--info-color);
+	font-style: italic;
+}
+
+/* Hostmask styling */
+#chat .hostmask {
+	color: var(--hostmask-color);
+	font-size: 0.95em;
+}
+
+/* Channel names */
+#chat .channel {
+	color: var(--channel-color);
+	font-weight: bold;
+}
+
+/* Reasons (part, quit, kick) */
+#chat .part-reason,
+#chat .quit-reason {
+	color: var(--reason-color);
+	font-style: italic;
+}
+
+/* Timestamp separator */
+#chat .time::after {
+	content: " │";
+	color: #4a4a4a;
+	margin-left: 2px;
+}
+
+/* From/Nick area */
+#chat .from {
+	color: var(--body-color-muted);
+}
+
+/* Content area */
+#chat .content {
+	color: var(--body-color);
+}
+
+/* ========================================
+   HUNTER THEME BASE STYLES
+   ======================================== */
+
+html,
+body {
+	font-family: Hack, monospace;
+	background-color: #2d2d2d !important;
+}
+
+/* Scrollbar styling - Safari 18.6 compatible (webkit only) */
+::-webkit-scrollbar {
+	width: 5px;
+	height: 5px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--scrollbar-thumb);
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--scrollbar-thumb-hover);
+}
+
+/* Window styling */
+.window {
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Chat area */
+#chat {
+	font-family: Hack, monospace;
+	font-size: 13px;
+	line-height: 1.2;
+}
+
+/* Reduce spacing between messages for more compact view like Irssi */
+#chat .msg {
+	line-height: 1.1;
+	margin: 0;
+	padding: 0;
+}
+
+/* Remove vertical padding from time, from, content - reduce from 3px to 0px */
+#chat .time,
+#chat .from,
+#chat .content {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+/* Keep horizontal padding minimal */
+#chat .time {
+	padding-left: 10px;
+}
+
+#chat .from {
+	padding-right: 10px;
+}
+
+#chat .content {
+	padding-left: 10px;
+	padding-right: 6px;
+}
+
+/* Reduce container padding */
+#chat .messages {
+	padding: 5px 0;
+}
+
+/* Set consistent width for nick/event column - 90px for all message types */
+#chat .from {
+	width: 90px;
+}
+
+/* Sidebar (networks/channels) - compact spacing and monospace font */
+.channel-list-item,
+#sidebar .empty {
+	font-family: Hack, monospace;
+	font-size: 13px;
+}
+
+.channel-list-item {
+	padding: 2px 14px;
+	line-height: 1.1;
+}
+
+#sidebar .network {
+	margin-bottom: 10px;
+}
+
+/* Userlist (nicklist) - compact spacing and monospace font */
+.userlist {
+	font-family: Hack, monospace;
+	font-size: 13px;
+	line-height: 1.1;
+}
+
+.userlist .user {
+	padding: 1px 14px;
+}
+
+/* Input area - monospace font */
+#form {
+	font-family: Hack, monospace;
+}
+
+#input {
+	font-family: Hack, monospace;
+	font-size: 13px;
+}
+
+/* Settings and windows - monospace font */
+.window {
+	font-family: Hack, monospace;
+}
+
+/* Logo inverted for dark theme */
+#loading .logo,
+.window .logo {
+	display: none;
+}
+
+#loading .logo-inverted,
+.window .logo-inverted {
+	display: inline-block !important;
+}
+
