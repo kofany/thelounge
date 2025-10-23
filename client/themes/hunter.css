@@ -4,9 +4,44 @@
 @import url("https://cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.css");
 @import "default.css";
 
-/* Force Hack monospace font EVERYWHERE */
+/* Force Hack monospace font EVERYWHERE except FontAwesome icons */
 * {
 	font-family: Hack, monospace !important;
+}
+
+/* Exception for FontAwesome icons - they need their own font */
+.settings-menu button::before,
+#viewport .lt::before,
+#viewport .rt::before,
+#chat button.mentions::before,
+#chat button.close::before,
+#chat button.menu::before,
+#chat button.search::before,
+.channel-list-item::before,
+#footer .icon,
+#chat .count::before,
+#connect .extra-help,
+#settings .extra-help,
+#settings #play::before,
+#form #upload::before,
+#form #submit::before,
+#chat .msg[data-type="away"] .from::before,
+#chat .msg[data-type="back"] .from::before,
+#chat .msg[data-type="invite"] .from::before,
+#chat .msg[data-type="join"] .from::before,
+#chat .msg[data-type="kick"] .from::before,
+#chat .msg[data-type="login"] .from::before,
+#chat .msg[data-type="logout"] .from::before,
+#chat .msg[data-type="part"] .from::before,
+#chat .msg[data-type="quit"] .from::before,
+#chat .msg[data-type="mode"] .from::before,
+#chat .msg[data-type="mode_channel"] .from::before,
+#chat .msg[data-type="mode_user"] .from::before,
+#chat .msg[data-type="nick"] .from::before,
+#chat .msg[data-type="topic"] .from::before,
+#chat .msg[data-type="topic_set_by"] .from::before,
+.context-menu-item::before {
+	font-family: "Font Awesome 5 Free", "Font Awesome 6 Free" !important;
 }
 
 :root {

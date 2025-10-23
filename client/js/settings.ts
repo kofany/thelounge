@@ -25,13 +25,13 @@ const defaultConfig = {
 		default: true,
 	},
 	nickPostfix: {
-		default: "",
+		default: ": ",
 	},
 	coloredNicks: {
 		default: true,
 	},
 	desktopNotifications: {
-		default: false,
+		default: true,
 		sync: "never",
 		apply(store: TypedStore, value: boolean) {
 			// Commit a mutation. options can have root: true that allows to commit root mutations in namespaced modules.
@@ -80,7 +80,7 @@ const defaultConfig = {
 		default: false,
 	},
 	statusMessages: {
-		default: "condensed",
+		default: "shown",
 	},
 	nexusStyleMessages: {
 		default: true,
@@ -146,7 +146,7 @@ const defaultConfig = {
 		},
 	},
 	searchEnabled: {
-		default: false,
+		default: true,
 	},
 };
 

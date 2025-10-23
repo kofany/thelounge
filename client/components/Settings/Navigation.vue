@@ -37,7 +37,7 @@
 }
 
 .settings-menu li {
-	font-size: 18px;
+	font-size: 14px;
 	list-style: none;
 }
 
@@ -54,11 +54,17 @@
 }
 
 .settings-menu button::before {
-	width: 18px;
-	height: 18px;
+	width: 14px;
+	height: 14px;
 	display: inline-block;
 	content: "";
-	margin-right: 8px;
+	margin-right: 6px;
+	font-family: "Font Awesome 5 Free", "Font Awesome 6 Free" !important;
+	font-weight: 900;
+	font-style: normal;
+	font-variant: normal;
+	text-rendering: auto;
+	-webkit-font-smoothing: antialiased;
 }
 
 .settings-menu .appearance::before {
