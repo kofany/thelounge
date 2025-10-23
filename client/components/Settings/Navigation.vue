@@ -59,12 +59,10 @@
 	display: inline-block;
 	content: "";
 	margin-right: 6px;
-	font-family: "Font Awesome 5 Free", "Font Awesome 6 Free" !important;
-	font-weight: 900;
-	font-style: normal;
-	font-variant: normal;
-	text-rendering: auto;
+	font: normal normal normal 14px/1 FontAwesome;
+	font-size: inherit;
 	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 .settings-menu .appearance::before {

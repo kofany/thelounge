@@ -40,7 +40,7 @@
 #chat .msg[data-type="topic"] .from::before,
 #chat .msg[data-type="topic_set_by"] .from::before,
 .context-menu-item::before {
-	font-family: "Font Awesome 5 Free", "Font Awesome 6 Free" !important;
+	font-family: FontAwesome !important;
 }
 
 :root {
