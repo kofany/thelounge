@@ -2,7 +2,6 @@
 /* Exact 1:1 clone of irc.xyz with Hack font and proper colors */
 
 @import url("https://cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.css");
-@import "default.css";
 
 /* Force Hack monospace font EVERYWHERE except FontAwesome icons */
 * {
