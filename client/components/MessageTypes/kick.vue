@@ -1,8 +1,15 @@
 <template>
 	<span class="content">
-		<Username :user="message.target" />
-		dropped by
-		<Username :user="message.from" />
+		<template v-if="store.state.settings.nexusStyleMessages">
+			<Username :user="message.target" />
+			dropped by
+			<Username :user="message.from" />
+		</template>
+		<template v-else>
+			<Username :user="message.from" />
+			has kicked
+			<Username :user="message.target" />
+		</template>
 		<i v-if="message.text" class="part-reason"
 			>&#32;(<ParsedMessage :network="network" :message="message" />)</i
 		>
@@ -14,6 +21,7 @@ import {defineComponent, PropType} from "vue";
 import {ClientNetwork, ClientMessage} from "../../js/types";
 import ParsedMessage from "../ParsedMessage.vue";
 import Username from "../Username.vue";
+import {useStore} from "../../js/store";
 
 export default defineComponent({
 	name: "MessageTypeKick",
@@ -30,6 +38,12 @@ export default defineComponent({
 			type: Object as PropType<ClientMessage>,
 			required: true,
 		},
+	},
+	setup() {
+		const store = useStore();
+		return {
+			store,
+		};
 	},
 });
 </script>

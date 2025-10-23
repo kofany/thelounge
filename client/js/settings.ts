@@ -82,6 +82,9 @@ const defaultConfig = {
 	statusMessages: {
 		default: "condensed",
 	},
+	nexusStyleMessages: {
+		default: true,
+	},
 	theme: {
 		default: document.getElementById("theme")?.dataset.serverTheme,
 		apply(store: TypedStore, value: string) {

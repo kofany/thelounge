@@ -1,8 +1,14 @@
 <template>
 	<span class="content">
 		<Username :user="message.from" />
-		<i class="hostmask"> ❮❮<ParsedMessage :network="network" :text="message.hostmask" />❯❯</i>
-		has been deprecated
+		<i v-if="store.state.settings.nexusStyleMessages" class="hostmask">
+			❮❮<ParsedMessage :network="network" :text="message.hostmask" />❯❯</i
+		>
+		<i v-else class="hostmask">
+			(<ParsedMessage :network="network" :text="message.hostmask" />)</i
+		>
+		<template v-if="store.state.settings.nexusStyleMessages"> has been deprecated </template>
+		<template v-else> has quit </template>
 		<i v-if="message.text" class="quit-reason"
 			>(<ParsedMessage :network="network" :message="message" />)</i
 		>
@@ -14,6 +20,7 @@ import {defineComponent, PropType} from "vue";
 import type {ClientMessage, ClientNetwork} from "../../js/types";
 import ParsedMessage from "../ParsedMessage.vue";
 import Username from "../Username.vue";
+import {useStore} from "../../js/store";
 
 export default defineComponent({
 	name: "MessageTypeQuit",
@@ -30,6 +37,12 @@ export default defineComponent({
 			type: Object as PropType<ClientMessage>,
 			required: true,
 		},
+	},
+	setup() {
+		const store = useStore();
+		return {
+			store,
+		};
 	},
 });
 </script>

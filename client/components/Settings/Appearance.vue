@@ -101,6 +101,22 @@
 		</div>
 		<div>
 			<label class="opt">
+				<input
+					:checked="store.state.settings.nexusStyleMessages"
+					type="checkbox"
+					name="nexusStyleMessages"
+				/>
+				Use Nexus-style event messages
+				<span
+					class="tooltipped tooltipped-n tooltipped-no-delay"
+					aria-label="Cyberpunk-themed event messages (breached, dropped, deprecated, etc.)"
+				>
+					<button class="extra-help" />
+				</span>
+			</label>
+		</div>
+		<div>
+			<label class="opt">
 				<label for="nickPostfix" class="opt">
 					Nick autocomplete postfix
 					<span
