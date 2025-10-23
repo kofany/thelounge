@@ -7,7 +7,7 @@
 			<h1 class="title">Help</h1>
 
 			<h2 class="help-version-title">
-				<span>About The Lounge</span>
+				<span>About Nexus Lounge</span>
 				<small>
 					v{{ store.state.serverConfiguration?.version }} (<router-link
 						id="view-changelog"
@@ -22,8 +22,8 @@
 
 				<template v-if="store.state.serverConfiguration?.gitCommit">
 					<p>
-						The Lounge is running from source (<a
-							:href="`https://github.com/thelounge/thelounge/tree/${store.state.serverConfiguration?.gitCommit}`"
+						Nexus Lounge is running from source (<a
+							:href="`https://github.com/kofany/thelounge/tree/${store.state.serverConfiguration?.gitCommit}`"
 							target="_blank"
 							rel="noopener"
 							>commit <code>{{ store.state.serverConfiguration?.gitCommit }}</code></a
@@ -640,7 +640,7 @@
 				</div>
 				<div class="description">
 					<p>
-						Send an action message to the current channel. The Lounge will display it
+						Send an action message to the current channel. Nexus Lounge will display it
 						inline, as if the message was posted in the third person.
 					</p>
 				</div>
