@@ -1885,6 +1885,18 @@ part/quit messages where we don't load previews (adds a blank line otherwise) */
 	width: 100%;
 }
 
+#sign-in .ascii-logo {
+	font-family: Hack, monospace;
+	font-size: 8px;
+	line-height: 1.2;
+	text-align: center;
+	margin: 0 0 20px 0;
+	padding: 0;
+	color: var(--body-color);
+	white-space: pre;
+	overflow: visible;
+}
+
 #connect .connect-row {
 	display: flex;
 }
