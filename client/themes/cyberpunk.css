@@ -590,3 +590,47 @@ code,
 	color: var(--link-color);
 	background: #383838;
 }
+
+/* ========================================
+   RESPONSIVE DESIGN - MOBILE
+   ======================================== */
+
+@media (max-width: 768px) {
+	/* Reduce font size by 1px for mobile devices */
+	#chat {
+		font-size: 12px; /* 13px - 1px = 12px */
+	}
+
+	.channel-list-item,
+	#sidebar .empty {
+		font-size: 12px; /* 13px - 1px = 12px */
+	}
+
+	.userlist {
+		font-size: 12px; /* 13px - 1px = 12px */
+	}
+
+	/* Hide timestamp text on mobile, show only ➜ symbol */
+	#chat .time {
+		font-size: 0; /* Hide text */
+		width: auto;
+		min-width: auto;
+	}
+
+	/* Show ➜ symbol before timestamp */
+	#chat .time::before {
+		content: "➜";
+		font-size: 14px; /* Visible size for arrow */
+		color: var(--timestamp-color);
+		display: inline-block;
+		padding-right: 5px;
+	}
+
+	/* Hide time brackets on mobile */
+	#chat .time-bracket {
+		display: none;
+	}
+
+	/* Tooltip still works via aria-label on .time element */
+	/* primer-tooltips library handles tooltip display on touch/hover */
+}
