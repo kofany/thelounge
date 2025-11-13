@@ -1,19 +1,20 @@
-# FAZA 8: ESM Migration (OPCJONALNE ale ZALECANE dla BLEEDING EDGE)
+# FAZA 8: ESM Migration (WYMAGANE dla BLEEDING EDGE)
 
 **Branch:** `migrate/esm-full`
 **Szacowany czas:** 1-2 TYGODNIE (20-40 godzin!)
 **Ryzyko:** 🔴 BARDZO WYSOKIE (zmienia całą architekturę modułów)
-**Status:** ⏳ DO WYKONANIA (DECYZJA WYMAGANA!)
+**Target:** Node.js 24.11.1+ (LTS)
+**Status:** ⏳ DO WYKONANIA (REQUIRED!)
 
 ---
 
 ## 🎯 CEL FAZY
 
-Migracja całego projektu z CommonJS (require/module.exports) na ECMAScript Modules (import/export). To największa architekturalna zmiana - wpływa na WSZYSTKIE pliki, webpack config, TypeScript config, package.json, i runtime.
+**FULL ESM MIGRATION** - Migracja całego projektu z CommonJS (require/module.exports) na ECMAScript Modules (import/export). To największa architekturalna zmiana - wpływa na WSZYSTKIE pliki, webpack config, TypeScript config, package.json, i runtime.
 
-### Dlaczego ESM?
+### Dlaczego ESM jest WYMAGANE?
 
-Wiele pakietów wymaga ESM w najnowszych wersjach:
+**Wiele pakietów wymaga ESM w najnowszych wersjach:**
 - **chalk** 5.x (ESM only)
 - **got** 12+ (ESM only) - lub zamień na native `fetch()`
 - **uuid** 9+ (ESM only)
@@ -25,38 +26,22 @@ Wiele pakietów wymaga ESM w najnowszych wersjach:
 - **linkify-it** 4+ (ESM only)
 - **babel-loader** 10+ (ESM only)
 
-### Decyzja: Robić czy nie?
+### Cel: Node.js 24.11.1+ (LTS) Compatibility
 
-**⚠️ TO JEST OPCJONALNE! Możesz:**
+**Nasz projekt będzie kompatybilny z Node.js 24 LTS i przyszłymi wersjami:**
+- ✅ **Node 24 = LTS** (Long Term Support) - stabilność production
+- ✅ ESM jest STANDARD od Node.js 14+, fully stable w 18+, perfected w 24 LTS
+- ✅ CommonJS jest LEGACY - Node.js przestaje go popierać
+- ✅ Wszystkie nowe features Node.js będą ESM-first
+- ✅ Lepsze tree-shaking, mniejsze bundle sizes
+- ✅ Native top-level await
+- ✅ Przyszłościowe podejście + stabilność LTS
 
-**OPCJA A: Full ESM Migration (ZALECANE dla bleeding edge)**
-- ✅ Pros: Najnowsze wersje wszystkich pakietów, modern standard, lepszy tree-shaking
-- ❌ Cons: 1-2 tygodnie pracy, wszystko może się zepsuć, wysokie ryzyko
-
-**OPCJA B: Zostań na CommonJS + starsze wersje**
-- ✅ Pros: Zero pracy, zero ryzyka, wszystko działa
-- ❌ Cons: Pakiety będą się starzeć, brak newest features
-
-**OPCJA C: Partial ESM (hybrid) - NIE ZALECANE**
-- ❌ Brzydki kod, problemy z types, maintenance nightmare
+**To nie jest opcja - to KONIECZNOŚĆ dla bleeding edge projektu na LTS foundation!**
 
 ---
 
-## ⚠️ DECYZJA WYMAGANA
-
-**ZANIM KONTYNUUJESZ - ODPOWIEDZ:**
-
-[ ] Wybieram OPCJĘ A - Full ESM Migration (przeczytaj dalej)
-[ ] Wybieram OPCJĘ B - Zostaje na CommonJS (skip tę fazę, idź do FAZA 9)
-[ ] Wybieram OPCJĘ C - Hybrid (PLEASE DON'T, seriously)
-
-**Jeśli wybrałeś OPCJĘ B:** Zamknij ten plik i idź do FAZA9.md ✅
-
-**Jeśli wybrałeś OPCJĘ A:** Czytaj dalej... i przygotuj się na intensywną pracę 💪
-
----
-
-## ⚠️ ZASADY REALIZACJI (dla OPCJI A)
+## ⚠️ ZASADY REALIZACJI
 
 ### 🚫 NIE CHCĘ ŻADNYCH HACK CZY WORKAROUND!
 
@@ -68,11 +53,13 @@ Wiele pakietów wymaga ESM w najnowszych wersjach:
 ### ✅ AKTUALIZUJEMY WSZYSTKO, PROJEKT MA BYĆ EDGE UP TO DATE
 
 - package.json `"type": "module"`
+- **Node.js 24.11.1+ (LTS)** jako minimum target
 - All imports używają ESM syntax
 - All files `.js` extension in imports
 - `__dirname`/`__filename` → `import.meta.url`
 - Top-level await gdzie potrzebne
-- Wszystkie ESM-only packages updated do latest
+- Wszystkie ESM-only packages updated do **latest bleeding edge**
+- Zero CommonJS legacy code
 
 ---
 
@@ -138,7 +125,25 @@ TOTAL: ~36-52 hours
   - [ ] Top-level await
 - [ ] Notatki sporządzone
 
-### Krok 2: Backup Everything (1h)
+### Krok 2: Node.js Version Check
+
+⚠️ **WAŻNE:** Projekt targetuje Node 24 LTS
+
+```bash
+node --version
+
+# WYMAGANE: Node.js 24.11.1+ (LTS)
+# Jeśli < 24: Upgrade Node.js!
+# Install: nvm install 24
+# Use: nvm use 24
+```
+
+**Checklist Node:**
+- [ ] Node.js **24.11.1+** zainstalowany i aktywny
+- [ ] Update .nvmrc: `echo "24" > .nvmrc`
+- [ ] Verify: `node --version` → pokazuje 24.x.x
+
+### Krok 3: Backup Everything (1h)
 
 ```bash
 git checkout main
@@ -156,13 +161,17 @@ cp server/tsconfig.json server/tsconfig.json.backup
 # (Backups NIE idą do git)
 ```
 
-### Krok 3: Update package.json (1h)
+**Checklist Backup:**
+- [ ] Backup branch utworzony
+- [ ] Wszystkie kluczowe pliki zbackupowane
+
+### Krok 4: Update package.json (1h)
 
 ```json
 {
   "type": "module",
   "engines": {
-    "node": ">=18.19.0"  // ESM fully stable from Node 18
+    "node": ">=24.11.1"  // Target Node 24 LTS for stability + bleeding edge
   },
   "exports": {
     ".": {
@@ -175,12 +184,12 @@ cp server/tsconfig.json server/tsconfig.json.backup
 
 **Checklist package.json:**
 - [ ] `"type": "module"` added
-- [ ] `"engines"` updated (Node 18+)
+- [ ] `"engines"` updated (Node **24.11.1+** LTS)
 - [ ] `"exports"` field added (jeśli library)
 - [ ] Scripts checked (mogą wymagać zmian)
-- [ ] Commit: `refactor: add ESM support to package.json`
+- [ ] Commit: `refactor: migrate to ESM - target Node 24 LTS`
 
-### Krok 4: Update TypeScript Config (2h)
+### Krok 5: Update TypeScript Config (2h)
 
 ```json
 // tsconfig.json & server/tsconfig.json
@@ -203,7 +212,7 @@ cp server/tsconfig.json server/tsconfig.json.backup
 - [ ] Test tsconfig.json updated
 - [ ] Commit: `refactor: update TypeScript config for ESM`
 
-### Krok 5: Update Webpack Config (4h)
+### Krok 6: Update Webpack Config (4h)
 
 ```javascript
 // webpack.config.js → webpack.config.mjs (or .js with "type": "module")
@@ -235,7 +244,7 @@ export default {
 - [ ] Test: `yarn build:client`
 - [ ] Commit: `refactor: migrate webpack config to ESM`
 
-### Krok 6: Migrate Server Files (12-20h!)
+### Krok 7: Migrate Server Files (12-20h!)
 
 ⚠️ **TO NAJDŁUŻSZA CZĘŚĆ**
 
@@ -296,7 +305,7 @@ import { helper } from './utils/helper.js';  // Add .js!
 - [ ] `yarn build:server` przechodzi
 - [ ] Commits: Batch commits per file group (np. `refactor: migrate server utils to ESM`)
 
-### Krok 7: Migrate Client Files (8h)
+### Krok 8: Migrate Client Files (8h)
 
 Client może być łatwiejszy (webpack already handles):
 
@@ -314,7 +323,7 @@ find client -name "*.ts" -name "*.js" -type f
 - [ ] `yarn build:client` przechodzi
 - [ ] Commit: `refactor: migrate client to ESM`
 
-### Krok 8: Migrate Test Files (4h)
+### Krok 9: Migrate Test Files (4h)
 
 ```javascript
 // test/.mocharc.yml - może wymagać changes
@@ -329,7 +338,7 @@ loader: 'tsx/esm'  // lub podobny ESM loader
 - [ ] All tests pass
 - [ ] Commit: `refactor: migrate tests to ESM`
 
-### Krok 9: Update ESM-Only Packages (2h)
+### Krok 10: Update ESM-Only Packages (2h)
 
 Teraz możesz zaktualizować pakiety ESM-only:
 
@@ -357,7 +366,7 @@ yarn add -D babel-loader@10.0.0
 - [ ] Wszystkie imports działają
 - [ ] Commit: `chore(deps): update ESM-only packages to latest`
 
-### Krok 10: Replace `got` with `fetch()` (4h)
+### Krok 11: Replace `got` with `fetch()` (4h)
 
 Native fetch() jest w Node.js 18+:
 
@@ -380,7 +389,7 @@ const data = await response.json();
 - [ ] Tests updated
 - [ ] Commit: `refactor: replace got with native fetch()`
 
-### Krok 11: Replace `__dirname` everywhere (2h)
+### Krok 12: Replace `__dirname` everywhere (2h)
 
 ```typescript
 // Helper function (create in utils):
@@ -403,7 +412,7 @@ const __dirname = getDirname(import.meta.url);
 - [ ] Build działa
 - [ ] Commit: `refactor: replace __dirname with import.meta.url`
 
-### Krok 12: Full Build & Test (8h)
+### Krok 13: Full Build & Test (8h)
 
 ```bash
 # Clean everything
@@ -434,7 +443,7 @@ NODE_ENV=production yarn start
 - [ ] WebSocket działa
 - [ ] No ESM-related errors w console
 
-### Krok 13: Performance Check (2h)
+### Krok 14: Performance Check (2h)
 
 ```bash
 # Check bundle sizes
@@ -568,7 +577,9 @@ git push -u origin migrate/esm-full
 
 ---
 
-**⚠️ GRATULACJE!** Jeśli ukończyłeś tę fazę - masz projekt na BLEEDING EDGE! 🚀
+**⚠️ GRATULACJE!** Ukończyłeś najtrudniejszą migrację - projekt jest teraz FULL ESM BLEEDING EDGE na Node 24 LTS! 🚀
+
+**Node.js 24 LTS (Bleeding Edge on Stable Foundation) Achieved!** ✅
 
 **Poprzednia faza:** FAZA 7 - Express Framework
-**Następna faza:** FAZA 9 - Final Cleanup
+**Następna faza:** FAZA 9 - Final Cleanup (ostatnia prosta!)

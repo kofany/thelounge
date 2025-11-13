@@ -7,11 +7,25 @@
 
 ---
 
+## ⚡ TARGET: Node.js 24.11.1+ (LTS) | Full ESM | Bleeding Edge
+
+**WYMAGANIA PROJEKTU:**
+- **Node.js:** ≥ 24.11.1 (LTS - Long Term Support)
+- **Module System:** ESM (ECMAScript Modules) - **REQUIRED**
+- **Philosophy:** Zero workarounds, zero hacks, full latest packages
+- **Goal:** Bleeding edge up-to-date project on stable LTS foundation
+
+**CEL:** Pełna modernizacja włącznie z migracją do ESM. Projekt będzie kompatybilny z Node.js 24 LTS i przyszłymi wersjami.
+
+---
+
 ## Zasady Foundation:
 1. **Dependency Graph Respect** - aktualizuj od najbardziej podstawowych (leaf dependencies) do najbardziej złożonych (top-level)
 2. **Ecosystem Cohesion** - pakiety tego samego ekosystemu razem (np. cały Babel, cały Vue, cały ESLint)
 3. **Breaking Changes Isolation** - każdy major update w osobnym branchu z pełnymi testami
 4. **Rollback Ready** - każdy commit buildable i testable osobno
+5. **No Compromises** - **NIE CHCĘ ŻADNYCH HACK CZY WORKAROUND!**
+6. **Full Latest** - **AKTUALIZUJEMY WSZYSTKO, PROJEKT MA BYĆ EDGE UP TO DATE**
 
 ---
 

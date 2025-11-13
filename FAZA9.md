@@ -87,7 +87,7 @@ git pull origin main
 
 # Merge all previous phases jeśli nie zrobione
 # git merge update/express-v5
-# git merge migrate/esm-full  # jeśli zrobione
+# git merge migrate/esm-full  # REQUIRED - musi być zrobione!
 
 git checkout -b update/final-deps
 
@@ -97,21 +97,20 @@ yarn outdated
 
 ### Krok 2: Node.js Version Check
 
-⚠️ **WAŻNE:** Commander 14 wymaga Node 20+
+⚠️ **WAŻNE:** Projekt targetuje Node 24.11.1+ LTS (po FAZA 8)
 
 ```bash
 node --version
 
-# Jeśli < 20:
-# Nie aktualizuj commander do 14, zostań na 12.x
-# LUB upgrade Node.js najpierw
+# POWINNO pokazać 24.x.x
+# Jeśli nie - FAZA 8 nie została ukończona poprawnie
 ```
 
 **Checklist Node:**
-- [ ] Node.js version checked: _____
-- [ ] Decyzja o commander update podjęta
-- [ ] Update .nvmrc jeśli trzeba: `echo "20" > .nvmrc`
-- [ ] Update package.json engines: `"node": ">=20.0.0"`
+- [ ] Node.js **24.11.1+** aktywny (verify: `node --version`)
+- [ ] .nvmrc zawiera "24"
+- [ ] package.json engines: `"node": ">=24.11.1"`
+- [ ] ESM migration complete (FAZA 8 done)
 
 ### Krok 3: Remove Deprecated Packages
 
@@ -221,12 +220,10 @@ yarn test
 - [ ] Tests pass
 - [ ] Commit: `chore(deps): update production dependencies with major versions`
 
-### Krok 7: Update Commander (jeśli Node 20+)
+### Krok 7: Update Commander
 
 ```bash
-# TYLKO jeśli Node.js >= 20
-node --version  # Check!
-
+# Node.js 24+ już jest (FAZA 8), więc commander 14 is safe
 yarn add commander@14.0.2
 
 # Test CLI
@@ -236,7 +233,6 @@ node index.js start --help
 ```
 
 **Checklist Commander:**
-- [ ] Node.js 20+ confirmed (lub skip this step)
 - [ ] commander 14.0.2 zainstalowany
 - [ ] CLI commands działają
 - [ ] `--help` działa
@@ -433,14 +429,14 @@ git push -u origin update/final-deps
 
 ## 🐛 COMMON ISSUES I ROZWIĄZANIA
 
-### Problem: Commander 14 requires Node 20+
+### Problem: Node.js version mismatch
 
-**Symptom:** Can't install commander 14
+**Symptom:** Commander lub inne pakiety failują
 
 **Rozwiązanie:**
-1. Upgrade Node.js do 20+
-2. LUB zostań na commander 12.x (dodaj komentarz dlaczego)
-3. Update .nvmrc i package.json engines
+1. Powinieneś mieć Node 24.11.1+ LTS (FAZA 8)
+2. Verify: `node --version` → 24.x.x
+3. Jeśli nie - wróć do FAZA 8 i dokończ migrację ESM
 
 ### Problem: bcryptjs 3 breaks password verification
 
@@ -508,10 +504,12 @@ Jeśli dotarłeś tutaj i ukończyłeś wszystkie checklisty - Twój projekt jes
 
 ✅ **BLEEDING EDGE** - najnowsze wersje wszystkich pakietów
 ✅ **SECURE** - zero vulnerabilities
-✅ **MODERN** - ESM (jeśli FAZA 8), latest frameworks
+✅ **MODERN** - Full ESM, latest frameworks, **Node 24 LTS ready**
 ✅ **CLEAN** - zero deprecated dependencies
 ✅ **TESTED** - all tests passing
 ✅ **DOCUMENTED** - up to date docs
+✅ **STABLE** - Node 24 LTS foundation (Long Term Support)
+✅ **FUTURE-PROOF** - Kompatybilny z przyszłymi wersjami Node.js
 
 ### Co dalej?
 
