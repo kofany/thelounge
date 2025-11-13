@@ -1,7 +1,6 @@
 # FAZA 3: CSS Pipeline
 
 **Branch:** `update/css-pipeline`
-**Szacowany czas:** 2-3 godziny
 **Ryzyko:** 🟡 ŚREDNIE (multiple major updates)
 **Status:** ⏳ DO WYKONANIA
 

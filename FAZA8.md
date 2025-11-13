@@ -1,7 +1,6 @@
 # FAZA 8: ESM Migration (WYMAGANE dla BLEEDING EDGE)
 
 **Branch:** `migrate/esm-full`
-**Szacowany czas:** 1-2 TYGODNIE (20-40 godzin!)
 **Ryzyko:** 🔴 BARDZO WYSOKIE (zmienia całą architekturę modułów)
 **Target:** Node.js 24.11.1+ (LTS)
 **Status:** ⏳ DO WYKONANIA (REQUIRED!)
@@ -83,18 +82,9 @@ babel-loader: 8.2.5 → 10.0.0
 
 ## 🔧 PLAN WYKONANIA (DŁUGI!)
 
-### ⏰ Realistic Timeline:
-
-- **Week 1, Day 1-2:** Setup + config changes (8-12h)
-- **Week 1, Day 3-5:** Server files migration (12-16h)
-- **Week 2, Day 1-3:** Client files migration (8-12h)
-- **Week 2, Day 4-5:** Testing + fixes (8-12h)
-
-TOTAL: ~36-52 hours
-
 ---
 
-### Krok 1: Research & Preparation (4h)
+### Krok 1: Research & Preparation
 
 ⚠️ **PRZECZYTAJ WSZYSTKO PRZED UPDATE:**
 
@@ -143,7 +133,7 @@ node --version
 - [ ] Update .nvmrc: `echo "24" > .nvmrc`
 - [ ] Verify: `node --version` → pokazuje 24.x.x
 
-### Krok 3: Backup Everything (1h)
+### Krok 3: Backup Everything
 
 ```bash
 git checkout main
@@ -165,7 +155,7 @@ cp server/tsconfig.json server/tsconfig.json.backup
 - [ ] Backup branch utworzony
 - [ ] Wszystkie kluczowe pliki zbackupowane
 
-### Krok 4: Update package.json (1h)
+### Krok 4: Update package.json
 
 ```json
 {
@@ -189,7 +179,7 @@ cp server/tsconfig.json server/tsconfig.json.backup
 - [ ] Scripts checked (mogą wymagać zmian)
 - [ ] Commit: `refactor: migrate to ESM - target Node 24 LTS`
 
-### Krok 5: Update TypeScript Config (2h)
+### Krok 5: Update TypeScript Config
 
 ```json
 // tsconfig.json & server/tsconfig.json
@@ -212,7 +202,7 @@ cp server/tsconfig.json server/tsconfig.json.backup
 - [ ] Test tsconfig.json updated
 - [ ] Commit: `refactor: update TypeScript config for ESM`
 
-### Krok 6: Update Webpack Config (4h)
+### Krok 6: Update Webpack Config
 
 ```javascript
 // webpack.config.js → webpack.config.mjs (or .js with "type": "module")
@@ -244,7 +234,7 @@ export default {
 - [ ] Test: `yarn build:client`
 - [ ] Commit: `refactor: migrate webpack config to ESM`
 
-### Krok 7: Migrate Server Files (12-20h!)
+### Krok 7: Migrate Server Files
 
 ⚠️ **TO NAJDŁUŻSZA CZĘŚĆ**
 
@@ -305,7 +295,7 @@ import { helper } from './utils/helper.js';  // Add .js!
 - [ ] `yarn build:server` przechodzi
 - [ ] Commits: Batch commits per file group (np. `refactor: migrate server utils to ESM`)
 
-### Krok 8: Migrate Client Files (8h)
+### Krok 8: Migrate Client Files
 
 Client może być łatwiejszy (webpack already handles):
 
@@ -323,7 +313,7 @@ find client -name "*.ts" -name "*.js" -type f
 - [ ] `yarn build:client` przechodzi
 - [ ] Commit: `refactor: migrate client to ESM`
 
-### Krok 9: Migrate Test Files (4h)
+### Krok 9: Migrate Test Files
 
 ```javascript
 // test/.mocharc.yml - może wymagać changes
@@ -338,7 +328,7 @@ loader: 'tsx/esm'  // lub podobny ESM loader
 - [ ] All tests pass
 - [ ] Commit: `refactor: migrate tests to ESM`
 
-### Krok 10: Update ESM-Only Packages (2h)
+### Krok 10: Update ESM-Only Packages
 
 Teraz możesz zaktualizować pakiety ESM-only:
 
@@ -366,7 +356,7 @@ yarn add -D babel-loader@10.0.0
 - [ ] Wszystkie imports działają
 - [ ] Commit: `chore(deps): update ESM-only packages to latest`
 
-### Krok 11: Replace `got` with `fetch()` (4h)
+### Krok 11: Replace `got` with `fetch()`
 
 Native fetch() jest w Node.js 18+:
 
@@ -389,7 +379,7 @@ const data = await response.json();
 - [ ] Tests updated
 - [ ] Commit: `refactor: replace got with native fetch()`
 
-### Krok 12: Replace `__dirname` everywhere (2h)
+### Krok 12: Replace `__dirname` everywhere
 
 ```typescript
 // Helper function (create in utils):
@@ -412,7 +402,7 @@ const __dirname = getDirname(import.meta.url);
 - [ ] Build działa
 - [ ] Commit: `refactor: replace __dirname with import.meta.url`
 
-### Krok 13: Full Build & Test (8h)
+### Krok 13: Full Build & Test
 
 ```bash
 # Clean everything
@@ -443,7 +433,7 @@ NODE_ENV=production yarn start
 - [ ] WebSocket działa
 - [ ] No ESM-related errors w console
 
-### Krok 14: Performance Check (2h)
+### Krok 14: Performance Check
 
 ```bash
 # Check bundle sizes

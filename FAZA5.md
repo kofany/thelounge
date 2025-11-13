@@ -1,7 +1,6 @@
 # FAZA 5: Code Formatting (Prettier)
 
 **Branch:** `update/prettier`
-**Szacowany czas:** 2-3 godziny
 **Ryzyko:** 🟡 ŚREDNIE (może zmienić formatowanie całego kodu)
 **Status:** ⏳ DO WYKONANIA
 

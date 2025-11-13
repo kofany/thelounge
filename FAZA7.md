@@ -1,7 +1,6 @@
 # FAZA 7: Express Framework
 
 **Branch:** `update/express-v5`
-**Szacowany czas:** 4-6 godzin
 **Ryzyko:** 🔴 WYSOKIE (backend framework - krytyczny dla działania app)
 **Status:** ⏳ DO WYKONANIA
 

@@ -1,7 +1,6 @@
 # FAZA 4: Testing Framework
 
 **Branch:** `update/testing-framework`
-**Szacowany czas:** 4-5 godzin
 **Ryzyko:** 🟡 ŚREDNIE (Chai major może łamać assercje)
 **Status:** ⏳ DO WYKONANIA
 

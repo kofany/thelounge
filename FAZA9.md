@@ -1,7 +1,6 @@
 # FAZA 9: Final Cleanup
 
 **Branch:** `update/final-deps`
-**Szacowany czas:** 3-5 godzin
 **Ryzyko:** 🟡 ŚREDNIE (multiple package updates)
 **Status:** ⏳ DO WYKONANIA
 

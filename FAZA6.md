@@ -1,7 +1,6 @@
 # FAZA 6: ESLint Ecosystem (NAJTRUDNIEJSZA!)
 
 **Branch:** `update/eslint-v9`
-**Szacowany czas:** 8-12 godzin (2-3 dni!)
 **Ryzyko:** 🔴 BARDZO WYSOKIE (największy breaking change!)
 **Status:** ⏳ DO WYKONANIA
 
@@ -26,11 +25,6 @@ Migracja do ESLint 9 z kompletnie nowym systemem konfiguracji (Flat Config). To 
 - Może wykryć SETKI nowych błędów w kodzie
 - @typescript-eslint 8 też ma breaking changes
 
-### ⏰ Realistic Timeline
-
-- **Day 1:** Migration config + instalacja pakietów (4h)
-- **Day 2:** Fixing lint errors (4-6h)
-- **Day 3:** Testing + cleanup (2-4h)
 
 ---
 

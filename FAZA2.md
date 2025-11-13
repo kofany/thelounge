@@ -1,7 +1,6 @@
 # FAZA 2: Webpack Build Chain
 
 **Branch:** `update/webpack-chain`
-**Szacowany czas:** 3-4 godziny
 **Ryzyko:** 🟡 ŚREDNIE (webpack-cli major update)
 **Status:** ⏳ DO WYKONANIA
 

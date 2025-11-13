@@ -1,7 +1,6 @@
 # FAZA 1: TypeScript Toolchain + Vue Ecosystem
 
 **Branch:** `update/typescript-toolchain-vue-ecosystem`
-**Szacowany czas:** 2-3 godziny
 **Ryzyko:** 🟢 NISKIE
 **Status:** ⏳ DO WYKONANIA
 
