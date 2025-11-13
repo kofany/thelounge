@@ -1,0 +1,560 @@
+(node:7390) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/user/thelounge/eslint.config.js?mtime=1763076791968 is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/user/thelounge/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[0m[0m
+[0m[4m/home/user/thelounge/client/components/ConfirmDialog.vue[24m[0m
+[0m  [2m64:3[22m  [31merror[39m  'confirmed' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/components/Draggable.vue[24m[0m
+[0m  [2m14:48[22m  [31merror[39m  'onUnmounted' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/components/NetworkForm.vue[24m[0m
+[0m  [2m459:32[22m  [31merror[39m  'network' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/components/NetworkList.vue[24m[0m
+[0m  [2m546:9[22m  [31merror[39m  'networkContainerRef' is assigned a value but never used  [2mno-unused-vars[22m[0m
+[0m  [2m547:9[22m  [31merror[39m  'channelRefs' is assigned a value but never used          [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/components/NetworkLobby.vue[24m[0m
+[0m  [2m54:14[22m  [31merror[39m  'ClientChan' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/components/ParsedMessage.vue[24m[0m
+[0m  [2m2:36[22m  [31merror[39m  'h' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/components/Settings/Account.vue[24m[0m
+[0m  [2m108:47[22m  [31merror[39m  'PropType' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/components/Username.vue[24m[0m
+[0m  [2m36:32[22m  [31merror[39m  'user' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/components/Windows/Help.vue[24m[0m
+[0m  [2m856:26[22m  [31merror[39m  'ref' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/components/Windows/SearchResults.vue[24m[0m
+[0m  [2m122:9[22m   [31merror[39m  'router' is assigned a value but never used  [2mno-unused-vars[22m[0m
+[0m  [2m244:17[22m  [31merror[39m  'message' is defined but never used          [2mno-unused-vars[22m[0m
+[0m  [2m244:41[22m  [31merror[39m  'id' is defined but never used               [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/autocompletion.ts[24m[0m
+[0m   [2m19:34[22m  [31merror[39m  'matches' is defined but never used             [2mno-unused-vars[22m[0m
+[0m   [2m37:34[22m  [31merror[39m  'matches' is defined but never used             [2mno-unused-vars[22m[0m
+[0m   [2m59:34[22m  [31merror[39m  'matches' is defined but never used             [2mno-unused-vars[22m[0m
+[0m   [2m74:34[22m  [31merror[39m  'matches' is defined but never used             [2mno-unused-vars[22m[0m
+[0m   [2m89:34[22m  [31merror[39m  'matches' is defined but never used             [2mno-unused-vars[22m[0m
+[0m  [2m122:34[22m  [31merror[39m  'matchingColorCodes' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/chan.ts[24m[0m
+[0m  [2m16:34[22m  [31merror[39m  '_' is assigned a value but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/eventbus.ts[24m[0m
+[0m  [2m10:32[22m  [31merror[39m  'evt' is defined but never used   [2mno-unused-vars[22m[0m
+[0m  [2m24:33[22m  [31merror[39m  'evt' is defined but never used   [2mno-unused-vars[22m[0m
+[0m  [2m28:40[22m  [31merror[39m  'evt' is defined but never used   [2mno-unused-vars[22m[0m
+[0m  [2m44:24[22m  [31merror[39m  'evts' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/router.ts[24m[0m
+[0m  [2m113:24[22m  [31merror[39m  'from' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/socket-events/auth.ts[24m[0m
+[0m  [2m9:12[22m  [31merror[39m  'Window' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/socket-events/msg.ts[24m[0m
+[0m  [2m101:12[22m  [31merror[39m  'NotificationOptions' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/socket.ts[24m[0m
+[0m  [2m19:12[22m  [31merror[39m  'Window' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/store.ts[24m[0m
+[0m   [2m16:2[22m   [31merror[39m  'Unsupported' is defined but never used            [2mno-unused-vars[22m[0m
+[0m   [2m17:2[22m   [31merror[39m  'Blocked' is defined but never used                [2mno-unused-vars[22m[0m
+[0m   [2m18:2[22m   [31merror[39m  'NoHttps' is defined but never used                [2mno-unused-vars[22m[0m
+[0m   [2m19:2[22m   [31merror[39m  'Granted' is defined but never used                [2mno-unused-vars[22m[0m
+[0m  [2m112:32[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m112:50[22m  [31merror[39m  'name' is defined but never used                   [2mno-unused-vars[22m[0m
+[0m  [2m113:25[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m114:3[22m   [31merror[39m  'networkUuid' is defined but never used            [2mno-unused-vars[22m[0m
+[0m  [2m115:3[22m   [31merror[39m  'channelName' is defined but never used            [2mno-unused-vars[22m[0m
+[0m  [2m120:16[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m120:34[22m  [31merror[39m  'id' is defined but never used                     [2mno-unused-vars[22m[0m
+[0m  [2m124:16[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m124:34[22m  [31merror[39m  'uuid' is defined but never used                   [2mno-unused-vars[22m[0m
+[0m  [2m125:17[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m126:8[22m   [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m126:22[22m  [31merror[39m  'getters' is defined but never used                [2mno-unused-vars[22m[0m
+[0m  [2m200:12[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m201:16[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m201:30[22m  [31merror[39m  'netChan' is defined but never used                [2mno-unused-vars[22m[0m
+[0m  [2m202:26[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m202:40[22m  [31merror[39m  'error' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m203:34[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m204:19[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m204:33[22m  [31merror[39m  'isAutoCompleting' is defined but never used       [2mno-unused-vars[22m[0m
+[0m  [2m205:14[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m205:28[22m  [31merror[39m  'payload' is defined but never used                [2mno-unused-vars[22m[0m
+[0m  [2m206:11[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m206:25[22m  [31merror[39m  'networks' is defined but never used               [2mno-unused-vars[22m[0m
+[0m  [2m207:11[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m207:25[22m  [31merror[39m  'mentions' is defined but never used               [2mno-unused-vars[22m[0m
+[0m  [2m209:16[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m209:30[22m  [31merror[39m  'networkUuid' is defined but never used            [2mno-unused-vars[22m[0m
+[0m  [2m211:3[22m   [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m212:3[22m   [31merror[39m  'sortFn' is defined but never used                 [2mno-unused-vars[22m[0m
+[0m  [2m212:12[22m  [31merror[39m  'a' is defined but never used                      [2mno-unused-vars[22m[0m
+[0m  [2m212:37[22m  [31merror[39m  'b' is defined but never used                      [2mno-unused-vars[22m[0m
+[0m  [2m214:19[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m216:3[22m   [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m217:3[22m   [31merror[39m  'pushNotificationState' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m219:22[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m219:36[22m  [31merror[39m  'serverConfiguration' is defined but never used    [2mno-unused-vars[22m[0m
+[0m  [2m220:11[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m220:25[22m  [31merror[39m  'payload' is defined but never used                [2mno-unused-vars[22m[0m
+[0m  [2m221:14[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m221:28[22m  [31merror[39m  'payload' is defined but never used                [2mno-unused-vars[22m[0m
+[0m  [2m222:18[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m222:32[22m  [31merror[39m  'payload' is defined but never used                [2mno-unused-vars[22m[0m
+[0m  [2m223:16[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m224:17[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m225:15[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m225:29[22m  [31merror[39m  'payload' is defined but never used                [2mno-unused-vars[22m[0m
+[0m  [2m226:14[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m226:28[22m  [31merror[39m  'payload' is defined but never used                [2mno-unused-vars[22m[0m
+[0m  [2m227:16[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m227:30[22m  [31merror[39m  'payload' is defined but never used                [2mno-unused-vars[22m[0m
+[0m  [2m228:21[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m228:35[22m  [31merror[39m  'payload' is defined but never used                [2mno-unused-vars[22m[0m
+[0m  [2m229:20[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m229:34[22m  [31merror[39m  'value' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m230:28[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m230:42[22m  [31merror[39m  'value' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m231:23[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m231:37[22m  [31merror[39m  'value' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m232:26[22m  [31merror[39m  'state' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m232:40[22m  [31merror[39m  'value' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m333:2[22m   [31merror[39m  'type' is defined but never used                   [2mno-unused-vars[22m[0m
+[0m  [2m334:2[22m   [31merror[39m  'payload' is defined but never used                [2mno-unused-vars[22m[0m
+[0m  [2m335:2[22m   [31merror[39m  'options' is defined but never used                [2mno-unused-vars[22m[0m
+[0m  [2m342:14[22m  [31merror[39m  'context' is defined but never used                [2mno-unused-vars[22m[0m
+[0m  [2m342:43[22m  [31merror[39m  'payload' is defined but never used                [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/types.d.ts[24m[0m
+[0m   [2m1:9[22m   [31merror[39m  'defineComponent' is defined but never used            [2mno-unused-vars[22m[0m
+[0m   [2m7:9[22m   [31merror[39m  'SharedConfiguration' is defined but never used        [2mno-unused-vars[22m[0m
+[0m   [2m7:30[22m  [31merror[39m  'LockedSharedConfiguration' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m10:11[22m  [31merror[39m  'LoungeWindow' is defined but never used               [2mno-unused-vars[22m[0m
+[0m  [2m36:6[22m   [31merror[39m  'InitClientChan' is defined but never used             [2mno-unused-vars[22m[0m
+[0m  [2m53:6[22m   [31merror[39m  'ClientMention' is defined but never used              [2mno-unused-vars[22m[0m
+[0m  [2m58:6[22m   [31merror[39m  'ClientLinkPreview' is defined but never used          [2mno-unused-vars[22m[0m
+[0m  [2m62:11[22m  [31merror[39m  'BeforeInstallPromptEvent' is defined but never used   [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/upload.ts[24m[0m
+[0m  [2m189:37[22m  [31merror[39m  'file' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/shims-vue.d.ts[24m[0m
+[0m  [2m4:2[22m  [31merror[39m  Definition for rule '@typescript-eslint/ban-types' was not found  [2m@typescript-eslint/ban-types[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/client.ts[24m[0m
+[0m  [2m389:27[22m  [31merror[39m  'token' is defined but never used    [2mno-unused-vars[22m[0m
+[0m  [2m431:39[22m  [31merror[39m  'success' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m856:23[22m  [31merror[39m  'this' is defined but never used     [2mno-unused-vars[22m[0m
+[0m  [2m873:2[22m   [31merror[39m  'this' is defined but never used     [2mno-unused-vars[22m[0m
+[0m  [2m874:2[22m   [31merror[39m  'irc' is defined but never used      [2mno-unused-vars[22m[0m
+[0m  [2m875:2[22m   [31merror[39m  'network' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/clientManager.ts[24m[0m
+[0m  [2m236:39[22m  [31merror[39m  'err' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/index.ts[24m[0m
+[0m  [2m1:1[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/start.ts[24m[0m
+[0m  [2m18:3[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/uninstall.ts[24m[0m
+[0m  [2m13:3[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m15:3[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/upgrade.ts[24m[0m
+[0m  [2m1:1[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/users/add.ts[24m[0m
+[0m  [2m22:3[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/users/edit.ts[24m[0m
+[0m  [2m20:3[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/users/index.ts[24m[0m
+[0m  [2m5:2[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m7:2[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/users/remove.ts[24m[0m
+[0m  [2m19:3[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/users/reset.ts[24m[0m
+[0m  [2m21:3[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/utils.ts[24m[0m
+[0m  [2m12:19[22m  [31merror[39m  'this' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/config.ts[24m[0m
+[0m   [2m1:1[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m73:6[22m  [31merror[39m  'TlsOptions' is defined but never used                                                                 [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/helper.ts[24m[0m
+[0m   [2m5:8[22m  [31merror[39m  'fs' is defined but never used                                                                         [2mno-unused-vars[22m[0m
+[0m  [2m60:3[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/identification.ts[24m[0m
+[0m  [2m18:32[22m  [31merror[39m  'identHandler' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m18:62[22m  [31merror[39m  'err' is defined but never used           [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/log.ts[24m[0m
+[0m  [2m31:14[22m  [31merror[39m  'error' is defined but never used      [2mno-unused-vars[22m[0m
+[0m  [2m31:21[22m  [31merror[39m  'result' is defined but never used     [2mno-unused-vars[22m[0m
+[0m  [2m31:29[22m  [31merror[39m  'isDefault' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/models/network.ts[24m[0m
+[0m  [2m55:1[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from 'no-use-before-define')[0m
+[0m  [2m57:2[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from 'no-use-before-define')[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/models/prefix.ts[24m[0m
+[0m  [2m37:14[22m  [31merror[39m  'value' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m37:35[22m  [31merror[39m  'index' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m37:50[22m  [31merror[39m  'array' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/auth.ts[24m[0m
+[0m   [2m7:2[22m   [31merror[39m  'manager' is defined but never used   [2mno-unused-vars[22m[0m
+[0m   [2m8:2[22m   [31merror[39m  'client' is defined but never used    [2mno-unused-vars[22m[0m
+[0m   [2m9:2[22m   [31merror[39m  'user' is defined but never used      [2mno-unused-vars[22m[0m
+[0m  [2m10:2[22m   [31merror[39m  'password' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m11:2[22m   [31merror[39m  'callback' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m11:13[22m  [31merror[39m  'success' is defined but never used   [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/auth/ldap.ts[24m[0m
+[0m   [2m63:13[22m  [31merror[39m  'success' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m102:68[22m  [31merror[39m  'success' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m120:70[22m  [31merror[39m  'success' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/inputs/ignorelist.ts[24m[0m
+[0m  [2m8:60[22m  [31merror[39m  '_cmd' is defined but never used   [2mno-unused-vars[22m[0m
+[0m  [2m8:66[22m  [31merror[39m  '_args' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/inputs/index.ts[24m[0m
+[0m   [2m9:2[22m   [31merror[39m  'this' is defined but never used     [2mno-unused-vars[22m[0m
+[0m  [2m10:2[22m   [31merror[39m  'network' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m11:2[22m   [31merror[39m  'chan' is defined but never used     [2mno-unused-vars[22m[0m
+[0m  [2m12:2[22m   [31merror[39m  'cmd' is defined but never used      [2mno-unused-vars[22m[0m
+[0m  [2m13:2[22m   [31merror[39m  'args' is defined but never used     [2mno-unused-vars[22m[0m
+[0m  [2m18:10[22m  [31merror[39m  'network' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m18:28[22m  [31merror[39m  'chan' is defined but never used     [2mno-unused-vars[22m[0m
+[0m  [2m18:40[22m  [31merror[39m  'cmd' is defined but never used      [2mno-unused-vars[22m[0m
+[0m  [2m18:53[22m  [31merror[39m  'args' is defined but never used     [2mno-unused-vars[22m[0m
+[0m  [2m25:3[22m   [31merror[39m  'pub' is defined but never used      [2mno-unused-vars[22m[0m
+[0m  [2m26:3[22m   [31merror[39m  'netChan' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m27:3[22m   [31merror[39m  'cmd' is defined but never used      [2mno-unused-vars[22m[0m
+[0m  [2m28:3[22m   [31merror[39m  'args' is defined but never used     [2mno-unused-vars[22m[0m
+[0m  [2m81:14[22m  [31merror[39m  'network' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m81:32[22m  [31merror[39m  'chan' is defined but never used     [2mno-unused-vars[22m[0m
+[0m  [2m81:44[22m  [31merror[39m  'cmd' is defined but never used      [2mno-unused-vars[22m[0m
+[0m  [2m81:57[22m  [31merror[39m  'args' is defined but never used     [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/irc-events/link.ts[24m[0m
+[0m  [2m80:32[22m  [31merror[39m  'preview' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/messageStorage/types.d.ts[24m[0m
+[0m   [2m1:14[22m  [31merror[39m  'Database' is defined but never used  [2mno-unused-vars[22m[0m
+[0m   [2m6:8[22m   [31merror[39m  'Client' is defined but never used    [2mno-unused-vars[22m[0m
+[0m  [2m23:8[22m   [31merror[39m  'network' is defined but never used   [2mno-unused-vars[22m[0m
+[0m  [2m23:26[22m  [31merror[39m  'channel' is defined but never used   [2mno-unused-vars[22m[0m
+[0m  [2m23:44[22m  [31merror[39m  'msg' is defined but never used       [2mno-unused-vars[22m[0m
+[0m  [2m25:16[22m  [31merror[39m  'network' is defined but never used   [2mno-unused-vars[22m[0m
+[0m  [2m25:34[22m  [31merror[39m  'channel' is defined but never used   [2mno-unused-vars[22m[0m
+[0m  [2m27:14[22m  [31merror[39m  'network' is defined but never used   [2mno-unused-vars[22m[0m
+[0m  [2m27:32[22m  [31merror[39m  'channel' is defined but never used   [2mno-unused-vars[22m[0m
+[0m  [2m27:50[22m  [31merror[39m  'nextID' is defined but never used    [2mno-unused-vars[22m[0m
+[0m  [2m32:24[22m  [31merror[39m  'query' is defined but never used     [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/packages/index.ts[24m[0m
+[0m  [2m15:18[22m  [31merror[39m  'packageApis' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/storage.ts[24m[0m
+[0m  [2m55:44[22m  [31merror[39m  'url' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/uploader.ts[24m[0m
+[0m  [2m241:7[22m   [31merror[39m  'arg0' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m242:7[22m   [31merror[39m  'arg1' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m242:15[22m  [31merror[39m  'err' is defined but never used   [2mno-unused-vars[22m[0m
+[0m  [2m244:15[22m  [31merror[39m  'arg0' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m245:20[22m  [31merror[39m  'arg0' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m246:13[22m  [31merror[39m  'arg0' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/server.ts[24m[0m
+[0m    [2m66:9[22m   [31merror[39m  'callback' is defined but never used                                                                                 [2mno-unused-vars[22m[0m
+[0m    [2m66:20[22m  [31merror[39m  'err' is defined but never used                                                                                      [2mno-unused-vars[22m[0m
+[0m   [2m197:2[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/restrict-template-expressions')[0m
+[0m   [2m242:5[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/restrict-template-expressions')[0m
+[0m   [2m335:29[22m  [31merror[39m  'err' is defined but never used                                                                                      [2mno-unused-vars[22m[0m
+[0m  [2m1113:50[22m  [31merror[39m  'hostname' is defined but never used                                                                                 [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/storageCleaner.ts[24m[0m
+[0m  [2m144:28[22m  [31merror[39m  '_' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/types/modules/irc-framework.d.ts[24m[0m
+[0m    [2m1:1[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from 'no-use-before-define')[0m
+[0m   [2m22:11[22m  [31merror[39m  'data' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m   [2m33:11[22m  [31merror[39m  'message' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m104:15[22m  [31merror[39m  'options' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m116:17[22m  [31merror[39m  'cap' is defined but never used                                                          [2mno-unused-vars[22m[0m
+[0m  [2m119:25[22m  [31merror[39m  'target' is defined but never used                                                       [2mno-unused-vars[22m[0m
+[0m  [2m124:13[22m  [31merror[39m  'feature' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m125:13[22m  [31merror[39m  'feature' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m129:30[22m  [31merror[39m  'transport' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m134:4[22m   [31merror[39m  'user_options' is defined but never used                                                 [2mno-unused-vars[22m[0m
+[0m  [2m146:29[22m  [31merror[39m  'capability' is defined but never used                                                   [2mno-unused-vars[22m[0m
+[0m  [2m148:7[22m   [31merror[39m  'a' is defined but never used                                                            [2mno-unused-vars[22m[0m
+[0m  [2m150:11[22m  [31merror[39m  'connect_options' is defined but never used                                              [2mno-unused-vars[22m[0m
+[0m  [2m168:10[22m  [31merror[39m  'raw_data_line' is defined but never used                                                [2mno-unused-vars[22m[0m
+[0m  [2m170:16[22m  [31merror[39m  'parameters' is defined but never used                                                   [2mno-unused-vars[22m[0m
+[0m  [2m172:13[22m  [31merror[39m  'parameters' is defined but never used                                                   [2mno-unused-vars[22m[0m
+[0m  [2m174:8[22m   [31merror[39m  'quit_message' is defined but never used                                                 [2mno-unused-vars[22m[0m
+[0m  [2m176:8[22m   [31merror[39m  'message' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m178:14[22m  [31merror[39m  'nick' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m  [2m180:15[22m  [31merror[39m  'commandName' is defined but never used                                                  [2mno-unused-vars[22m[0m
+[0m  [2m180:36[22m  [31merror[39m  'target' is defined but never used                                                       [2mno-unused-vars[22m[0m
+[0m  [2m180:52[22m  [31merror[39m  'message' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m182:7[22m   [31merror[39m  'target' is defined but never used                                                       [2mno-unused-vars[22m[0m
+[0m  [2m182:23[22m  [31merror[39m  'message' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m184:10[22m  [31merror[39m  'target' is defined but never used                                                       [2mno-unused-vars[22m[0m
+[0m  [2m184:26[22m  [31merror[39m  'message' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m186:8[22m   [31merror[39m  'channel' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m186:25[22m  [31merror[39m  'key' is defined but never used                                                          [2mno-unused-vars[22m[0m
+[0m  [2m188:8[22m   [31merror[39m  'channel' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m188:25[22m  [31merror[39m  'message' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m190:8[22m   [31merror[39m  'channel' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m190:25[22m  [31merror[39m  'mode' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m  [2m190:39[22m  [31merror[39m  'extra_args' is defined but never used                                                   [2mno-unused-vars[22m[0m
+[0m  [2m192:14[22m  [31merror[39m  'channel' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m192:31[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m192:37[22m  [31merror[39m  'e' is defined but never used                                                            [2mno-unused-vars[22m[0m
+[0m  [2m195:10[22m  [31merror[39m  'channel' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m195:27[22m  [31merror[39m  'nick' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m  [2m197:13[22m  [31merror[39m  'channel' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m197:30[22m  [31merror[39m  'mask' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m  [2m199:16[22m  [31merror[39m  'channel' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m199:33[22m  [31merror[39m  'mask' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m  [2m201:11[22m  [31merror[39m  'channel' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m201:28[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m201:34[22m  [31merror[39m  'e' is defined but never used                                                            [2mno-unused-vars[22m[0m
+[0m  [2m203:7[22m   [31merror[39m  'channel' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m203:24[22m  [31merror[39m  'mask' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m  [2m205:9[22m   [31merror[39m  'channel' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m205:26[22m  [31merror[39m  'mask' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m  [2m207:12[22m  [31merror[39m  'channel' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m207:29[22m  [31merror[39m  'newTopic' is defined but never used                                                     [2mno-unused-vars[22m[0m
+[0m  [2m209:15[22m  [31merror[39m  'target' is defined but never used                                                       [2mno-unused-vars[22m[0m
+[0m  [2m209:31[22m  [31merror[39m  'type' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m  [2m209:48[22m  [31merror[39m  'params' is defined but never used                                                       [2mno-unused-vars[22m[0m
+[0m  [2m211:16[22m  [31merror[39m  'target' is defined but never used                                                       [2mno-unused-vars[22m[0m
+[0m  [2m211:32[22m  [31merror[39m  'type' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m  [2m211:49[22m  [31merror[39m  'params' is defined but never used                                                       [2mno-unused-vars[22m[0m
+[0m  [2m213:10[22m  [31merror[39m  'target' is defined but never used                                                       [2mno-unused-vars[22m[0m
+[0m  [2m213:26[22m  [31merror[39m  'message' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m215:10[22m  [31merror[39m  'target' is defined but never used                                                       [2mno-unused-vars[22m[0m
+[0m  [2m215:26[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m215:32[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m217:9[22m   [31merror[39m  'nick' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m  [2m217:23[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m217:28[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m224:7[22m   [31merror[39m  'target' is defined but never used                                                       [2mno-unused-vars[22m[0m
+[0m  [2m224:23[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m224:28[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m226:11[22m  [31merror[39m  'params' is defined but never used                                                       [2mno-unused-vars[22m[0m
+[0m  [2m228:11[22m  [31merror[39m  'channel_name' is defined but never used                                                 [2mno-unused-vars[22m[0m
+[0m  [2m231:4[22m   [31merror[39m  'match_regex' is defined but never used                                                  [2mno-unused-vars[22m[0m
+[0m  [2m232:4[22m   [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m232:9[22m   [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m233:4[22m   [31merror[39m  'message_type' is defined but never used                                                 [2mno-unused-vars[22m[0m
+[0m  [2m236:15[22m  [31merror[39m  'match_regex' is defined but never used                                                  [2mno-unused-vars[22m[0m
+[0m  [2m236:36[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m236:41[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m238:16[22m  [31merror[39m  'match_regex' is defined but never used                                                  [2mno-unused-vars[22m[0m
+[0m  [2m238:37[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m238:42[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m240:15[22m  [31merror[39m  'match_regex' is defined but never used                                                  [2mno-unused-vars[22m[0m
+[0m  [2m240:36[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m240:41[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m242:18[22m  [31merror[39m  'str' is defined but never used                                                          [2mno-unused-vars[22m[0m
+[0m  [2m242:31[22m  [31merror[39m  'block_size' is defined but never used                                                   [2mno-unused-vars[22m[0m
+[0m  [2m244:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m244:34[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m244:39[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m246:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m246:24[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m246:29[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m248:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m248:25[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m248:30[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m250:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m250:31[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m250:36[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m252:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m252:25[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m252:30[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m254:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m254:25[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m254:30[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m256:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m256:25[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m256:30[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m258:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m258:28[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m258:33[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m260:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m260:27[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m260:32[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m262:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m262:25[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m262:30[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m264:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m264:33[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m264:38[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m266:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m266:37[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m266:42[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m268:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m268:41[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m268:46[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m270:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m270:35[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m270:40[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m272:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m272:26[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m272:31[22m  [31merror[39m  'message' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m274:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m274:32[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m274:37[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m276:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m276:33[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m276:38[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m278:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m278:30[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m278:35[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m282:15[22m  [31merror[39m  'command' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m282:36[22m  [31merror[39m  'args' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m  [2m296:9[22m   [31merror[39m  'e' is defined but never used                                                            [2mno-unused-vars[22m[0m
+[0m  [2m338:15[22m  [31merror[39m  'irc_client' is defined but never used                                                   [2mno-unused-vars[22m[0m
+[0m  [2m338:35[22m  [31merror[39m  'channel_name' is defined but never used                                                 [2mno-unused-vars[22m[0m
+[0m  [2m338:57[22m  [31merror[39m  'key' is defined but never used                                                          [2mno-unused-vars[22m[0m
+[0m  [2m344:7[22m   [31merror[39m  'message' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m346:10[22m  [31merror[39m  'message' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m348:8[22m   [31merror[39m  'key' is defined but never used                                                          [2mno-unused-vars[22m[0m
+[0m  [2m350:8[22m   [31merror[39m  'message' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m352:8[22m   [31merror[39m  'mode' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m  [2m352:22[22m  [31merror[39m  'extra_args' is defined but never used                                                   [2mno-unused-vars[22m[0m
+[0m  [2m354:11[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m354:16[22m  [31merror[39m  'e' is defined but never used                                                            [2mno-unused-vars[22m[0m
+[0m  [2m356:7[22m   [31merror[39m  'mask' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m  [2m358:9[22m   [31merror[39m  'mask' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m  [2m371:9[22m   [31merror[39m  'target_chan' is defined but never used                                                  [2mno-unused-vars[22m[0m
+[0m  [2m371:43[22m  [31merror[39m  'opts' is defined but never used                                                         [2mno-unused-vars[22m[0m
+[0m  [2m375:15[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m375:20[22m  [31merror[39m  'channel' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m  [2m377:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m377:33[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m377:38[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m379:6[22m   [31merror[39m  'eventType' is defined but never used                                                    [2mno-unused-vars[22m[0m
+[0m  [2m379:34[22m  [31merror[39m  'cb' is defined but never used                                                           [2mno-unused-vars[22m[0m
+[0m  [2m379:39[22m  [31merror[39m  'event' is defined but never used                                                        [2mno-unused-vars[22m[0m
+[0m  [2m424:20[22m  [31merror[39m  'options' is defined but never used                                                      [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/shared/types/chan.ts[24m[0m
+[0m   [2m2:9[22m  [31merror[39m  'SharedUser' is defined but never used         [2mno-unused-vars[22m[0m
+[0m   [2m3:9[22m  [31merror[39m  'SharedNetworkChan' is defined but never used  [2mno-unused-vars[22m[0m
+[0m   [2m6:2[22m  [31merror[39m  'CHANNEL' is defined but never used            [2mno-unused-vars[22m[0m
+[0m   [2m7:2[22m  [31merror[39m  'LOBBY' is defined but never used              [2mno-unused-vars[22m[0m
+[0m   [2m8:2[22m  [31merror[39m  'QUERY' is defined but never used              [2mno-unused-vars[22m[0m
+[0m   [2m9:2[22m  [31merror[39m  'SPECIAL' is defined but never used            [2mno-unused-vars[22m[0m
+[0m  [2m13:2[22m  [31merror[39m  'BANLIST' is defined but never used            [2mno-unused-vars[22m[0m
+[0m  [2m14:2[22m  [31merror[39m  'INVITELIST' is defined but never used         [2mno-unused-vars[22m[0m
+[0m  [2m15:2[22m  [31merror[39m  'CHANNELLIST' is defined but never used        [2mno-unused-vars[22m[0m
+[0m  [2m16:2[22m  [31merror[39m  'IGNORELIST' is defined but never used         [2mno-unused-vars[22m[0m
+[0m  [2m20:2[22m  [31merror[39m  'PARTED' is defined but never used             [2mno-unused-vars[22m[0m
+[0m  [2m21:2[22m  [31merror[39m  'JOINED' is defined but never used             [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/shared/types/msg.ts[24m[0m
+[0m   [2m2:2[22m  [31merror[39m  'UNHANDLED' is defined but never used        [2mno-unused-vars[22m[0m
+[0m   [2m3:2[22m  [31merror[39m  'ACTION' is defined but never used           [2mno-unused-vars[22m[0m
+[0m   [2m4:2[22m  [31merror[39m  'AWAY' is defined but never used             [2mno-unused-vars[22m[0m
+[0m   [2m5:2[22m  [31merror[39m  'BACK' is defined but never used             [2mno-unused-vars[22m[0m
+[0m   [2m6:2[22m  [31merror[39m  'ERROR' is defined but never used            [2mno-unused-vars[22m[0m
+[0m   [2m7:2[22m  [31merror[39m  'INVITE' is defined but never used           [2mno-unused-vars[22m[0m
+[0m   [2m8:2[22m  [31merror[39m  'JOIN' is defined but never used             [2mno-unused-vars[22m[0m
+[0m   [2m9:2[22m  [31merror[39m  'KICK' is defined but never used             [2mno-unused-vars[22m[0m
+[0m  [2m10:2[22m  [31merror[39m  'LOGIN' is defined but never used            [2mno-unused-vars[22m[0m
+[0m  [2m11:2[22m  [31merror[39m  'LOGOUT' is defined but never used           [2mno-unused-vars[22m[0m
+[0m  [2m12:2[22m  [31merror[39m  'MESSAGE' is defined but never used          [2mno-unused-vars[22m[0m
+[0m  [2m13:2[22m  [31merror[39m  'MODE' is defined but never used             [2mno-unused-vars[22m[0m
+[0m  [2m14:2[22m  [31merror[39m  'MODE_CHANNEL' is defined but never used     [2mno-unused-vars[22m[0m
+[0m  [2m15:2[22m  [31merror[39m  'MODE_USER' is defined but never used        [2mno-unused-vars[22m[0m
+[0m  [2m16:2[22m  [31merror[39m  'MONOSPACE_BLOCK' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m17:2[22m  [31merror[39m  'NICK' is defined but never used             [2mno-unused-vars[22m[0m
+[0m  [2m18:2[22m  [31merror[39m  'NOTICE' is defined but never used           [2mno-unused-vars[22m[0m
+[0m  [2m19:2[22m  [31merror[39m  'PART' is defined but never used             [2mno-unused-vars[22m[0m
+[0m  [2m20:2[22m  [31merror[39m  'QUIT' is defined but never used             [2mno-unused-vars[22m[0m
+[0m  [2m21:2[22m  [31merror[39m  'CTCP' is defined but never used             [2mno-unused-vars[22m[0m
+[0m  [2m22:2[22m  [31merror[39m  'CTCP_REQUEST' is defined but never used     [2mno-unused-vars[22m[0m
+[0m  [2m23:2[22m  [31merror[39m  'CHGHOST' is defined but never used          [2mno-unused-vars[22m[0m
+[0m  [2m24:2[22m  [31merror[39m  'TOPIC' is defined but never used            [2mno-unused-vars[22m[0m
+[0m  [2m25:2[22m  [31merror[39m  'TOPIC_SET_BY' is defined but never used     [2mno-unused-vars[22m[0m
+[0m  [2m26:2[22m  [31merror[39m  'WHOIS' is defined but never used            [2mno-unused-vars[22m[0m
+[0m  [2m27:2[22m  [31merror[39m  'RAW' is defined but never used              [2mno-unused-vars[22m[0m
+[0m  [2m28:2[22m  [31merror[39m  'PLUGIN' is defined but never used           [2mno-unused-vars[22m[0m
+[0m  [2m29:2[22m  [31merror[39m  'WALLOPS' is defined but never used          [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/shared/types/socket-events.d.ts[24m[0m
+[0m   [2m19:25[22m  [31merror[39m  'data' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m   [2m22:11[22m  [31merror[39m  'ServerToClientEvents' is defined but never used  [2mno-unused-vars[22m[0m
+[0m   [2m23:17[22m  [31merror[39m  'serverHash' is defined but never used            [2mno-unused-vars[22m[0m
+[0m   [2m27:18[22m  [31merror[39m  'token' is defined but never used                 [2mno-unused-vars[22m[0m
+[0m   [2m64:9[22m   [31merror[39m  'id' is defined but never used                    [2mno-unused-vars[22m[0m
+[0m   [2m88:21[22m  [31merror[39m  'response' is defined but never used              [2mno-unused-vars[22m[0m
+[0m   [2m92:10[22m  [31merror[39m  'error' is defined but never used                 [2mno-unused-vars[22m[0m
+[0m  [2m115:11[22m  [31merror[39m  'ClientToServerEvents' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m126:9[22m   [31merror[39m  'channelId' is defined but never used             [2mno-unused-vars[22m[0m
+[0m  [2m133:18[22m  [31merror[39m  'token' is defined but never used                 [2mno-unused-vars[22m[0m
+[0m  [2m151:23[22m  [31merror[39m  'msgId' is defined but never used                 [2mno-unused-vars[22m[0m
+[0m  [2m165:18[22m  [31merror[39m  'uuid' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m167:19[22m  [31merror[39m  'data' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m168:18[22m  [31merror[39m  'data' is defined but never used                  [2mno-unused-vars[22m[0m
+[0m  [2m170:15[22m  [31merror[39m  'token' is defined but never used                 [2mno-unused-vars[22m[0m
+[0m  [2m177:11[22m  [31merror[39m  'InterServerEvents' is defined but never used     [2mno-unused-vars[22m[0m
+[0m  [2m179:11[22m  [31merror[39m  'SocketData' is defined but never used            [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/client.ts[24m[0m
+[0m  [2m50:9[22m  [31merror[39m  'channel' is assigned a value but never used  [2mno-unused-vars[22m[0m
+[0m  [2m81:9[22m  [31merror[39m  'channel' is assigned a value but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/client/js/helpers/parse.ts[24m[0m
+[0m  [2m5:9[22m  [31merror[39m  'ClientMessage' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/commands/mode.ts[24m[0m
+[0m  [2m40:15[22m  [31merror[39m  'type' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m42:12[22m  [31merror[39m  'args' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/plugins/auth/ldap.ts[24m[0m
+[0m  [2m20:2[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-base-to-string')[0m
+[0m  [2m37:48[22m  [31merror[39m  'error' is defined but never used                                                                        [2mno-unused-vars[22m[0m
+[0m  [2m48:46[22m  [31merror[39m  'error' is defined but never used                                                                        [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/plugins/packages/indexTest.ts[24m[0m
+[0m  [2m16:3[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/plugins/sqlite.ts[24m[0m
+[0m  [2m260:11[22m  [31merror[39m  'db_get_mult' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/util.ts[24m[0m
+[0m  [2m36:33[22m  [31merror[39m  'log' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[31m[1m✖ 430 problems (430 errors, 0 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[31m[1m  20 errors and 0 warnings potentially fixable with the `--fix` option.[22m[39m[0m
+[0m[31m[1m[22m[39m[0m

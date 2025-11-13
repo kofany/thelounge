@@ -1,0 +1,12 @@
+! Corepack is about to download https://repo.yarnpkg.com/4.11.0/packages/yarnpkg-cli/bin/yarn.js
+Internal Error: thelounge@workspace:.: This package doesn't seem to be present in your lockfile; run "yarn install" to update the lockfile
+    at jR.getCandidates (/root/.cache/node/corepack/v1/yarn/4.11.0/yarn.js:204:4607)
+    at rm.getCandidates (/root/.cache/node/corepack/v1/yarn/4.11.0/yarn.js:141:1311)
+    at /root/.cache/node/corepack/v1/yarn/4.11.0/yarn.js:209:8420
+    at qE (/root/.cache/node/corepack/v1/yarn/4.11.0/yarn.js:140:45054)
+    at mt (/root/.cache/node/corepack/v1/yarn/4.11.0/yarn.js:209:8400)
+    at async Promise.allSettled (index 0)
+    at async Uu (/root/.cache/node/corepack/v1/yarn/4.11.0/yarn.js:140:44382)
+    at async /root/.cache/node/corepack/v1/yarn/4.11.0/yarn.js:209:9166
+    at async ki.startProgressPromise (/root/.cache/node/corepack/v1/yarn/4.11.0/yarn.js:140:129679)
+    at async t.resolveEverything (/root/.cache/node/corepack/v1/yarn/4.11.0/yarn.js:209:7138)

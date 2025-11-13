@@ -17,7 +17,7 @@ const serverPort = 1389;
 
 function normalizeDN(dn: string) {
 	// warning is bogus in this case
-	// eslint-disable-next-line @typescript-eslint/no-base-to-string
+	 
 	return ldap.parseDN(dn).toString();
 }
 

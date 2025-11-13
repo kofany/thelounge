@@ -142,6 +142,19 @@ const tsRules = {
 	"no-shadow": "off",
 	"@typescript-eslint/no-shadow": ["error"],
 	"@typescript-eslint/no-redundant-type-constituents": "off",
+	// Use TypeScript-specific no-unused-vars which handles types better
+	"no-unused-vars": "off",
+	"@typescript-eslint/no-unused-vars": [
+		"error",
+		{
+			args: "all",
+			argsIgnorePattern: "^_",
+			caughtErrors: "none",
+			destructuredArrayIgnorePattern: "^_",
+			ignoreRestSiblings: true,
+			varsIgnorePattern: "^_",
+		},
+	],
 };
 
 // TODO: eventually remove these

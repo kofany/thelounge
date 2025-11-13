@@ -1,0 +1,393 @@
+(node:6109) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/user/thelounge/eslint.config.js?mtime=1763076426453 is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/user/thelounge/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[0m[0m
+[0m[4m/home/user/thelounge/client/components/App.vue[24m[0m
+[0m  [2m159:30[22m  [31merror[39m  'setTimeout' is not defined    [2mno-undef[22m[0m
+[0m  [2m162:29[22m  [31merror[39m  'setTimeout' is not defined    [2mno-undef[22m[0m
+[0m  [2m176:5[22m   [31merror[39m  'clearTimeout' is not defined  [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/components/Settings/Notifications.vue[24m[0m
+[0m  [2m163:16[22m  [31merror[39m  'navigator' is not defined  [2mno-undef[22m[0m
+[0m  [2m165:6[22m   [31merror[39m  'navigator' is not defined  [2mno-undef[22m[0m
+[0m  [2m169:20[22m  [31merror[39m  'Audio' is not defined      [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/components/Windows/Help.vue[24m[0m
+[0m  [2m869:19[22m  [31merror[39m  'navigator' is not defined  [2mno-undef[22m[0m
+[0m  [2m870:19[22m  [31merror[39m  'navigator' is not defined  [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/helpers/isIgnoredKeybind.ts[24m[0m
+[0m  [2m1:37[22m  [31merror[39m  'Mousetrap' is not defined  [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/loading-error-handlers.js[24m[0m
+[0m   [2m17:77[22m  [31merror[39m  'location' is not defined      [2mno-undef[22m[0m
+[0m   [2m27:29[22m  [31merror[39m  'setTimeout' is not defined    [2mno-undef[22m[0m
+[0m   [2m78:35[22m  [31merror[39m  'localStorage' is not defined  [2mno-undef[22m[0m
+[0m  [2m104:11[22m  [31merror[39m  'e' is defined but never used  [2mno-unused-vars[22m[0m
+[0m  [2m109:25[22m  [31merror[39m  'navigator' is not defined     [2mno-undef[22m[0m
+[0m  [2m110:3[22m   [31merror[39m  'navigator' is not defined     [2mno-undef[22m[0m
+[0m  [2m122:5[22m   [31merror[39m  'navigator' is not defined     [2mno-undef[22m[0m
+[0m  [2m126:3[22m   [31merror[39m  'navigator' is not defined     [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/router.ts[24m[0m
+[0m  [2m173:24[22m  [31merror[39m  'navigator' is not defined  [2mno-undef[22m[0m
+[0m  [2m174:2[22m   [31merror[39m  'navigator' is not defined  [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/socket-events/changelog.ts[24m[0m
+[0m  [2m28:4[22m  [31merror[39m  'setTimeout' is not defined  [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/socket-events/msg.ts[24m[0m
+[0m   [2m12:12[22m  [31merror[39m  'Audio' is not defined      [2mno-undef[22m[0m
+[0m  [2m161:7[22m   [31merror[39m  'navigator' is not defined  [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/store.ts[24m[0m
+[0m  [2m25:13[22m  [31merror[39m  The two values in this comparison do not have a shared enum type  [2m@typescript-eslint/no-unsafe-enum-comparison[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/upload.ts[24m[0m
+[0m    [2m9:18[22m  [31merror[39m  'NodeJS' is not defined                                                                                   [2mno-undef[22m[0m
+[0m  [2m175:25[22m  [31merror[39m  'setInterval' is not defined                                                                              [2mno-undef[22m[0m
+[0m  [2m196:20[22m  [31merror[39m  'Image' is not defined                                                                                    [2mno-undef[22m[0m
+[0m  [2m217:21[22m  [31merror[39m  'fileReader.result' may use Object's default stringification format ('[object Object]') when stringified  [2m@typescript-eslint/no-base-to-string[22m[0m
+[0m  [2m272:4[22m   [31merror[39m  'clearInterval' is not defined                                                                            [2mno-undef[22m[0m
+[0m  [2m287:32[22m  [31merror[39m  'location' is not defined                                                                                 [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/js/webpush.ts[24m[0m
+[0m  [2m12:27[22m  [31merror[39m  'navigator' is not defined  [2mno-undef[22m[0m
+[0m  [2m16:2[22m   [31merror[39m  'navigator' is not defined  [2mno-undef[22m[0m
+[0m  [2m52:2[22m   [31merror[39m  'navigator' is not defined  [2mno-undef[22m[0m
+[0m  [2m87:3[22m   [31merror[39m  'location' is not defined   [2mno-undef[22m[0m
+[0m  [2m88:3[22m   [31merror[39m  'location' is not defined   [2mno-undef[22m[0m
+[0m  [2m89:3[22m   [31merror[39m  'location' is not defined   [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/service-worker.js[24m[0m
+[0m    [2m9:1[22m   [31merror[39m  'self' is not defined      [2mno-undef[22m[0m
+[0m   [2m10:2[22m   [31merror[39m  'self' is not defined      [2mno-undef[22m[0m
+[0m   [2m13:1[22m   [31merror[39m  'self' is not defined      [2mno-undef[22m[0m
+[0m   [2m15:3[22m   [31merror[39m  'caches' is not defined    [2mno-undef[22m[0m
+[0m   [2m19:63[22m  [31merror[39m  'caches' is not defined    [2mno-undef[22m[0m
+[0m   [2m24:18[22m  [31merror[39m  'self' is not defined      [2mno-undef[22m[0m
+[0m   [2m27:1[22m   [31merror[39m  'self' is not defined      [2mno-undef[22m[0m
+[0m   [2m33:16[22m  [31merror[39m  'self' is not defined      [2mno-undef[22m[0m
+[0m   [2m51:22[22m  [31merror[39m  'caches' is not defined    [2mno-undef[22m[0m
+[0m   [2m63:13[22m  [31merror[39m  'Response' is not defined  [2mno-undef[22m[0m
+[0m   [2m72:24[22m  [31merror[39m  'fetch' is not defined     [2mno-undef[22m[0m
+[0m  [2m105:23[22m  [31merror[39m  'caches' is not defined    [2mno-undef[22m[0m
+[0m  [2m112:1[22m   [31merror[39m  'self' is not defined      [2mno-undef[22m[0m
+[0m  [2m116:1[22m   [31merror[39m  'self' is not defined      [2mno-undef[22m[0m
+[0m  [2m131:3[22m   [31merror[39m  'self' is not defined      [2mno-undef[22m[0m
+[0m  [2m140:12[22m  [31merror[39m  'self' is not defined      [2mno-undef[22m[0m
+[0m  [2m151:1[22m   [31merror[39m  'self' is not defined      [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/client/shims-vue.d.ts[24m[0m
+[0m  [2m4:2[22m   [31merror[39m  Definition for rule '@typescript-eslint/ban-types' was not found                                                                                                                                                                                                                                                                                                                           [2m@typescript-eslint/ban-types[22m[0m
+[0m  [2m5:35[22m  [31merror[39m  The `{}` ("empty object") type allows any non-nullish value, including literals like `0` and `""`.[0m
+[0m- If that's what you want, disable this lint rule with an inline comment or configure the 'allowObjectTypes' rule option.[0m
+[0m- If you want a type meaning "any object", you probably want `object` instead.[0m
+[0m- If you want a type meaning "any value", you probably want `unknown` instead  [2m@typescript-eslint/no-empty-object-type[22m[0m
+[0m  [2m5:39[22m  [31merror[39m  The `{}` ("empty object") type allows any non-nullish value, including literals like `0` and `""`.[0m
+[0m- If that's what you want, disable this lint rule with an inline comment or configure the 'allowObjectTypes' rule option.[0m
+[0m- If you want a type meaning "any object", you probably want `object` instead.[0m
+[0m- If you want a type meaning "any value", you probably want `unknown` instead  [2m@typescript-eslint/no-empty-object-type[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/scripts/changelog.js[24m[0m
+[0m  [2m95:11[22m  [31merror[39m  'e' is defined but never used  [2mno-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/client.ts[24m[0m
+[0m  [2m204:5[22m  [31merror[39m  'setTimeout' is not defined  [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/index.ts[24m[0m
+[0m   [2m1:1[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m40:20[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m  [2m41:20[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m  [2m42:20[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m  [2m43:20[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m  [2m44:20[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m  [2m45:20[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m  [2m48:2[22m   [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/install.ts[24m[0m
+[0m  [2m109:15[22m  [31merror[39m  Expected an error object to be thrown  [2m@typescript-eslint/only-throw-error[22m[0m
+[0m  [2m114:13[22m  [31merror[39m  Expected an error object to be thrown  [2m@typescript-eslint/only-throw-error[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/start.ts[24m[0m
+[0m  [2m18:3[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m19:18[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/uninstall.ts[24m[0m
+[0m  [2m13:3[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m14:14[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m  [2m15:3[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m16:16[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/upgrade.ts[24m[0m
+[0m   [2m1:1[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m14:14[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m  [2m15:16[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/users/add.ts[24m[0m
+[0m  [2m22:3[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m23:25[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/users/edit.ts[24m[0m
+[0m  [2m20:3[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m21:25[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/users/index.ts[24m[0m
+[0m  [2m5:2[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m6:8[22m   [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m  [2m7:2[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m8:10[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/users/remove.ts[24m[0m
+[0m  [2m19:3[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m20:25[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/users/reset.ts[24m[0m
+[0m  [2m21:3[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m22:25[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/command-line/utils.ts[24m[0m
+[0m  [2m196:13[22m  [31merror[39m  Expected the Promise rejection reason to be an Error  [2m@typescript-eslint/prefer-promise-reject-errors[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/config.ts[24m[0m
+[0m    [2m1:1[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m118:11[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m  [2m215:23[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/helper.ts[24m[0m
+[0m  [2m60:3[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m61:16[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/models/network.ts[24m[0m
+[0m  [2m55:1[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from 'no-use-before-define')[0m
+[0m  [2m57:2[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from 'no-use-before-define')[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/auth/ldap.ts[24m[0m
+[0m  [2m8:22[22m  [31merror[39m  'NodeJS' is not defined  [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/changelog.ts[24m[0m
+[0m   [2m11:25[22m  [31merror[39m  'NodeJS' is not defined        [2mno-undef[22m[0m
+[0m  [2m109:26[22m  [31merror[39m  'setTimeout' is not defined    [2mno-undef[22m[0m
+[0m  [2m135:3[22m   [31merror[39m  'clearTimeout' is not defined  [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/irc-events/connection.ts[24m[0m
+[0m   [2m45:5[22m   [31merror[39m  'setTimeout' is not defined                                                                    [2mno-undef[22m[0m
+[0m   [2m60:4[22m   [31merror[39m  'setTimeout' is not defined                                                                    [2mno-undef[22m[0m
+[0m  [2m121:54[22m  [31merror[39m  'error' will use Object's default stringification format ('[object Object]') when stringified  [2m@typescript-eslint/no-base-to-string[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/irc-events/link.ts[24m[0m
+[0m  [2m146:4[22m   [31merror[39m  Expected the Promise rejection reason to be an Error  [2m@typescript-eslint/prefer-promise-reject-errors[22m[0m
+[0m  [2m161:4[22m   [31merror[39m  Expected the Promise rejection reason to be an Error  [2m@typescript-eslint/prefer-promise-reject-errors[22m[0m
+[0m  [2m204:16[22m  [31merror[39m  Expected the Promise rejection reason to be an Error  [2m@typescript-eslint/prefer-promise-reject-errors[22m[0m
+[0m  [2m221:4[22m   [31merror[39m  Expected the Promise rejection reason to be an Error  [2m@typescript-eslint/prefer-promise-reject-errors[22m[0m
+[0m  [2m478:11[22m  [31merror[39m  Expected the Promise rejection reason to be an Error  [2m@typescript-eslint/prefer-promise-reject-errors[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/messageStorage/sqlite.ts[24m[0m
+[0m   [2m18:12[22m  [31merror[39m  A `require()` style import is forbidden               [2m@typescript-eslint/no-require-imports[22m[0m
+[0m  [2m223:10[22m  [31merror[39m  Expected an error object to be thrown                 [2m@typescript-eslint/only-throw-error[22m[0m
+[0m  [2m262:6[22m   [31merror[39m  Expected the Promise rejection reason to be an Error  [2m@typescript-eslint/prefer-promise-reject-errors[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/packages/index.ts[24m[0m
+[0m  [2m129:10[22m  [31merror[39m  Expected an error object to be thrown    [2m@typescript-eslint/only-throw-error[22m[0m
+[0m  [2m138:10[22m  [31merror[39m  Expected an error object to be thrown    [2m@typescript-eslint/only-throw-error[22m[0m
+[0m  [2m141:17[22m  [31merror[39m  A `require()` style import is forbidden  [2m@typescript-eslint/no-require-imports[22m[0m
+[0m  [2m270:3[22m   [31merror[39m  'setTimeout' is not defined              [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/plugins/uploader.ts[24m[0m
+[0m  [2m64:4[22m   [31merror[39m  'clearTimeout' is not defined  [2mno-undef[22m[0m
+[0m  [2m71:10[22m  [31merror[39m  'setTimeout' is not defined    [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/server.ts[24m[0m
+[0m   [2m197:2[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/restrict-template-expressions')[0m
+[0m   [2m242:5[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/restrict-template-expressions')[0m
+[0m   [2m283:24[22m  [31merror[39m  'NodeJS' is not defined                                                                                              [2mno-undef[22m[0m
+[0m   [2m304:22[22m  [31merror[39m  'setTimeout' is not defined                                                                                          [2mno-undef[22m[0m
+[0m   [2m309:7[22m   [31merror[39m  'clearTimeout' is not defined                                                                                        [2mno-undef[22m[0m
+[0m  [2m1148:3[22m   [31merror[39m  'setImmediate' is not defined                                                                                        [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/storageCleaner.ts[24m[0m
+[0m   [2m31:29[22m  [31merror[39m  'setTimeout' is not defined    [2mno-undef[22m[0m
+[0m  [2m120:17[22m  [31merror[39m  'setTimeout' is not defined    [2mno-undef[22m[0m
+[0m  [2m140:3[22m   [31merror[39m  'clearTimeout' is not defined  [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/server/types/modules/irc-framework.d.ts[24m[0m
+[0m  [2m1:1[22m  [31merror[39m  Unused eslint-disable directive (no problems were reported from 'no-use-before-define')[0m
+[0m[0m
+[0m[4m/home/user/thelounge/shared/types/socket-events.d.ts[24m[0m
+[0m  [2m100:9[22m   [31merror[39m  'SharedNetworkChan' is not defined                                                                                                                                                                                                                                                                                                                                                        [2mno-undef[22m[0m
+[0m  [2m177:11[22m  [31merror[39m  An empty interface declaration allows any non-nullish value, including literals like `0` and `""`.[0m
+[0m- If that's what you want, disable this lint rule with an inline comment or configure the 'allowInterfaces' rule option.[0m
+[0m- If you want a type meaning "any object", you probably want `object` instead.[0m
+[0m- If you want a type meaning "any value", you probably want `unknown` instead  [2m@typescript-eslint/no-empty-object-type[22m[0m
+[0m  [2m179:11[22m  [31merror[39m  An empty interface declaration allows any non-nullish value, including literals like `0` and `""`.[0m
+[0m- If that's what you want, disable this lint rule with an inline comment or configure the 'allowInterfaces' rule option.[0m
+[0m- If you want a type meaning "any object", you probably want `object` instead.[0m
+[0m- If you want a type meaning "any value", you probably want `unknown` instead  [2m@typescript-eslint/no-empty-object-type[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/client/js/authTest.ts[24m[0m
+[0m  [2m25:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m31:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/client/js/constantsTest.ts[24m[0m
+[0m  [2m23:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m24:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/client/js/helpers/ircmessageparser/fill.ts[24m[0m
+[0m  [2m44:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/client/js/helpers/parse.ts[24m[0m
+[0m  [2m362:4[22m  [31merror[39m  Unexpected iterable of non-Promise (non-"Thenable") values passed to promise aggregator  [2m@typescript-eslint/await-thenable[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/models/chan.ts[24m[0m
+[0m  [2m46:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m55:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/models/msg.ts[24m[0m
+[0m  [2m56:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/models/network.ts[24m[0m
+[0m  [2m145:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m155:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m171:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m174:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m175:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m183:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m195:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m205:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m213:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m221:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m223:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m231:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m233:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m236:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m246:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m249:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m252:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m265:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m269:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m272:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m275:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m283:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m293:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m297:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m298:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m302:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m303:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m309:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m352:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m353:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m357:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m359:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m367:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m368:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m392:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/plugins/clientCertificate.ts[24m[0m
+[0m  [2m12:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m41:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m42:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m46:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m47:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/plugins/inputs/indexTest.ts[24m[0m
+[0m  [2m7:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/plugins/link.ts[24m[0m
+[0m  [2m232:11[22m  [31merror[39m  Expected an error object to be thrown                                  [2m@typescript-eslint/only-throw-error[22m[0m
+[0m  [2m254:11[22m  [31merror[39m  Expected an error object to be thrown                                  [2m@typescript-eslint/only-throw-error[22m[0m
+[0m  [2m394:4[22m   [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m595:3[22m   [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m632:3[22m   [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m640:3[22m   [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m663:4[22m   [31merror[39m  'setTimeout' is not defined                                            [2mno-undef[22m[0m
+[0m  [2m694:3[22m   [31merror[39m  'setTimeout' is not defined                                            [2mno-undef[22m[0m
+[0m  [2m703:4[22m   [31merror[39m  'setTimeout' is not defined                                            [2mno-undef[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/plugins/packages/indexTest.ts[24m[0m
+[0m  [2m16:3[22m   [31merror[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')[0m
+[0m  [2m17:14[22m  [31merror[39m  A `require()` style import is forbidden                                                                [2m@typescript-eslint/no-require-imports[22m[0m
+[0m  [2m26:4[22m   [31merror[39m  Expected an assignment or function call and instead saw an expression                                  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m38:4[22m   [31merror[39m  Expected an assignment or function call and instead saw an expression                                  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/plugins/sqlite.ts[24m[0m
+[0m  [2m173:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m294:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m295:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m298:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m304:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m318:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m480:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/plugins/storage.ts[24m[0m
+[0m  [2m137:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m139:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m140:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/server.ts[24m[0m
+[0m   [2m86:4[22m  [31merror[39m  'setTimeout' is not defined                                            [2mno-undef[22m[0m
+[0m  [2m113:5[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m143:5[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m153:5[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m154:5[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/shared/findLinks.ts[24m[0m
+[0m  [2m456:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/shared/irc.ts[24m[0m
+[0m  [2m6:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/src/command-line/utilsTest.ts[24m[0m
+[0m  [2m50:5[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/tests/build.ts[24m[0m
+[0m   [2m9:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m10:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m14:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m15:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m16:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m17:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m21:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m25:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m26:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m30:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m31:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m35:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m36:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m37:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m38:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m43:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m45:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m46:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m47:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m48:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m55:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m59:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m65:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m67:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m68:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/tests/customhighlights.ts[24m[0m
+[0m  [2m95:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m99:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/tests/hostmask.ts[24m[0m
+[0m   [2m50:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m   [2m51:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m   [2m57:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m   [2m58:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m   [2m64:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m   [2m65:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m   [2m88:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m108:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[4m/home/user/thelounge/test/tests/passwords.ts[24m[0m
+[0m  [2m17:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m29:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m38:4[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m43:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m  [2m48:3[22m  [31merror[39m  Expected an assignment or function call and instead saw an expression  [2m@typescript-eslint/no-unused-expressions[22m[0m
+[0m[0m
+[0m[31m[1m✖ 251 problems (251 errors, 0 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[31m[1m  19 errors and 0 warnings potentially fixable with the `--fix` option.[22m[39m[0m
+[0m[31m[1m[22m[39m[0m
