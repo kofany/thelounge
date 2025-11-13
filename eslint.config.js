@@ -11,6 +11,52 @@ import path from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Common globals for all files
+const commonGlobals = {
+	// Node.js globals
+	console: "readonly",
+	process: "readonly",
+	Buffer: "readonly",
+	__dirname: "readonly",
+	__filename: "readonly",
+	module: "readonly",
+	require: "readonly",
+	exports: "readonly",
+	global: "readonly",
+	NodeJS: "readonly",
+	// Node.js timers
+	setTimeout: "readonly",
+	setInterval: "readonly",
+	clearTimeout: "readonly",
+	clearInterval: "readonly",
+	setImmediate: "readonly",
+	clearImmediate: "readonly",
+	// Browser globals
+	window: "readonly",
+	document: "readonly",
+	navigator: "readonly",
+	location: "readonly",
+	localStorage: "readonly",
+	sessionStorage: "readonly",
+	Audio: "readonly",
+	Image: "readonly",
+	Response: "readonly",
+	fetch: "readonly",
+	// Service Worker globals
+	self: "readonly",
+	caches: "readonly",
+	// External libraries
+	Mousetrap: "readonly",
+	SharedNetworkChan: "readonly",
+	// Mocha globals
+	describe: "readonly",
+	it: "readonly",
+	before: "readonly",
+	after: "readonly",
+	beforeEach: "readonly",
+	afterEach: "readonly",
+};
+
 // Base rules from original config
 const baseRules = {
 	"block-scoped-var": "error",
@@ -35,6 +81,12 @@ const baseRules = {
 		"error",
 		{
 			functions: false,
+		},
+	],
+	"no-unused-vars": [
+		"error",
+		{
+			caughtErrors: "none", // Allow unused catch block variables
 		},
 	],
 	"no-var": "error",
@@ -104,6 +156,14 @@ const tsRulesTemp = {
 	"@typescript-eslint/no-unsafe-call": "off",
 	"@typescript-eslint/no-unsafe-member-access": "off",
 	"@typescript-eslint/no-unused-vars": "off",
+	// New in typescript-eslint v8 - TODO: fix these
+	"@typescript-eslint/no-require-imports": "off", // CommonJS require() - needs migration
+	"@typescript-eslint/no-empty-object-type": "off", // Replaces ban-types - needs fixing
+	"@typescript-eslint/only-throw-error": "off", // Enforces throwing Error objects
+	"@typescript-eslint/prefer-promise-reject-errors": "off", // Enforces Error in Promise.reject
+	"@typescript-eslint/no-base-to-string": "off", // Unsafe toString() calls
+	"@typescript-eslint/no-unsafe-enum-comparison": "off", // Enum comparison safety
+	"@typescript-eslint/await-thenable": "off", // await on non-Promise values
 };
 
 // TODO: remove these
@@ -111,6 +171,7 @@ const tsTestRulesTemp = {
 	"@typescript-eslint/no-unsafe-return": "off",
 	"@typescript-eslint/no-empty-function": "off",
 	"@typescript-eslint/restrict-plus-operands": "off",
+	"@typescript-eslint/no-unused-expressions": "off", // Chai assertions
 };
 
 export default [
@@ -125,26 +186,7 @@ export default [
 		languageOptions: {
 			ecmaVersion: 2022,
 			sourceType: "module",
-			globals: {
-				// Node.js globals
-				console: "readonly",
-				process: "readonly",
-				Buffer: "readonly",
-				__dirname: "readonly",
-				__filename: "readonly",
-				module: "readonly",
-				require: "readonly",
-				// Browser globals
-				window: "readonly",
-				document: "readonly",
-				// Mocha globals
-				describe: "readonly",
-				it: "readonly",
-				before: "readonly",
-				after: "readonly",
-				beforeEach: "readonly",
-				afterEach: "readonly",
-			},
+			globals: commonGlobals,
 		},
 		...js.configs.recommended,
 		rules: {
@@ -164,26 +206,7 @@ export default [
 				ecmaVersion: "latest",
 				sourceType: "module",
 			},
-			globals: {
-				// Node.js globals
-				console: "readonly",
-				process: "readonly",
-				Buffer: "readonly",
-				__dirname: "readonly",
-				__filename: "readonly",
-				module: "readonly",
-				require: "readonly",
-				// Browser globals
-				window: "readonly",
-				document: "readonly",
-				// Mocha globals
-				describe: "readonly",
-				it: "readonly",
-				before: "readonly",
-				after: "readonly",
-				beforeEach: "readonly",
-				afterEach: "readonly",
-			},
+			globals: commonGlobals,
 		},
 		plugins: {
 			"@typescript-eslint": tseslint,
@@ -214,26 +237,7 @@ export default [
 					jsx: true,
 				},
 			},
-			globals: {
-				// Node.js globals
-				console: "readonly",
-				process: "readonly",
-				Buffer: "readonly",
-				__dirname: "readonly",
-				__filename: "readonly",
-				module: "readonly",
-				require: "readonly",
-				// Browser globals
-				window: "readonly",
-				document: "readonly",
-				// Mocha globals
-				describe: "readonly",
-				it: "readonly",
-				before: "readonly",
-				after: "readonly",
-				beforeEach: "readonly",
-				afterEach: "readonly",
-			},
+			globals: commonGlobals,
 		},
 		plugins: {
 			vue: vuePlugin,
