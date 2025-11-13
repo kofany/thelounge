@@ -102,11 +102,11 @@ vue-eslint-parser: 9.4.3 → 9.4.3 ✓
 
 #### Pakiety do aktualizacji:
 ```bash
-webpack: 5.97.1 → 5.102.1
-webpack-cli: 5.1.4 → 6.0.1 ⚠️ (MAJOR)
-webpack-dev-middleware: 7.4.2 → 7.4.2 ✓
-webpack-hot-middleware: 2.26.1 → 2.26.1 ✓
-mini-css-extract-plugin: 2.9.2 → 2.9.4
+webpack: 5.94.0 → 5.102.1
+webpack-cli: 4.9.2 → 6.0.1 ⚠️ (MAJOR)
+webpack-dev-middleware: 5.3.4 → 7.4.2 ⚠️ (MAJOR)
+webpack-hot-middleware: 2.25.4 → 2.26.1
+mini-css-extract-plugin: 2.5.3 → 2.9.4
 ```
 
 #### Komendy:
@@ -145,11 +145,14 @@ yarn dev # Test dev server
 
 #### Pakiety do aktualizacji:
 ```bash
-postcss: 8.4.49 → 8.5.1
-postcss-preset-env: 10.1.3 → 10.2.0
-stylelint: 16.11.0 → 16.12.0
-cssnano: 7.0.6 → 7.0.6 ✓
-css-loader: 7.1.2 → 7.1.2 ✓
+postcss: 8.4.47 → 8.5.6
+postcss-preset-env: 7.3.0 → 10.4.0 ⚠️ (MAJOR)
+postcss-loader: 6.2.1 → 8.2.0 ⚠️ (MAJOR)
+postcss-import: 14.0.2 → 16.1.1 ⚠️ (MAJOR)
+stylelint: 14.3.0 → 16.25.0 ⚠️ (MAJOR)
+stylelint-config-standard: 24.0.0 → 36.0.1 ⚠️ (MAJOR)
+cssnano: 5.0.17 → 7.1.2 ⚠️ (MAJOR)
+css-loader: 6.5.1 → 7.1.2 ⚠️ (MAJOR)
 ```
 
 #### Komendy:
@@ -186,9 +189,12 @@ yarn build:client
 
 #### Pakiety do aktualizacji:
 ```bash
-mocha: 11.0.1 → 11.7.5 ⚠️ (uwaga: v12 wymaga Node 20.19+)
-chai: 4.5.0 → 5.2.0 ⚠️ (MAJOR - może łamać assercje!)
-sinon: 19.0.2 → 19.0.2 ✓
+mocha: 9.2.2 → 11.7.5 ⚠️ (MAJOR, uwaga: v12 wymaga Node 20.19+)
+chai: 4.3.7 → 6.2.1 ⚠️ (MAJOR - może łamać assercje!)
+sinon: 13.0.2 → 21.0.0 ⚠️ (MAJOR)
+ts-sinon: 2.0.2 → 2.0.2 ✓
+@types/mocha: 9.1.1 → 10.0.11 ⚠️ (MAJOR)
+@types/chai: 4.3.5 → 5.2.3 ⚠️ (MAJOR, dla Chai 5+)
 ```
 
 #### Komendy:
@@ -235,8 +241,9 @@ yarn test:mocha
 
 #### Pakiety do aktualizacji:
 ```bash
-prettier: 2.8.8 → 3.6.2 ⚠️ (MAJOR)
+prettier: 2.5.1 → 3.6.2 ⚠️ (MAJOR)
 eslint-config-prettier: 9.1.0 → 10.0.3 ⚠️ (MAJOR - zależność od Prettier 3)
+pretty-quick: 3.1.3 → 4.0.0 ⚠️ (MAJOR - wymaga Prettier 3)
 ```
 
 #### Komendy:
@@ -286,10 +293,11 @@ yarn test
 
 #### Pakiety do aktualizacji:
 ```bash
-eslint: 8.57.1 → 9.39.1 ⚠️ (MAJOR - breaking changes!)
-@typescript-eslint/eslint-plugin: 7.18.0 → 8.23.1 ⚠️ (MAJOR)
-@typescript-eslint/parser: 7.18.0 → 8.23.1 ⚠️ (MAJOR)
-eslint-plugin-vue: 9.31.0 → 9.31.0 ✓ (sprawdź kompatybilność z ESLint 9)
+eslint: 8.57.0 → 9.39.1 ⚠️ (MAJOR - breaking changes!)
+@typescript-eslint/eslint-plugin: 7.8.0 → 8.46.4 ⚠️ (MAJOR)
+@typescript-eslint/parser: 7.8.0 → 8.46.4 ⚠️ (MAJOR)
+eslint-plugin-vue: 9.25.0 → 9.33.0 (sprawdź kompatybilność z ESLint 9)
+eslint-define-config: 2.1.0 → usuń (deprecated w ESLint 9)
 ```
 
 #### Breaking Changes w ESLint 9:
@@ -350,8 +358,8 @@ yarn lint:eslint
 
 #### Pakiety do aktualizacji:
 ```bash
-express: 4.21.2 → 5.1.0 ⚠️ (MAJOR)
-@types/express: 4.17.21 → 5.0.0 ⚠️ (MAJOR)
+express: 4.20.0 → 5.1.0 ⚠️ (MAJOR)
+@types/express: 4.17.21 → 5.0.5 ⚠️ (MAJOR)
 ```
 
 #### Breaking Changes w Express 5:
@@ -407,12 +415,16 @@ yarn start
 
 #### Pakiety które wymagają ESM w nowych wersjach:
 ```bash
-chalk: 4.1.2 → 5.6.2 ⚠️ (ESM only)
-got: 11.8.6 → 14.6.3 ⚠️ (ESM only, rozważ migrację do Ky)
-uuid: 11.0.3 → 13.0.0 ⚠️ (no CommonJS)
-file-type: 16.5.4 → 21.0.0 ⚠️ (ESM)
-filenamify: 4.3.0 → 7.0.1 ⚠️ (ESM)
-read-chunk: 3.2.0 → 5.0.0 ⚠️ (ESM)
+chalk: 4.1.2 → 5.6.2 ⚠️ (ESM only od v5)
+got: 11.8.6 → 14.6.3 ⚠️ (ESM only od v12, rozważ fetch() lub Ky)
+uuid: 8.3.2 → 13.0.0 ⚠️ (ESM only od v9)
+file-type: 16.5.4 → 21.1.0 ⚠️ (ESM only od v17)
+filenamify: 4.3.0 → 7.0.1 ⚠️ (ESM only od v5)
+read-chunk: 3.2.0 → 5.0.0 ⚠️ (ESM only od v4)
+read: 1.0.7 → 5.0.1 ⚠️ (ESM only od v2)
+package-json: 7.0.0 → 10.0.1 ⚠️ (ESM only od v8)
+linkify-it: 3.0.3 → 5.0.0 ⚠️ (ESM only od v4)
+babel-loader: 8.2.5 → 10.0.0 ⚠️ (ESM only)
 ```
 
 #### Opcje:
@@ -486,13 +498,24 @@ git checkout -b migrate/esm-full
 
 #### Pakiety do aktualizacji:
 ```bash
-commander: 12.1.0 → 14.0.2 ⚠️ (MAJOR, wymaga Node 20+)
-package-json: 7.0.0 → 10.0.1 ⚠️ (MAJOR)
-ua-parser-js: 1.0.39 → 2.0.3 ⚠️ (MAJOR)
-semver: 7.6.3 → 7.7.3
-@types/node: 22.10.5 → 22.11.5
-@types/chai: 4.3.20 → 5.1.0 (jeśli Chai 5 zadziałał w fazie 5)
-@types/ldapjs → usuń (już niepotrzebne po migracji ldapts)
+commander: 9.0.0 → 14.0.2 ⚠️ (MAJOR, wymaga Node 20+)
+package-json: 7.0.0 → 10.0.1 ⚠️ (MAJOR, ESM)
+ua-parser-js: 1.0.39 → 2.0.6 ⚠️ (MAJOR)
+semver: 7.5.2 → 7.7.3
+@types/node: 17.0.45 → 24.10.1 ⚠️ (MAJOR)
+@types/chai: 4.3.5 → 5.2.3 (jeśli Chai 5+ zadziałał w fazie 5)
+@types/ldapjs: 2.2.5 → usuń (już niepotrzebne po migracji ldapts)
+bcryptjs: 2.4.3 → 3.0.3 ⚠️ (MAJOR)
+@fastify/busboy: 1.0.0 → 3.2.0 ⚠️ (MAJOR)
+cheerio: 1.0.0 → 1.1.2
+content-disposition: 0.5.4 → 1.0.0 ⚠️ (MAJOR)
+mime-types: 2.1.35 → 3.0.1 ⚠️ (MAJOR)
+socket.io: 4.6.2 → 4.8.1
+socket.io-client: 4.5.0 → 4.8.1
+tlds: 1.228.0 → 1.261.0
+web-push: 3.4.5 → 3.6.7
+ts-loader: 9.3.0 → 9.5.4
+fork-ts-checker-webpack-plugin: 7.2.13 → 9.1.0 ⚠️ (MAJOR)
 ```
 
 #### Komendy:

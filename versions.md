@@ -26,7 +26,7 @@
 | Nazwa Pakietu | Nasza Wersja | Najnowsza Wersja | Status Rozwoju |
 |---------------|--------------|------------------|----------------|
 | **ldapts** | 8.0.9 | 8.0.9 | ✅ Aktywny |
-| **uuid** | 8.3.2 | 8.2.0 | ✅ Aktywny |
+| **uuid** | 8.3.2 | 13.0.0 | ⚠️ Aktywny (ESM only od v9+) |
 | **lodash** | 4.17.21 | 4.17.21 | ✅ Aktywny |
 | **node-forge** | 1.3.1 | 1.3.1 | ✅ Aktywny |
 | **irc-framework** | 4.14.0 | 4.14.0 | ⚠️ Niewiadomy status |
@@ -72,14 +72,31 @@
 | Nazwa Pakietu | Nasza Wersja | Najnowsza Wersja | Status Rozwoju | Uwagi |
 |---------------|--------------|------------------|----------------|-------|
 | **typescript** | 5.4.5 | 5.9.3 | ✅ Aktywny | Drobne aktualizacje |
+| **ts-node** | 10.7.0 | 10.9.2 | ✅ Aktywny | Drobne aktualizacje |
 | **vue** | 3.2.35 | 3.5.24 | ✅ Aktywny | Poprawy wydajności |
 | **vue-router** | 4.0.15 | 4.6.3 | ✅ Aktywny | Drobne aktualizacje |
 | **vuex** | 4.0.2 | 4.1.0 | ✅ Aktywny | Drobna aktualizacja |
 | **webpack** | 5.94.0 | 5.102.1 | ✅ Aktywny | Drobne aktualizacje |
-| **eslint** | 8.57.1 | 9.39.1 | ✅ Aktywny | Zmiany w konfiguracji |
-| **prettier** | 2.8.8 | 3.6.2 | ✅ Aktywny | Główna aktualizacja |
-| **mocha** | 10.7.3 | 11.7.5 | ✅ Aktywny | Główna aktualizacja |
-| **chai** | 4.5.0 | 6.2.1 | ✅ Aktywny | Główna aktualizacja |
+| **webpack-cli** | 4.9.2 | 6.0.1 | ✅ Aktywny | Major update |
+| **eslint** | 8.57.0 | 9.39.1 | ✅ Aktywny | Zmiany w konfiguracji (flat config) |
+| **@typescript-eslint/eslint-plugin** | 7.8.0 | 8.46.4 | ✅ Aktywny | Major update |
+| **@typescript-eslint/parser** | 7.8.0 | 8.46.4 | ✅ Aktywny | Major update |
+| **prettier** | 2.5.1 | 3.6.2 | ✅ Aktywny | Główna aktualizacja |
+| **mocha** | 9.2.2 | 11.7.5 | ✅ Aktywny | Główna aktualizacja (v12 wymaga Node 20.19+) |
+| **chai** | 4.3.7 | 6.2.1 | ✅ Aktywny | Główna aktualizacja (może łamać assercje) |
+| **sinon** | 13.0.2 | 21.0.0 | ✅ Aktywny | Major updates |
+| **stylelint** | 14.3.0 | 16.25.0 | ✅ Aktywny | Major updates |
+| **postcss** | 8.4.47 | 8.5.6 | ✅ Aktywny | Drobne aktualizacje |
+| **postcss-preset-env** | 7.3.0 | 10.4.0 | ✅ Aktywny | Major updates |
+| **postcss-loader** | 6.2.1 | 8.2.0 | ✅ Aktywny | Major updates |
+| **postcss-import** | 14.0.2 | 16.1.1 | ✅ Aktywny | Major updates |
+| **cssnano** | 5.0.17 | 7.1.2 | ✅ Aktywny | Major updates |
+| **ts-loader** | 9.3.0 | 9.5.4 | ✅ Aktywny | Drobne aktualizacje |
+| **fork-ts-checker-webpack-plugin** | 7.2.13 | 9.1.0 | ✅ Aktywny | Major update |
+| **babel-loader** | 8.2.5 | 10.0.0 | ⚠️ Aktywny (ESM only) | Major update |
+| **@types/node** | 17.0.45 | 24.10.1 | ✅ Aktywny | Major updates |
+| **@types/express** | 4.17.21 | 5.0.5 | ✅ Aktywny | Match Express 5 |
+| **@types/chai** | 4.3.5 | 5.2.3 | ✅ Aktywny | Match Chai 5+ |
 
 ---
 
