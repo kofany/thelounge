@@ -85,33 +85,12 @@ const tsRules = {
     "@typescript-eslint/no-redundant-type-constituents": "off",
 };
 
+// ESM Migration workaround (temporary - will be removed in FAZA 8)
 const tsRulesTemp = {
-    // TODO: eventually remove these
-    "@typescript-eslint/ban-ts-comment": "off",
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-non-null-assertion": "off",
-    "@typescript-eslint/no-this-alias": "off",
-    "@typescript-eslint/no-unnecessary-type-assertion": "off",
-    "@typescript-eslint/no-unsafe-argument": "off",
-    "@typescript-eslint/no-unsafe-assignment": "off",
-    "@typescript-eslint/no-unsafe-call": "off",
-    "@typescript-eslint/no-unsafe-member-access": "off",
-    "@typescript-eslint/no-unused-vars": "off",
-    // New rules from @typescript-eslint v8
-    "@typescript-eslint/no-require-imports": "off",
-    "@typescript-eslint/prefer-promise-reject-errors": "off",
-    "@typescript-eslint/only-throw-error": "off",
-    "@typescript-eslint/no-base-to-string": "off",
-    "@typescript-eslint/no-empty-object-type": "off",
-    "@typescript-eslint/no-unsafe-enum-comparison": "off",
-    "@typescript-eslint/no-unused-expressions": "off",
-};
-
-const tsTestRulesTemp = {
-    // TODO: remove these
-    "@typescript-eslint/no-unsafe-return": "off",
-    "@typescript-eslint/no-empty-function": "off",
-    "@typescript-eslint/restrict-plus-operands": "off",
+    // ONLY ESM-related rule disabled (waiting for FAZA 8: ESM Migration)
+    // This rule will cause ~15-20 errors in server/command-line/*.ts
+    // All of these use require() which will be converted to import in FAZA 8
+    "@typescript-eslint/no-require-imports": "off", // TODO: Remove after FAZA 8
 };
 
 export default [
@@ -210,14 +189,6 @@ export default [
             ...tsRules,
             ...tsRulesTemp,
             ...vueRules,
-        },
-    },
-
-    // Test files
-    {
-        files: ["test/**/*.ts"],
-        rules: {
-            ...tsTestRulesTemp,
         },
     },
 
