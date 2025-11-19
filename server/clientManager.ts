@@ -12,288 +12,291 @@ import log from "./log.js";
 import {Server} from "./server.js";
 
 class ClientManager {
-	clients: Client[];
-	sockets!: Server;
-	identHandler: any;
-	webPush!: WebPush;
-	userWatcher: fs.FSWatcher | null = null;
+    clients: Client[];
+    sockets!: Server;
+    identHandler: any;
+    webPush!: WebPush;
+    userWatcher: fs.FSWatcher | null = null;
 
-	constructor() {
-		this.clients = [];
-	}
+    constructor() {
+        this.clients = [];
+    }
 
-	init(identHandler, sockets: Server) {
-		this.sockets = sockets;
-		this.identHandler = identHandler;
-		this.webPush = new WebPush();
+    init(identHandler, sockets: Server) {
+        this.sockets = sockets;
+        this.identHandler = identHandler;
+        this.webPush = new WebPush();
 
-		if (!Config.values.public) {
-			this.loadUsers();
+        if (!Config.values.public) {
+            this.loadUsers();
 
-			// LDAP does not have user commands, and users are dynamically
-			// created upon logon, so we don't need to watch for new files
-			if (!Config.values.ldap.enable) {
-				this.autoloadUsers();
-			}
-		}
-	}
+            // LDAP does not have user commands, and users are dynamically
+            // created upon logon, so we don't need to watch for new files
+            if (!Config.values.ldap.enable) {
+                this.autoloadUsers();
+            }
+        }
+    }
 
-	findClient(name: string) {
-		name = name.toLowerCase();
-		return this.clients.find((u) => u.name.toLowerCase() === name);
-	}
+    findClient(name: string) {
+        name = name.toLowerCase();
+        return this.clients.find((u) => u.name.toLowerCase() === name);
+    }
 
-	loadUsers() {
-		let users = this.getUsers();
+    loadUsers() {
+        let users = this.getUsers();
 
-		if (users.length === 0) {
-			log.info(
-				`There are currently no users. Create one with ${colors.bold(
-					"thelounge add <name>"
-				)}.`
-			);
+        if (users.length === 0) {
+            log.info(
+                `There are currently no users. Create one with ${colors.bold(
+                    "thelounge add <name>"
+                )}.`
+            );
 
-			return;
-		}
+            return;
+        }
 
-		const alreadySeenUsers = new Set();
-		users = users.filter((user) => {
-			user = user.toLowerCase();
+        const alreadySeenUsers = new Set();
+        users = users.filter((user) => {
+            user = user.toLowerCase();
 
-			if (alreadySeenUsers.has(user)) {
-				log.error(
-					`There is more than one user named "${colors.bold(
-						user
-					)}". Usernames are now case insensitive, duplicate users will not load.`
-				);
+            if (alreadySeenUsers.has(user)) {
+                log.error(
+                    `There is more than one user named "${colors.bold(
+                        user
+                    )}". Usernames are now case insensitive, duplicate users will not load.`
+                );
 
-				return false;
-			}
+                return false;
+            }
 
-			alreadySeenUsers.add(user);
+            alreadySeenUsers.add(user);
 
-			return true;
-		});
+            return true;
+        });
 
-		// This callback is used by Auth plugins to load users they deem acceptable
-		const callbackLoadUser = (user) => {
-			this.loadUser(user);
-		};
+        // This callback is used by Auth plugins to load users they deem acceptable
+        const callbackLoadUser = (user) => {
+            this.loadUser(user);
+        };
 
-		if (!Auth.loadUsers(users, callbackLoadUser)) {
-			// Fallback to loading all users
-			users.forEach((name) => this.loadUser(name));
-		}
-	}
+        if (!Auth.loadUsers(users, callbackLoadUser)) {
+            // Fallback to loading all users
+            users.forEach((name) => this.loadUser(name));
+        }
+    }
 
-	autoloadUsers() {
-		this.userWatcher = fs.watch(
-			Config.getUsersPath(),
-			{persistent: false},
-			(_eventType, file) => {
-				if (!file || !file.endsWith(".json")) {
-					return;
-				}
+    autoloadUsers() {
+        this.userWatcher = fs.watch(
+            Config.getUsersPath(),
+            {persistent: false},
+            (_eventType, file) => {
+                if (!file || !file.endsWith(".json")) {
+                    return;
+                }
 
-				const name = file.slice(0, -5);
+                const name = file.slice(0, -5);
 
-				const userPath = Config.getUserConfigPath(name);
+                const userPath = Config.getUserConfigPath(name);
 
-				if (fs.existsSync(userPath)) {
-					this.loadUser(name);
-					return;
-				}
+                if (fs.existsSync(userPath)) {
+                    this.loadUser(name);
+                    return;
+                }
 
-				const client = _.find(this.clients, {name});
+                const client = _.find(this.clients, {name});
 
-				if (client) {
-					client.quit(true);
-					this.clients = _.without(this.clients, client);
-					log.info(`User ${colors.bold(name)} disconnected and removed.`);
-				}
-			}
-		);
-	}
+                if (client) {
+                    client.quit(true);
+                    this.clients = _.without(this.clients, client);
+                    log.info(`User ${colors.bold(name)} disconnected and removed.`);
+                }
+            }
+        );
+    }
 
-	stopAutoloadUsers() {
-		if (this.userWatcher) {
-			this.userWatcher.close();
-			this.userWatcher = null;
-		}
-	}
+    stopAutoloadUsers() {
+        if (this.userWatcher) {
+            this.userWatcher.close();
+            this.userWatcher = null;
+        }
+    }
 
-	loadUser(name: string) {
-		const userConfig = this.readUserConfig(name);
+    loadUser(name: string) {
+        const userConfig = this.readUserConfig(name);
 
-		if (!userConfig) {
-			return;
-		}
+        if (!userConfig) {
+            return;
+        }
 
-		let client = this.findClient(name);
+        let client = this.findClient(name);
 
-		if (client) {
-			if (userConfig.password !== client.config.password) {
-				/**
-				 * If we happen to reload an existing client, make super duper sure we
-				 * have their latest password. We're not replacing the entire config
-				 * object, because that could have undesired consequences.
-				 *
-				 * @see https://github.com/thelounge/thelounge/issues/598
-				 */
-				client.config.password = userConfig.password;
-				log.info(`Password for user ${colors.bold(name)} was reset.`);
-			}
-		} else {
-			client = new Client(this, name, userConfig);
-			client.connect();
-			this.clients.push(client);
-		}
+        if (client) {
+            if (userConfig.password !== client.config.password) {
+                /**
+                 * If we happen to reload an existing client, make super duper sure we
+                 * have their latest password. We're not replacing the entire config
+                 * object, because that could have undesired consequences.
+                 *
+                 * @see https://github.com/thelounge/thelounge/issues/598
+                 */
+                client.config.password = userConfig.password;
+                log.info(`Password for user ${colors.bold(name)} was reset.`);
+            }
+        } else {
+            client = new Client(this, name, userConfig);
+            client.connect();
+            this.clients.push(client);
+        }
 
-		return client;
-	}
+        return client;
+    }
 
-	getUsers = function () {
-		if (!fs.existsSync(Config.getUsersPath())) {
-			return [];
-		}
+    getUsers = function () {
+        if (!fs.existsSync(Config.getUsersPath())) {
+            return [];
+        }
 
-		return fs
-			.readdirSync(Config.getUsersPath())
-			.filter((file) => file.endsWith(".json"))
-			.map((file) => file.slice(0, -5));
-	};
+        return fs
+            .readdirSync(Config.getUsersPath())
+            .filter((file) => file.endsWith(".json"))
+            .map((file) => file.slice(0, -5));
+    };
 
-	addUser(name: string, password: string | null, enableLog?: boolean) {
-		if (path.basename(name) !== name) {
-			throw new Error(`${name} is an invalid username.`);
-		}
+    addUser(name: string, password: string | null, enableLog?: boolean) {
+        if (path.basename(name) !== name) {
+            throw new Error(`${name} is an invalid username.`);
+        }
 
-		const userPath = Config.getUserConfigPath(name);
+        const userPath = Config.getUserConfigPath(name);
 
-		if (fs.existsSync(userPath)) {
-			log.error(`User ${colors.green(name)} already exists.`);
-			return false;
-		}
+        if (fs.existsSync(userPath)) {
+            log.error(`User ${colors.green(name)} already exists.`);
+            return false;
+        }
 
-		const user = {
-			password: password || "",
-			log: enableLog,
-		};
+        const user = {
+            password: password || "",
+            log: enableLog,
+        };
 
-		try {
-			const tmpPath = userPath + ".tmp";
-			fs.writeFileSync(tmpPath, JSON.stringify(user, null, "\t"), {
-				mode: 0o600,
-			});
-			fs.renameSync(tmpPath, userPath);
-		} catch (e) {
-			log.error(
-				`Failed to create user ${colors.green(name)} (${e instanceof Error ? e.message : String(e)})`
-			);
-			throw e;
-		}
+        try {
+            const tmpPath = userPath + ".tmp";
+            fs.writeFileSync(tmpPath, JSON.stringify(user, null, "\t"), {
+                mode: 0o600,
+            });
+            fs.renameSync(tmpPath, userPath);
+        } catch (e) {
+            log.error(
+                `Failed to create user ${colors.green(name)} (${e instanceof Error ? e.message : String(e)})`
+            );
+            throw e;
+        }
 
-		try {
-			const userFolderStat = fs.statSync(Config.getUsersPath());
-			const userFileStat = fs.statSync(userPath);
+        try {
+            const userFolderStat = fs.statSync(Config.getUsersPath());
+            const userFileStat = fs.statSync(userPath);
 
-			if (
-				userFolderStat &&
-				userFileStat &&
-				(userFolderStat.uid !== userFileStat.uid || userFolderStat.gid !== userFileStat.gid)
-			) {
-				log.warn(
-					`User ${colors.green(
-						name
-					)} has been created, but with a different uid (or gid) than expected.`
-				);
-				log.warn(
-					"The file owner has been changed to the expected user. " +
-						"To prevent any issues, please run thelounge commands " +
-						"as the correct user that owns the config folder."
-				);
-				log.warn(
-					"See https://thelounge.chat/docs/usage#using-the-correct-system-user for more information."
-				);
-				fs.chownSync(userPath, userFolderStat.uid, userFolderStat.gid);
-			}
-		} catch {
-			// We're simply verifying file owner as a safe guard for users
-			// that run `thelounge add` as root, so we don't care if it fails
-		}
+            if (
+                userFolderStat &&
+                userFileStat &&
+                (userFolderStat.uid !== userFileStat.uid || userFolderStat.gid !== userFileStat.gid)
+            ) {
+                log.warn(
+                    `User ${colors.green(
+                        name
+                    )} has been created, but with a different uid (or gid) than expected.`
+                );
+                log.warn(
+                    "The file owner has been changed to the expected user. " +
+                        "To prevent any issues, please run thelounge commands " +
+                        "as the correct user that owns the config folder."
+                );
+                log.warn(
+                    "See https://thelounge.chat/docs/usage#using-the-correct-system-user for more information."
+                );
+                fs.chownSync(userPath, userFolderStat.uid, userFolderStat.gid);
+            }
+        } catch {
+            // We're simply verifying file owner as a safe guard for users
+            // that run `thelounge add` as root, so we don't care if it fails
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	getDataToSave(client: Client) {
-		const json = Object.assign({}, client.config, {
-			networks: client.networks.map((n) => n.export()),
-		});
-		const newUser = JSON.stringify(json, null, "\t");
-		const newHash = crypto.createHash("sha256").update(newUser).digest("hex");
+    getDataToSave(client: Client) {
+        const json = Object.assign({}, client.config, {
+            networks: client.networks.map((n) => n.export()),
+        });
+        const newUser = JSON.stringify(json, null, "\t");
+        const newHash = crypto.createHash("sha256").update(newUser).digest("hex");
 
-		return {newUser, newHash};
-	}
+        return {newUser, newHash};
+    }
 
-	saveUser(client: Client, callback?: (err?: any) => void) {
-		const {newUser, newHash} = this.getDataToSave(client);
+    saveUser(client: Client, callback?: (err?: any) => void) {
+        const {newUser, newHash} = this.getDataToSave(client);
 
-		// Do not write to disk if the exported data hasn't actually changed
-		if (client.fileHash === newHash) {
-			return;
-		}
+        // Do not write to disk if the exported data hasn't actually changed
+        if (client.fileHash === newHash) {
+            return;
+        }
 
-		const pathReal = Config.getUserConfigPath(client.name);
-		const pathTemp = pathReal + ".tmp";
+        const pathReal = Config.getUserConfigPath(client.name);
+        const pathTemp = pathReal + ".tmp";
 
-		try {
-			// Write to a temp file first, in case the write fails
-			// we do not lose the original file (for example when disk is full)
-			fs.writeFileSync(pathTemp, newUser, {
-				mode: 0o600,
-			});
-			fs.renameSync(pathTemp, pathReal);
+        try {
+            // Write to a temp file first, in case the write fails
+            // we do not lose the original file (for example when disk is full)
+            fs.writeFileSync(pathTemp, newUser, {
+                mode: 0o600,
+            });
+            fs.renameSync(pathTemp, pathReal);
 
-			return callback ? callback() : true;
-		} catch (e) {
-			log.error(`Failed to update user ${colors.green(client.name)} (${e})`);
+            return callback ? callback() : true;
+        } catch (e) {
+            log.error(
+                `Failed to update user ${colors.green(client.name)} (${e instanceof Error ? e.message : String(e)})`
+            );
 
-			if (callback) {
-				callback(e);
-			}
-		}
-	}
+            if (callback) {
+                callback(e);
+            }
+        }
+    }
 
-	removeUser(name) {
-		const userPath = Config.getUserConfigPath(name);
+    removeUser(name) {
+        const userPath = Config.getUserConfigPath(name);
 
-		if (!fs.existsSync(userPath)) {
-			log.error(`Tried to remove non-existing user ${colors.green(name)}.`);
-			return false;
-		}
+        if (!fs.existsSync(userPath)) {
+            log.error(`Tried to remove non-existing user ${colors.green(name)}.`);
+            return false;
+        }
 
-		fs.unlinkSync(userPath);
+        fs.unlinkSync(userPath);
 
-		return true;
-	}
+        return true;
+    }
 
-	readUserConfig(name: string) {
-		const userPath = Config.getUserConfigPath(name);
+    readUserConfig(name: string) {
+        const userPath = Config.getUserConfigPath(name);
 
-		if (!fs.existsSync(userPath)) {
-			log.error(`Tried to read non-existing user ${colors.green(name)}`);
-			return false;
-		}
+        if (!fs.existsSync(userPath)) {
+            log.error(`Tried to read non-existing user ${colors.green(name)}`);
+            return false;
+        }
 
-		try {
-			const data = fs.readFileSync(userPath, "utf-8");
-			return JSON.parse(data) as UserConfig;
-		} catch (e) {
-			log.error(`Failed to read user ${colors.bold(name)}: ${e}`);
-		}
+        try {
+            const data = fs.readFileSync(userPath, "utf-8");
+            return JSON.parse(data) as UserConfig;
+        } catch (e) {
+            const message = e instanceof Error ? e.message : String(e);
+            log.error(`Failed to read user ${colors.bold(name)}: ${message}`);
+        }
 
-		return false;
-	}
+        return false;
+    }
 }
 
 export default ClientManager;
