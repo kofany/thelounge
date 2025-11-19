@@ -60,7 +60,7 @@ program
             }) as unknown as Promise<CustomMetadata>;
         }
 
-        if (!readFile) {
+        if (readFile === null) {
             // no-op, error should've been thrown before this point
             return;
         }
